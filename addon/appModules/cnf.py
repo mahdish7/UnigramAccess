@@ -29,6 +29,7 @@ listLanguages = {
 	"hr": _("Croatian"),
 	"sr": _("Serbian"),
 	"zh": _("Chinese (Traditional)"),
+	"ro": _("Romanian"),
 }
 
 spec = (
@@ -52,11 +53,12 @@ spec = (
 	"automatically announce activity in chats = boolean(default=False)",
 	"notify administrators in messages = boolean(default=True)",
 	"action_when_pressing_up_arrow_in_text_field = string(default=normal)",
+	"announce_end_of_message = boolean(default=True)"
 )
 
 class cnf:
 	def __init__(self):
-		self.path = os.path.join(globalVars.appArgs.configPath, "UnigramPlus.ini")
+		self.path = os.path.join(globalVars.appArgs.configPath, "UnigramAccess.ini")
 		self.conf = ConfigObj(self.path, configspec=spec )
 		validator = Validator()
 		self.conf.validate(validator, copy=True)
@@ -69,6 +71,6 @@ class cnf:
 
 try: conf = cnf()
 except:
-	path = os.path.join(globalVars.appArgs.configPath, "UnigramPlus.ini")
+	path = os.path.join(globalVars.appArgs.configPath, "UnigramAccess.ini")
 	os.remove(path)
 	conf = cnf()

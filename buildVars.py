@@ -16,28 +16,28 @@ def _(arg):
 # Add-on information variables
 addon_info = {
 	# add-on Name/identifier, internal for NVDA
-	"addon_name": "unigramPlus",
+	"addon_name": "unigramAccess",
 	# Add-on summary, usually the user visible name of the addon.
 	# Translators: Summary for this add-on
 	# to be shown on installation and add-on information found in Add-ons Manager.
-	"addon_summary": _("UnigramPlus"),
+	"addon_summary": _("UnigramAccess"),
 	# Add-on description
 	# Translators: Long description to be shown for this add-on on add-on information from add-ons manager
 	"addon_description": _("""This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"""),
 	# version
-	"addon_version": "5.2.0",
+	"addon_version": "1.0.0",
 	# Author(s)
-	"addon_author": "Kostya Gladkiy<gladkiy.kostya@gmail.com>",
+	"addon_author": "Mahdi Sharifi <mahdii.sh7@gmail.com>",
 	# URL for the add-on documentation support
-	"addon_url": "https://github.com/Kostya-Gladkiy/UnigramPlus",
+	"addon_url": "https://github.com/mahdish7/UnigramAccess",
 	# URL for the add-on repository where the source code can be found
-	"addon_sourceURL": "https://github.com/Kostya-Gladkiy/UnigramPlus",
+	"addon_sourceURL": "https://github.com/mahdish7/UnigramAccess",
 	# Documentation file name
 	"addon_docFileName": "readme.html",
 	# Minimum NVDA version supported (e.g. "2018.3.0", minor version is optional)
-	"addon_minimumNVDAVersion": "2021.2.0",
+	"addon_minimumNVDAVersion": "2026.0.0",
 	# Last NVDA version supported/tested (e.g. "2018.4.0", ideally more recent than minimum version)
-	"addon_lastTestedNVDAVersion": "2024.1.0",
+	"addon_lastTestedNVDAVersion": "2026.1.1",
 	# Add-on update channel (default is None, denoting stable releases,
 	# and for development releases, use "dev".)
 	# Do not change unless you know what you are doing!
@@ -56,7 +56,7 @@ addon_info = {
 # pythonSources = ["addon/globalPlugins/*.py"]
 # For more information on SCons Glob expressions please take a look at:
 # https://scons.org/doc/production/HTML/scons-user/apd.html
-pythonSources = ["addon/appModules/*.py", "addon/GlobalPlugins/UnigramPlus/*.py"]
+pythonSources = ["addon/appModules/*.py", "addon/GlobalPlugins/UnigramAccess/*.py"]
 
 # Files that contain strings for translation. Usually your python sources
 i18nSources = pythonSources + ["buildVars.py"]

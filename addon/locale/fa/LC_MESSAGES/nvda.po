@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: UnigramPlus\n"
+"Project-Id-Version: UnigramAccess\n"
 "Report-Msgid-Bugs-To: 'nvda-translations@groups.io'\n"
 "POT-Creation-Date: 2022-08-13 21:15+0300\n"
 "PO-Revision-Date: 2022-08-14 23:15+0430\n"
@@ -15,7 +15,7 @@ msgstr ""
 "X-Poedit-Basepath: ../../..\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-SearchPath-0: appModules\n"
-"X-Poedit-SearchPath-1: GlobalPlugins/UnigramPlus\n"
+"X-Poedit-SearchPath-1: GlobalPlugins/UnigramAccess\n"
 
 #: addon\appModules\cnf.py:12
 msgid "Arabic"
@@ -476,12 +476,12 @@ msgid "Toggle progress bar announcements"
 msgstr "جا به جا کردن گفته شدن نوار پیشرفت."
 
 #: addon\appModules\unigram.py:718
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:143
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:143
 msgid "Announce all progress bars"
 msgstr "گفته شدن همه ی نوارهای پیشرفت."
 
 #: addon\appModules\unigram.py:721
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:144
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:144
 msgid "Do not announce any progress bars"
 msgstr "هیچ نوار پیشرفتی گفته نشود."
 
@@ -604,154 +604,154 @@ msgstr "پیام صوتی را عقب میبرد."
 msgid "Right answer"
 msgstr "جوابتان را بنویسید."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:20
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:20
 msgid "No updates available"
 msgstr "به روز رسانی در دسترس نیست."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:21
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:47
-msgid "UnigramPlus update"
-msgstr "به روز رسانی UnigramPlus "
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:21
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:47
+msgid "UnigramAccess update"
+msgstr "به روز رسانی UnigramAccess "
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:48
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:48
 msgid ""
-"A new version of the add-on is available. Do you want to update UnigramPlus "
+"A new version of the add-on is available. Do you want to update UnigramAccess "
 "to version %version?"
 msgstr ""
 "به روز رسانی برای این افضونه در دسترس است. آیا میخواهید به ورژن %version به "
 "روز رسانی کنید؟"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:58
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:58
 msgid "Yes, update"
 msgstr "بله, بروز رسانی شود."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:59
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:59
 msgid "No, not now"
 msgstr "خیر, الان نه"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:74
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:74
 msgid "Download in progress"
 msgstr "دانلود درحال انجام است."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:100
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:100
 msgid "Changes in this version:"
 msgstr "تغییرات در این نسخه:"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:101
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:101
 msgid "No update information"
 msgstr "اطلاعاتی در باره ی این بروز رسانی در دسترس نیست."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:126
-msgid "Open UnigramPlus settings window"
-msgstr "باز کردن پنجره ی تنزیمات UnigramPlus "
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:126
+msgid "Open UnigramAccess settings window"
+msgstr "باز کردن پنجره ی تنزیمات UnigramAccess "
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:133
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:133
 msgid "Before chat name"
 msgstr "قبل از نام گفت و گو"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:134
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:134
 msgid "After chat name"
 msgstr "بعد از نام گفت و گو"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:135
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:135
 msgid "Do not speak chat type"
 msgstr "نوع گفتوگو را اعلام نکن."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:138
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:138
 msgid "Revert to standard voice message recording behavior"
 msgstr "برگرداندن حالت ضبط صدا به حالت استاندارد."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:139
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:139
 msgid "Text notification"
 msgstr "اعلان متنی"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:140
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:140
 msgid "sound notification"
 msgstr "اعلان صوتی"
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:148
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:148
 msgid "Do not say at all"
 msgstr "چیزی اعلام نکن."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:149
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:149
 msgid "Only in sent messages"
 msgstr "فقط در پیامهای ارسال شده."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:150
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:150
 msgid "Only in received messages"
 msgstr "فقط در پیامهای دریافت شده."
 
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:151
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:151
 msgid "In all messages"
 msgstr "در همه ی پیامها."
 
 #. Вибір мови інтерфейсу
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:156
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:156
 msgid "Interface language in Unigram:"
 msgstr "زبان برنامه ی یونیگرام."
 
 #. Режим озвучення типу чату
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:159
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:159
 msgid "Speak the type of chat in the chat list:"
 msgstr "اعلام کردن نام گفتوگو در لیست گفتوگوها"
 
 #. Озвучення відправника повідомлень
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:162
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:162
 msgid "Say the sender's name in:"
 msgstr "نام ارسال کننده را بگو در:"
 
 #. Повідомляти про те що повідомлення непрочитане перед вмістом повідомлення
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:165
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:165
 msgid "Speak \"Not Seen\" before reading contents of a message"
 msgstr "اعلام کردن کلمه ی دیده نشده قبل از خواندن بقیه ی محتوای پیام."
 
 #. Озвучувати назву активної папки при перемиканні між ними
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:168
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:168
 msgid "Speak folder names when switching between them"
 msgstr "اعلام کردن نام پوشه‌ها هنگام جا به جا شدن بین آنها."
 
 #. Тип оповіщення при видаленні
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:171
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:171
 msgid "Notify about deleting a message and chat with a sound"
 msgstr "اعلام کن پاک شدن پیام و گفتوگو را با استفاده از صدا."
 
 #. Відображати вікно підтвердження при видаленні
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:174
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:174
 msgid "Display confirmation dialog when deleting messages and chats"
 msgstr "نشان دادن پنجره ی تعیید وقتی که پیامی را پاک میکنید."
 
 #. Тип оповіщення при записі голосових повідомлень
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:177
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:177
 msgid "Set voice message recording notification method as:"
 msgstr "تنظیم کردن اعلانها هنگام ضبط پیام صوتی روی:"
 
 #. ОЗвучення індикаторів виконання
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:180
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:180
 msgid "Select the progress bar notification level:"
 msgstr "انتخاب نوع اعلام کردن وضعیت نوار پیشرفت."
 
 #. Обробляти повідомлення які містять посилання
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:183
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:183
 msgid "Read description of URLs attached to messages"
 msgstr " خواندن توضیحاتی که در پیوست url ها موجود است."
 
 #. Озвучувати повний опис посилань, які ведуть на ютуб
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:186
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:186
 msgid "Read full video description in YouTube URLs"
 msgstr "خواندن توضیحات به صورت کامل در فیلمهای YouTube."
 
 #. Повідомляти якщо в групі є відповіді для вас
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:189
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:189
 msgid "Announce if there is a reply in the group"
 msgstr "اگر جوابی برای شما وجود داشته باشد میگوید که جوابی برای شما وجود د"
 
 #. Повідомляти про наявність реакцій в повідомленні
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:192
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:192
 msgid "Announce if the message contains a reaction"
 msgstr "واکنشها بر روی پیامها را بگو."
 
 #. Виправити роботу перемикачів в деяких користувачів
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:195
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:195
 msgid ""
 "Check this box if the voice message recording function or the voice message "
 "playback speed change function does not work properly"
@@ -760,12 +760,12 @@ msgstr ""
 "پیام صوتی با مشکل مواجه هستید."
 
 #. Перевірка оновлення при старті програми
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:198
-msgid "Check for UnigramPlus updates on NVDA startup"
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:198
+msgid "Check for UnigramAccess updates on NVDA startup"
 msgstr "چک کردن برای به روز رسانی وقتی که NVDA شروع به کار میکند."
 
 #. Кнопка для провірки оновлень
-#: addon\GlobalPlugins\UnigramPlus\__init__.py:201
+#: addon\GlobalPlugins\UnigramAccess\__init__.py:201
 msgid "Check for &updates"
 msgstr "چک کردن برای به روز رسانی"
 
@@ -773,8 +773,8 @@ msgstr "چک کردن برای به روز رسانی"
 #. Translators: Summary for this add-on
 #. to be shown on installation and add-on information found in Add-ons Manager.
 #: buildVars.py:23
-msgid "UnigramPlus"
-msgstr "UnigramPlus "
+msgid "UnigramAccess"
+msgstr "UnigramAccess "
 
 #. Add-on description
 #. Translators: Long description to be shown for this add-on on add-on information from add-ons manager
