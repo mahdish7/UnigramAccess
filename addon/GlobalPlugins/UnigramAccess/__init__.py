@@ -5,7 +5,7 @@ import addonHandler
 from scriptHandler import script
 import api
 import gui
-from gui import guiHelper, nvdaControls
+from gui import guiHelper
 from gui.settingsDialogs import SettingsPanel
 import wx
 import os
@@ -27,11 +27,15 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if os.path.exists(fp): os.remove(fp)
 		# Checking for updates
 		if conf.get("is_automatically_check_for_updates") and not globalVars.appArgs.secure:
-			threading.Thread(target=onCheckForUpdates, args=(False, True,)).start()
+			threading.Thread(target=onCheckForUpdates, args=(False, True,), daemon=True).start()
+
+	def terminate(self):
+		super().terminate()
+		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(UnigramAccessSettings)
 
 	@script(description=_("Open UnigramAccess settings window"), gesture="kb:NVDA+ALT+U")
 	def script_open_settings_dialog(self, gesture, arg = False):
-		wx.CallAfter(gui.mainFrame._popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, UnigramAccessSettings)
+		wx.CallAfter(gui.mainFrame.popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, UnigramAccessSettings)
 
 	# Call answer
 	@script(description=_("Accept call"), gesture="kb:ALT+Y")
@@ -56,7 +60,10 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if button:
 			button.doAction()
 			return
-		AppModule.script_callCancellation(AppModule, gesture)
+		import appModuleHandler
+		appMod = appModuleHandler.getAppModuleFromProcessID(api.getFocusObject().processID)
+		if appMod and hasattr(appMod, 'script_callCancellation'):
+			appMod.script_callCancellation(gesture)
 
 
 class UnigramAccessSettings(SettingsPanel):

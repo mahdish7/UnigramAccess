@@ -20,7 +20,7 @@ class Saved_items:
 	def get(self, key):
 		id = api.getFocusObject().windowHandle
 		try: return self._items[id][key]
-		except: return False
+		except Exception: return False
 	def save(self, key, obj):
 		# id = obj.windowHandle
 		id = api.getFocusObject().windowHandle
@@ -80,7 +80,7 @@ class Chat_update:
 	def tick(cls):
 		if not cls.active or cls.pause: return
 		try : last_message = cls.app.getMessagesElement().lastChild
-		except: last_message = False
+		except Exception: last_message = False
 		if not last_message or not last_message.isInForeground:
 			cls.pause = True
 			return False
@@ -91,13 +91,13 @@ class Chat_update:
 		try:
 			last_message.positionInfo["indexInGroup"]
 			last_message.positionInfo["similarItemsInGroup"]
-		except:
+		except Exception:
 			Timer(cls.interval, cls.tick).start()
 			return
 		if last_message.positionInfo["indexInGroup"] != last_saved_message[1] and last_message.positionInfo["indexInGroup"] == last_message.positionInfo["similarItemsInGroup"]:
 			try:
 				title = cls.app.saved_items.get("profile name").firstChild.name
-			except:
+			except Exception:
 				title = False
 			keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
 			if ((title == last_saved_message[0]) or not title) and keywords[3] in last_message.name[-60:]:
@@ -106,7 +106,7 @@ class Chat_update:
 			try:
 				new_message = (title, last_message.positionInfo["indexInGroup"])
 				cls.app.saved_items.save("last message", new_message)
-			except: pass
+			except Exception: pass
 		Timer(cls.interval, cls.tick).start()
 	@classmethod
 	def toggle(cls, app=False):

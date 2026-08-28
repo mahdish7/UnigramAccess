@@ -5,7 +5,6 @@
 
 
 Use Unigram in a more comfortable and productive way. This addon provides many hotkeys for a quick and comfortable use of Unigram and makes a lot of small improvements.
-
 ## Some of the major improvements are:
 
 * Adds a significant improvement to the display of messages such as a poll, a link, or a message with attached media.

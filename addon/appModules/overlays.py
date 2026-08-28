@@ -2,13 +2,13 @@
 # UI component classes for UnigramAccess addon
 
 from NVDAObjects.UIA import ListItem
-import winUser
 import api
 from controlTypes import Role, State
 import scriptHandler
 from scriptHandler import script
 from keyboardHandler import KeyboardInputGesture
 from ui import message
+import queueHandler
 from threading import Timer
 import editableText
 import textInfos
@@ -27,8 +27,8 @@ class Audio_and_video_button:
 		gesture.send()
 		if self.UIAAutomationId == "Audio": new_name = self.next.name if self.next else self.name
 		elif self.UIAAutomationId == "Video": new_name = _("Camera on") if self.firstChild.name == "\ue964" else _("Camera off") if self.firstChild.name == "\ue963" else self.name
-		def spechState(): message(new_name)
-		thr = Timer(.1, spechState).start()
+		def spechState(): queueHandler.queueFunction(queueHandler.eventQueue, message, new_name)
+		Timer(.1, spechState).start()
 	
 	def initOverlayClass(self):
 		self.bindGesture("kb:Enter", "enter")
@@ -154,7 +154,7 @@ class ExplanationCorrectAnswerInQuiz:
 		gesture.send()
 		elements = self.appModule.getElements()
 		try: obj = elements[1].firstChild.firstChild.firstChild
-		except: obj = None
+		except Exception: obj = None
 		if not obj: return False
 		TextWindow(obj.name, _("Explanation"), readOnly=False)
 

@@ -70,7 +70,7 @@ class cnf:
 		self.conf.write()
 
 try: conf = cnf()
-except:
+except Exception:
 	path = os.path.join(globalVars.appArgs.configPath, "UnigramAccess.ini")
 	os.remove(path)
 	conf = cnf()
