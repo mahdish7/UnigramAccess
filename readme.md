@@ -18,59 +18,75 @@ Use Unigram in a more comfortable and productive way. This addon provides many h
 * If the media attached to the message is opened using the spacebar, then after closing it, the focus will return to the last element that was in focus.
 * The add-on allows you to completely disable the announcement of progress bars, as well as disable only the announcement of the progress bar for playing voice messages.
 
-## Hotkey list:
-* ALT+1: Move focus to chat list;
-* ALT+2: Move focus to the last message in an open chat;
-* ALT+3: Move focus to "unread messages" label;
-* ALT+D: Move the focus to the edit field. If the focus is already in the edit field, then after pressing the hotkey, it will move to where it was before;
-* ALT+T: Announce the name and status of an open chat;
-* space: Play/stop the focused voice or video message, or open a media file attached to the current message;
-* ALT+P: Play/pause the voice message currently playing;
-* ALT+S: Increase/decrease the playback speed of voice messages;
-* ALT+E: Close audio player;
-* control+C: Copy the message if it contains text. If the focus is on a link, the link will be copied.
-* ALT+shift+C: Call if it's a contact, or enter a voice chat if it's a group;
-* ALT+shift+V: Press the video call button;
-* ALT+Y: Accept call;
-* ALT+N: Press the \"Decline call\" button if there is an incoming call, the \"End call\" button if the call is in progress, or leave the voice chat if it is active;
-* ALT+A: Press \"Mute/unmute microphone\" button;
-* ALT+V: Press "Enable/disable camera" button;
-* ALT+Q: Press \"Instant view\" button, if it is included in the current message;
-* ALT+M: Open navigation menu;
-* control+R: Start/stop voice message recording;
-* control+D: If pressed once, cancels the recording of a voice message. If pressed twice, changes the notification type when starting, sending, or canceling a voice message recording;
-* ALT+U: Toggle progress bar announcements;
-* control+P: Open current chat profile;
-* delete: Delete a message or chat;
-* shift+delete: Delete message or chat from both sides;
-* control+ALT+C: Open comments;
-* enter: Reply to message;
-* ALT+F: Forward message;
-* backspace: Edit message;
-* ALT+shift+R: Mark a chat as read;
-* control+space: Switch to selection mode;
-* ALT+shift+L: Copy data for broadcasting to the clipboard;
-* ALT+C: Show message text in popup window.
-* NVDA+ALT+U: Open UnigramAccess settings window
-* ALT+4: Move focus to list of chat folders.
-* control+shift+A: Press "Attach file" button.
-* control+N: Press "New chat" button.
-* Unassigned: Pin a message or chat.
-* ALT+5: Move focus to open profile.
-* ALT+L: Enable automatic reading of new messages in the current chat.
-* NVDA+ALT+R: Convert voice message to text.
-* Left arrow: Announce the original message, the message that was replied to. Double-pressing moves focus to that message.
-* ALT+6: Move focus to the list of group threads.
-* ALT+H: Show a list of all UnigramAccess shortcuts.
-* ALT+I: Open a list of chat search results.
-* ALT+J: Go to the previous search result in the chat.
-* ALT+K: Go to the next search result in the chat.
+## Hotkey List:
+
+### Navigation & Layout
+* **ALT+1**: Move focus to chat list.
+* **ALT+2**: Move focus to the last message in an open chat.
+* **ALT+3**: Move focus to "unread messages" label.
+* **ALT+4**: Move focus to list of chat folders.
+* **ALT+5**: Move focus to open profile.
+* **ALT+6**: Move focus to the list of group threads.
+* **ALT+shift+P**: Open current chat profile.
+* **ALT+M**: Open navigation menu.
+
+### Messages & Interaction
+* **ALT+D**: Move the focus to the edit field (pressing it again returns focus to the previous location).
+* **ALT+T**: Announce the name and status of an open chat.
+* **ALT+W**: Announce the time a message was sent or received and its reactions. Double-clicking toggles the announcement mode.
+* **NVDA+control+1-9, 0**: Read the N-th most recent message in the chat without moving system focus (1 is the newest, 0 is the 10th). Also moves the NVDA navigator object.
+* **Left arrow**: Announce the original message that was replied to. Double-pressing moves focus to it.
+* **ALT+C**: Show message text in a popup window.
+* **control+C**: Copy the message text (or link if focused on a link).
+* **ALT+shift+L**: Copy data for broadcasting to the clipboard.
+* **delete**: Delete a message or chat.
+* **shift+delete**: Delete message or chat from both sides.
+* **enter**: Reply to message.
+* **backspace**: Edit message.
+* **ALT+F**: Forward message.
+* **control+space**: Switch to selection mode.
+* **ALT+shift+R**: Mark a chat as read.
+* **ALT+L**: Enable automatic reading of new messages in the current chat.
+* **control+ALT+C**: Open comments.
+* **Unassigned**: Pin a message or chat.
+* **control+shift+A**: Press "Attach file" button.
+* **control+N**: Press "New chat" button.
+* **ALT+Q**: Press "Instant view" button if included in the current message.
+
+### Media & Voice Messages
+* **space**: Play/stop the focused voice or video message, or open a media file attached to the current message.
+* **ALT+P**: Play/pause the voice message currently playing.
+* **ALT+S**: Increase/decrease the playback speed of voice messages.
+* **ALT+E**: Close audio player.
+* **control+R**: Start/stop voice message recording.
+* **control+D**: Once: cancel voice message recording. Twice: change the notification type for voice messages.
+* **control+ALT+rightArrow**: Fast forward a voice message.
+* **control+ALT+leftArrow**: Rewind a voice message.
+* **NVDA+ALT+R**: Convert voice message to text.
+
+### Calls
+* **ALT+shift+C**: Call if it's a contact, or enter a voice chat if it's a group.
+* **ALT+shift+V**: Press the video call button.
+* **ALT+Y**: Accept call.
+* **ALT+N**: Decline an incoming call, end an active call, or leave a voice chat.
+* **ALT+A**: Mute/unmute microphone.
+* **ALT+V**: Enable/disable camera.
+
+### Search
+* **ALT+I**: Open a list of chat search results.
+* **F3**: Go to the next search result in the chat.
+* **shift+F3**: Go to the previous search result in the chat.
+
+### Settings & Miscellaneous
+* **NVDA+ALT+U**: Open UnigramAccess settings window.
+* **ALT+U**: Toggle progress bar announcements.
+* **ALT+H**: Show a list of all UnigramAccess shortcuts.
 
 ## Changes in version 1.0.0
 
 * Initial official release of **UnigramAccess**.
-* Complete modular architecture rewrite with clean separation of overlay classes (`overlays.py`), state trackers (`trackers.py`), and core application logic (`unigram.py`).
-* Full compatibility with modern NVDA releases (NVDA 2024.1 through 2026+) and Python 3.12+.
+* Complete modular architecture rewrite: The main `AppModule` class in `unigram.py` now acts as a central router that elegantly delegates logic to specialized helper modules (`unigram_ui`, `unigram_navigation`, `unigram_calls`, `unigram_messages`, and `unigram_media`), making the codebase highly organized and maintainable. State trackers and overlay classes are also cleanly separated.
+* Full compatibility with modern NVDA releases (NVDA 2025.1 through 2026+) and Python 3.12+.
 * Independent configuration system via `UnigramAccess.ini`.
 * 35+ dedicated accessibility hotkeys for fast navigation, chat lists, messages, folders, topics, and profiles.
 * Comprehensive audio message interaction: playback control, speed adjustment, and rewind/fast-forward.
