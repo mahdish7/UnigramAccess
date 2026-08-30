@@ -29,12 +29,12 @@ Use Unigram in a more comfortable and productive way. This addon provides many h
 * **ALT+6**: Move focus to the list of group threads.
 * **ALT+shift+P**: Open current chat profile.
 * **ALT+M**: Open navigation menu.
+* **ALT+end**: Go to bottom in the chat page.
 
 ### Messages & Interaction
 * **ALT+D**: Move the focus to the edit field (pressing it again returns focus to the previous location).
 * **ALT+T**: Announce the name and status of an open chat.
 * **ALT+W**: Announce the time a message was sent or received and its reactions. Double-clicking toggles the announcement mode.
-* **NVDA+control+1-9, 0**: Read the N-th most recent message in the chat without moving system focus (1 is the newest, 0 is the 10th). Also moves the NVDA navigator object.
 * **Left arrow**: Announce the original message that was replied to. Double-pressing moves focus to it.
 * **ALT+C**: Show message text in a popup window.
 * **control+C**: Copy the message text (or link if focused on a link).
@@ -56,12 +56,11 @@ Use Unigram in a more comfortable and productive way. This addon provides many h
 ### Media & Voice Messages
 * **space**: Play/stop the focused voice or video message, or open a media file attached to the current message.
 * **ALT+P**: Play/pause the voice message currently playing.
-* **ALT+S**: Increase/decrease the playback speed of voice messages.
+* **ALT+X**: Increase/decrease the playback speed of voice messages.
+* **ALT+S**: Toggle focus to the voice message slider (pressing it again returns focus to the previous location).
 * **ALT+E**: Close audio player.
 * **control+R**: Start/stop voice message recording.
 * **control+D**: Once: cancel voice message recording. Twice: change the notification type for voice messages.
-* **control+ALT+rightArrow**: Fast forward a voice message.
-* **control+ALT+leftArrow**: Rewind a voice message.
 * **NVDA+ALT+R**: Convert voice message to text.
 
 ### Calls

@@ -53,8 +53,6 @@ class AppModule(appModuleHandler.AppModule):
 		if conf.get("automatically announce new messages") and not Chat_update.active: Chat_update.restore(self)
 		if conf.get("automatically announce activity in chats") and not Title_change_tracking.active: Title_change_tracking.restore(self.saved_items)
 		self.app_version = self.productVersion
-		# assign hotkeys for the function of reading messages by numbering
-		for i in range(10): self.bindGesture("kb:NVDA+control+%d" % i, "reviewRecentMessage")
 		self.ui_helper = UnigramUIHelper(self)
 		self.nav_helper = UnigramNavigation(self)
 		self.call_helper = UnigramCalls(self)
@@ -332,9 +330,6 @@ class AppModule(appModuleHandler.AppModule):
 			conf.set("voicingPerformanceIndicators", "none")
 			message(_("Do not announce any progress bars"))
 
-	def script_reviewRecentMessage(self, gesture):
-		return self.msg_helper.script_reviewRecentMessage(gesture)
-
 
 	# Focus change tracking
 	def event_gainFocus(self, obj, nextHandler):
@@ -483,7 +478,7 @@ class AppModule(appModuleHandler.AppModule):
 				self.saved_items.save("profile name", obj)
 			elif obj.UIAAutomationId in ("Audio", "Video"):
 				clsList.insert(0, Audio_and_video_button)
-			elif obj.role == Role.SLIDER and obj.UIAAutomationId == "Slider":
+			elif obj.role in (Role.SLIDER, Role.UNKNOWN) and getattr(obj, "UIAAutomationId", "") == "Slider":
 				self.saved_items.save("slider", obj)
 			elif conf.get("voicingPerformanceIndicators") == "none" and obj.role == Role.PROGRESSBAR:
 				clsList.pop(0)
@@ -495,10 +490,10 @@ class AppModule(appModuleHandler.AppModule):
 	def deleteMessageAndChat(self, obj):
 		return self.msg_helper.deleteMessageAndChat(obj)
 
-	@script(description=_("Delete a message or chat"), gestures=["kb:delete", "kb:ALT+delete"])
+	@script(description=_("Delete a message or chat"), gesture="kb:delete")
 	def script_deletion(self, gesture):
 		return self.msg_helper.script_deletion(gesture)
-	@script(description=_("Delete message or chat from both sides"), gestures=["kb:shift+delete", "kb:ALT+shift+delete"])
+	@script(description=_("Delete message or chat from both sides"), gesture="kb:shift+delete")
 	def script_completeDeletion(self, gesture):
 		return self.msg_helper.script_completeDeletion(gesture)
 	@script(description=_("Switch to selection mode"), gesture="kb:control+space")
@@ -602,14 +597,18 @@ class AppModule(appModuleHandler.AppModule):
 		# We replace the file extension, because we need an md file
 		a = a[:-4]+"md"
 		with open(a, "r", encoding="utf-8") as file:
-			text = file.read()
-		blocks = text.split("\n\n")
-		count_rows = [len(item.split("\n")) for item in blocks]
-		index = count_rows.index(max(count_rows))
-		text = blocks[index]
-		text = text.replace("* ", "")
-		text = text.replace("## ", "")
-		TextWindow(text.strip(), _("List of shortcuts"), readOnly=True)
+			lines = file.readlines()
+		parsed_lines = []
+		for line in lines:
+			line = line.strip()
+			if line.startswith("### "):
+				if parsed_lines: parsed_lines.append("")
+				parsed_lines.append(line.replace("### ", "") + ":")
+			elif line.startswith("* **"):
+				parsed_lines.append(line.replace("* **", "").replace("**", ""))
+		
+		text = "\n".join(parsed_lines).strip()
+		TextWindow(text, _("List of shortcuts"), readOnly=True)
 
 
 	@script(description=_("Go to the end"), gesture="kb:ALT+end")
@@ -630,9 +629,13 @@ class AppModule(appModuleHandler.AppModule):
 
 
 	# The function of changing the playback speed of a voice message
-	@script(description=_("Increase/decrease the playback speed of voice messages"), gesture="kb:ALT+S")
+	@script(description=_("Increase/decrease the playback speed of voice messages"), gesture="kb:ALT+X")
 	def script_voiceMessageAcceleration(self, gesture):
 		return self.media_helper.script_voiceMessageAcceleration(gesture)
+
+	@script(description=_("Toggle focus to voice slider"), gesture="kb:ALT+S")
+	def script_toggleVoiceSlider(self, gesture):
+		return self.media_helper.script_toggleVoiceSlider(gesture)
 
 	# Audio player close function
 	@script(description=_("Close audio player"), gesture="kb:ALT+E")
@@ -658,20 +661,6 @@ class AppModule(appModuleHandler.AppModule):
 	@script(description=_("Cancel voice message recording or cycle notification mode"), gesture="kb:control+D")
 	def script_cancelVoiceMessageRecording(self, gesture):
 		return self.media_helper.script_cancelVoiceMessageRecording(gesture)
-
-	def rewind_voice_message(self, direction):
-		return self.media_helper.rewind_voice_message(direction)
-
-	def script_rewind_voice_message(self, gesture):
-		return self.media_helper.script_rewind_voice_message(gesture)
-
-	@script(description=_("Fast forward a voice message"), gesture="kb:control+ALT+rightArrow")	
-	def script_rewindVoiceMessageForward(self, gesture):
-		return self.media_helper.script_rewindVoiceMessageForward(gesture)
-
-	@script(description=_("Rewind voice message"), gesture="kb:control+ALT+leftArrow")
-	def script_rewindVoiceMessageBack(self, gesture):
-		return self.media_helper.script_rewindVoiceMessageBack(gesture)
 
 	# A timer that checks if the voice message has been converted to text
 	def waiting_for_recognition(self, obj):
