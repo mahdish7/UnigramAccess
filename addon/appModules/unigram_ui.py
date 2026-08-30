@@ -24,7 +24,12 @@ class UnigramUIHelper:
 	def getChatsListElement(self):
 		targetList = self.appModule.saved_items.get("chats")
 		if targetList and targetList.location and targetList.location.width: return targetList
-		if self.appModule.productVersion >= "11.2.13.0":
+		
+		def get_version_tuple(v):
+			try: return tuple(map(int, str(v).split(".")))
+			except Exception: return (0, 0, 0, 0)
+			
+		if get_version_tuple(self.appModule.productVersion) >= (11, 2, 13, 0):
 			targetList = next((item for item in self.getElements() if item.role == Role.LIST and item.UIAAutomationId == "ChatsList"), False)
 		else:
 			targetList = next((item for item in reversed(self.getElements()) if item.role == Role.TABCONTROL and item.UIAAutomationId == "rpMasterTitlebar"), False)
