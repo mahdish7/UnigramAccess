@@ -114,31 +114,6 @@ class UnigramMessages:
 		except (AttributeError, ValueError): return
 		self.appModule.is_set_reaction = index
 
-	def script_reviewRecentMessage(self, gesture):
-		try: index = int(gesture.mainKeyName[-1])
-		except (AttributeError, ValueError): return
-		if index == 0: index = 10
-		obj = self.appModule.ui_helper.getMessagesElement()
-		if not obj:
-			message(_("No open chat"))
-			return
-		target = obj.lastChild
-		if not target:
-			message(_("This chat is empty"))
-			return
-		i = 0
-		while target:
-			child = target.firstChild
-			if child.role not in (Role.BUTTON, Role.GROUPING):
-				i += 1
-				if i == index:
-					message(self.appModule.action_message_focus(target))
-					api.setNavigatorObject(target)
-					break
-			target = target.previous
-		if i < index:
-			message(_("This chat is empty"))
-			return
 
 	def script_copy(self, gesture):
 		self.activate_option_for_menu((icons_from_context_menu["copy"]), "Messages")

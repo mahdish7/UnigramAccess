@@ -153,40 +153,71 @@ class UnigramMedia:
 		lastFocus.setFocus()
 		lastFocus.setFocus()
 
-	def rewind_voice_message(self, direction):
+	def script_toggleVoiceSlider(self, gesture):
+		current_focus = api.getFocusObject()
+		is_slider = lambda obj: getattr(obj, 'role', None) in (Role.UNKNOWN, Role.SLIDER) and getattr(obj, 'UIAAutomationId', None) == "Slider"
+		
+		if is_slider(current_focus):
+			# We are on the slider, jump back
+			if hasattr(self, 'saved_slider_focus') and self.saved_slider_focus:
+				try:
+					self.saved_slider_focus.setFocus()
+				except Exception:
+					pass
+				self.saved_slider_focus = None
+			return
+
+		# Find the slider
 		slider = self.appModule.saved_items.get("slider")
 		if not slider or slider.location.width == 0:
-			message(_("Nothing is playing right now"))
-			return False
-		self.script_pauseVoiceMessage(None)
-		obj = api.getFocusObject()
-		slider.setFocus()
-		KeyboardInputGesture.fromName(direction).send()
-		self.script_pauseVoiceMessage(None)
-		obj.setFocus()
-		speech.cancelSpeech()
-		obj.setFocus()
+			slider = None
+			for item in self.appModule.ui_helper.getElements():
+				if is_slider(item):
+					slider = item
+					break
+			if not slider and self.appModule.ui_helper.getElements() and self.appModule.ui_helper.getElements()[0].role == Role.WINDOW:
+				for item in self.appModule.ui_helper.getElements()[0].children:
+					if is_slider(item):
+						slider = item
+						break
 
-	def script_rewind_voice_message(self, gesture):
-		try: index = int(gesture.mainKeyName[-1])
-		except (AttributeError, ValueError): return
-		slider = self.appModule.saved_items.get("slider")
-		if not slider or slider.location.width == 0:
-			message(_("Nothing is playing right now"))
-			return False
-		obj = api.getFocusObject()
-		part = slider.location.width // 10
-		x = slider.location.left + (part * index)
-		y = slider.location.top + (slider.location.height // 2)
-		winUser.dll.SetCursorPos(x, y)
-		mouseHandler.executeMouseEvent(winUser.MOUSEEVENTF.LEFTDOWN, 0, 0)
-		mouseHandler.executeMouseEvent(winUser.MOUSEEVENTF.LEFTUP, 0, 0)
+		if slider:
+			self.saved_slider_focus = current_focus
+			slider.setFocus()
 
-	def script_rewindVoiceMessageForward(self, gesture):
-		self.rewind_voice_message("rightArrow")
+			def monitor_slider():
+				# Stop if saved focus is cleared (e.g. user toggled back manually via Alt+S)
+				if not getattr(self, 'saved_slider_focus', None):
+					return
+				
+				curr = api.getFocusObject()
+				# If user manually moved focus away from the slider, stop monitoring
+				if not is_slider(curr):
+					self.saved_slider_focus = None
+					return
+				
+				# Check if slider is still on screen
+				is_alive = False
+				try:
+					if curr.location and curr.location.width > 0:
+						is_alive = True
+				except Exception:
+					pass
+				
+				if not is_alive:
+					try:
+						self.saved_slider_focus.setFocus()
+					except Exception:
+						pass
+					self.saved_slider_focus = None
+					return
+				
+				core.callLater(500, monitor_slider)
 
-	def script_rewindVoiceMessageBack(self, gesture):
-		self.rewind_voice_message("leftArrow")
+			core.callLater(500, monitor_slider)
+		else:
+			message(_("Slider not found"))
+
 
 	def waiting_for_recognition(self, obj):
 		interval = .5
