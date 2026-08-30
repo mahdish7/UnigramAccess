@@ -15,7 +15,7 @@ import speech
 from threading import Timer
 from nvwave import playWaveFile
 import os
-from logHandler import log
+from .unigram_logger import ulog as log
 import queueHandler
 import re
 from .data import *
@@ -225,6 +225,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	# Processing the message that got into focus
 	def action_message_focus(self, obj):
+		log.info("Processing focused message.")
 		keywords = obj.keywords
 		sender = ""
 		header = False
@@ -337,6 +338,12 @@ class AppModule(appModuleHandler.AppModule):
 
 	# Focus change tracking
 	def event_gainFocus(self, obj, nextHandler):
+		obj_id = getattr(obj, 'UIAAutomationId', '')
+		obj_name = getattr(obj, 'name', '')
+		if obj_id or obj_name:
+			role = getattr(obj, 'role', None)
+			role_name = getattr(role, 'name', str(role)) if role else 'Unknown'
+			log.debug(f"Focus changed: Role: {role_name} ({role}) - ID: '{obj_id}' - Name: '{obj_name}'")
 		if conf.get("automatically announce new messages") and Chat_update.pause:
 			# Since the timer is suspended when the program window is minimized, it needs to be restored as soon as the focus is set on some element in the window
 			Chat_update.restore(self)
@@ -480,7 +487,10 @@ class AppModule(appModuleHandler.AppModule):
 				self.saved_items.save("slider", obj)
 			elif conf.get("voicingPerformanceIndicators") == "none" and obj.role == Role.PROGRESSBAR:
 				clsList.pop(0)
-		except (comtypes.COMError, AttributeError): pass
+		except (comtypes.COMError, AttributeError) as e:
+			log.debugException(f"Handled expected exception during chooseNVDAObjectOverlayClasses: {e}")
+		except Exception as e:
+			log.error(f"Unexpected exception in chooseNVDAObjectOverlayClasses: {e}", exc_info=True)
 
 	def deleteMessageAndChat(self, obj):
 		return self.msg_helper.deleteMessageAndChat(obj)

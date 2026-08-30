@@ -94,6 +94,14 @@ class UnigramAccessSettings(SettingsPanel):
 		"to_messages": _("Move focus to the last message in a chat"),
 	}
 	
+	listCustomLogLevels = {
+		"disabled": _("Disabled"),
+		"error": _("Error"),
+		"warning": _("Warning"),
+		"info": _("Info"),
+		"debug": _("Debug"),
+	}
+	
 	def makeSettings(self, settingsSizer):
 		settingsSizerHelper = gui.guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
 		# Selecting an interface language
@@ -151,6 +159,30 @@ class UnigramAccessSettings(SettingsPanel):
 		self.checkForUpdates = settingsSizerHelper.addItem(wx.Button(self, label=_("Check for &updates")))
 		self.checkForUpdates.Bind(wx.EVT_BUTTON, onCheckForUpdates)
 
+		# Custom Log settings
+		self.custom_log_level = settingsSizerHelper.addLabeledControl(_("Add-on log level:"), wx.Choice, choices=[self.listCustomLogLevels[item] for item in self.listCustomLogLevels])
+		self.custom_log_level.SetStringSelection(self.listCustomLogLevels.get(conf.get("custom_log_level"), self.listCustomLogLevels["disabled"]))
+		
+		btnSizer = wx.BoxSizer(wx.HORIZONTAL)
+		self.btnOpenLog = wx.Button(self, label=_("Open Log File"))
+		self.btnOpenLog.Bind(wx.EVT_BUTTON, self.onOpenLog)
+		btnSizer.Add(self.btnOpenLog, 0, wx.ALL, 5)
+		
+		self.btnClearLog = wx.Button(self, label=_("Clear Log File"))
+		self.btnClearLog.Bind(wx.EVT_BUTTON, self.onClearLog)
+		btnSizer.Add(self.btnClearLog, 0, wx.ALL, 5)
+		
+		settingsSizerHelper.addItem(btnSizer)
+
+	def onOpenLog(self, evt):
+		from appModules.unigram_logger import ulog
+		ulog.open_log_file()
+		
+	def onClearLog(self, evt):
+		from appModules.unigram_logger import ulog
+		ulog.clear_log_file()
+		gui.messageBox(_("Log file has been cleared successfully."), _("Success"), wx.OK | wx.ICON_INFORMATION)
+
 	def get_key(self, d, value):
 		for k, v in d.items():
 			if v == value: return k
@@ -173,3 +205,8 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("voice_the_presence_of_a_reaction", self.voice_the_presence_of_a_reaction.IsChecked())
 		conf.set("isFixedToggleButton", self.isFixedToggleButton.IsChecked())
 		conf.set("is_automatically_check_for_updates", self.is_automatically_check_for_updates.IsChecked())
+		
+		level = self.get_key(self.listCustomLogLevels, self.custom_log_level.GetStringSelection())
+		conf.set("custom_log_level", level)
+		from appModules.unigram_logger import ulog
+		ulog.update_log_level()
