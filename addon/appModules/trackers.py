@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 # State tracking and caching logic
 
-from threading import Timer
+import core
 from ui import message
 import queueHandler
 import api
@@ -18,8 +18,16 @@ class Saved_items:
 	# store frequently used window elements in cache for faster access
 	_items = {}
 	def get(self, key):
+		import comtypes
 		id = api.getFocusObject().windowHandle
-		try: return self._items[id][key]
+		try:
+			obj = self._items[id][key]
+			if hasattr(obj, "name"):
+				_ = obj.name
+			return obj
+		except comtypes.COMError:
+			del self._items[id][key]
+			return False
 		except Exception: return False
 	def save(self, key, obj):
 		# id = obj.windowHandle
@@ -48,7 +56,7 @@ class Title_change_tracking:
 				queueHandler.queueFunction(queueHandler.eventQueue, message, text)
 			new_title = [item.name for item in title.children]
 			cls.saved_items.save("last profile name", new_title)
-		Timer(cls.interval, cls.tick).start()
+		core.callLater(int(cls.interval * 1000), cls.tick)
 	@classmethod
 	def toggle(cls, saved_items=False):
 		if not conf.get("automatically announce activity in chats") or not saved_items:
@@ -56,7 +64,7 @@ class Title_change_tracking:
 			cls.active = True
 			cls.pause = False
 			conf.set("automatically announce activity in chats", True)
-			Timer(cls.interval, cls.tick).start()
+			core.callLater(int(cls.interval * 1000), cls.tick)
 			return True
 		else:
 			cls.active = False
@@ -68,7 +76,7 @@ class Title_change_tracking:
 		cls.active = True
 		cls.saved_items = saved_items
 		cls.saved_items.save("last profile name", None)
-		Timer(cls.interval, cls.tick).start()
+		core.callLater(int(cls.interval * 1000), cls.tick)
 
 
 class Chat_update:
@@ -92,7 +100,7 @@ class Chat_update:
 			last_message.positionInfo["indexInGroup"]
 			last_message.positionInfo["similarItemsInGroup"]
 		except Exception:
-			Timer(cls.interval, cls.tick).start()
+			core.callLater(int(cls.interval * 1000), cls.tick)
 			return
 		if last_message.positionInfo["indexInGroup"] != last_saved_message[1] and last_message.positionInfo["indexInGroup"] == last_message.positionInfo["similarItemsInGroup"]:
 			try:
@@ -107,14 +115,14 @@ class Chat_update:
 				new_message = (title, last_message.positionInfo["indexInGroup"])
 				cls.app.saved_items.save("last message", new_message)
 			except Exception: pass
-		Timer(cls.interval, cls.tick).start()
+		core.callLater(int(cls.interval * 1000), cls.tick)
 	@classmethod
 	def toggle(cls, app=False):
 		if not conf.get("automatically announce new messages") or not app:
 			cls.active = True
 			conf.set("automatically announce new messages", True)
 			cls.app = app
-			Timer(cls.interval, cls.tick).start()
+			core.callLater(int(cls.interval * 1000), cls.tick)
 			return True
 		else:
 			cls.active = False
@@ -126,4 +134,4 @@ class Chat_update:
 		cls.active = True
 		cls.app = app
 		cls.app.saved_items.save("last message", None)
-		Timer(cls.interval, cls.tick).start()
+		core.callLater(int(cls.interval * 1000), cls.tick)

@@ -8,7 +8,7 @@ from winBindings import user32 as winUser
 import mouseHandler
 from ui import message
 import speech
-from threading import Timer
+import core
 from nvwave import playWaveFile
 import os
 import queueHandler
@@ -78,7 +78,7 @@ class UnigramMedia:
 				obj.setFocus()
 			else:
 				self.appModule.is_exit_from_media = True
-		Timer(.1, spechState).start()
+		core.callLater(100, spechState)
 
 	def script_recordingVoiceMessage(self, gesture):
 		lastFocus = api.getFocusObject()
@@ -197,13 +197,13 @@ class UnigramMedia:
 					if obj and obj.next: text = obj.next.name
 					else: text = ""
 					queueHandler.queueFunction(queueHandler.eventQueue, message, text)
-				Timer(.4, speak_result).start()
+				core.callLater(400, speak_result)
 				try: playWaveFile(os.path.join(baseDir, "RecognitionFinish.wav"))
 				except Exception: pass
 				return
 			else: 
-				Timer(interval, tick, [obj]).start()
-		Timer(interval, tick, [obj]).start()
+				core.callLater(int(interval * 1000), tick, obj)
+		core.callLater(int(interval * 1000), tick, obj)
 
 	def script_Recognize_voice_message(self, gesture):
 		obj = api.getFocusObject()

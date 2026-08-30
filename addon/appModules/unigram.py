@@ -442,8 +442,8 @@ class AppModule(appModuleHandler.AppModule):
 				obj.name = "/. ".join(name)
 		nextHandler()
 
-	# Processing item initialization
 	def chooseNVDAObjectOverlayClasses(self, obj, clsList):
+		import comtypes
 		try:
 			if obj.role == Role.LISTITEM and  obj.name and obj.isFocusable:
 				parent = obj.parent
@@ -473,7 +473,7 @@ class AppModule(appModuleHandler.AppModule):
 				self.saved_items.save("slider", obj)
 			elif conf.get("voicingPerformanceIndicators") == "none" and obj.role == Role.PROGRESSBAR:
 				clsList.pop(0)
-		except Exception as e: pass
+		except (comtypes.COMError, AttributeError): pass
 
 	def deleteMessageAndChat(self, obj):
 		return self.msg_helper.deleteMessageAndChat(obj)
