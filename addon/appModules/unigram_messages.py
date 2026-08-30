@@ -10,6 +10,7 @@ import os
 from .data import *
 from .text_window import *
 from .cnf import conf
+from .unigram_logger import ulog as log
 
 baseDir = os.path.join(os.path.dirname(__file__), "media")
 

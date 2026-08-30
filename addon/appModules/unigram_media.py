@@ -12,7 +12,7 @@ import core
 from nvwave import playWaveFile
 import os
 import queueHandler
-from logHandler import log
+from .unigram_logger import ulog as log
 from .cnf import conf
 
 baseDir = os.path.join(os.path.dirname(__file__), "media")

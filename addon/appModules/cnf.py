@@ -53,7 +53,8 @@ spec = (
 	"automatically announce activity in chats = boolean(default=False)",
 	"notify administrators in messages = boolean(default=True)",
 	"action_when_pressing_up_arrow_in_text_field = string(default=normal)",
-	"announce_end_of_message = boolean(default=True)"
+	"announce_end_of_message = boolean(default=True)",
+	"custom_log_level = string(default=disabled)"
 )
 
 class cnf:

@@ -6,6 +6,9 @@ from keyboardHandler import KeyboardInputGesture
 import api
 from ui import message
 import scriptHandler
+from NVDAObjects.UIA import ListItem
+from .unigram_logger import ulog as log
+import appModuleHandler
 from .trackers import Title_change_tracking
 
 class UnigramNavigation:
@@ -13,6 +16,7 @@ class UnigramNavigation:
 		self.appModule = appModule
 
 	def script_toChatList(self, gesture, arg = False):
+		log.info("Executing toChatList shortcut.")
 		obj = api.getFocusObject()
 		lastFocusChatElement = self.appModule.saved_items.get("last focused chat")
 		if lastFocusChatElement and lastFocusChatElement.location and lastFocusChatElement.location.width:

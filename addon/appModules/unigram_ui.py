@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 from controlTypes import Role, State
 import api
-from logHandler import log
+from .unigram_logger import ulog as log
 
 class UnigramUIHelper:
 	def __init__(self, appModule):
@@ -23,19 +23,28 @@ class UnigramUIHelper:
 
 	def getChatsListElement(self):
 		targetList = self.appModule.saved_items.get("chats")
-		if targetList and targetList.location and targetList.location.width: return targetList
+		if targetList and targetList.location and targetList.location.width:
+			log.debug("Found chats list in cache.")
+			return targetList
 		
 		def get_version_tuple(v):
 			try: return tuple(map(int, str(v).split(".")))
 			except Exception: return (0, 0, 0, 0)
 			
+		log.debug(f"Chats list not in cache, detecting for version: {self.appModule.productVersion}")
 		if get_version_tuple(self.appModule.productVersion) >= (11, 2, 13, 0):
 			targetList = next((item for item in self.getElements() if item.role == Role.LIST and item.UIAAutomationId == "ChatsList"), False)
 		else:
 			targetList = next((item for item in reversed(self.getElements()) if item.role == Role.TABCONTROL and item.UIAAutomationId == "rpMasterTitlebar"), False)
-			if not targetList: return False
+			if not targetList:
+				log.warning("Failed to find rpMasterTitlebar for older version of Unigram.")
+				return False
 			targetList = next((item for item in targetList.firstChild.children if item.role == Role.LIST and 	item.UIAAutomationId == "ChatsList"), False)
-		if targetList: self.appModule.saved_items.save("chats", targetList)
+		if targetList:
+			log.debug("Successfully found and cached chats list element.")
+			self.appModule.saved_items.save("chats", targetList)
+		else:
+			log.warning("Chats list element could not be found.")
 		return targetList
 
 	def getElements(self):
