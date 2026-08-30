@@ -230,7 +230,7 @@ class AppModule(appModuleHandler.AppModule):
 		header = False
 		admin_label = ""
 		reactions = []
-		sender_message = self.sender_message or ""
+		sender_message = getattr(obj, "sender_message", "")
 		item = obj.firstChild
 		while item:
 			if item.UIAAutomationId == "Question":
@@ -276,10 +276,10 @@ class AppModule(appModuleHandler.AppModule):
 		
 		# Check the status of the message, whether it is read and sent
 		# Checking only sent messages
-		if keywords[0] in self.end_text:
+		if keywords[0] in getattr(obj, "end_text", ""):
 			# If the message is read, delete information about it
 			obj.name = obj.name.replace(keywords[0], ".", -1)
-		elif keywords[1] in self.end_text:
+		elif keywords[1] in getattr(obj, "end_text", ""):
 			# If the message is not read, check whether it is necessary to display information about it
 			if (sender_message == "received") or (profile_name and profile_name.childCount == 1):
 				obj.name = obj.name.replace(keywords[1], ".", -1)
@@ -288,7 +288,7 @@ class AppModule(appModuleHandler.AppModule):
 				obj.name = keywords[1][2:]+". "+obj.name
 		if not conf.get("announce_end_of_message") and obj.index_last_part_in_message:
 			obj.name = obj.name[:obj.index_last_part_in_message]
-		if keywords[3] in self.end_text:
+		if keywords[3] in getattr(obj, "end_text", ""):
 			# Removal of the phrase "administrator" and the phrase "owner" in messages
 			list_text = obj.name.split("\n")
 			key_phrases = phrase_administrator_in_message.get(conf.get("lang"), phrase_administrator_in_message["en"])
@@ -456,11 +456,18 @@ class AppModule(appModuleHandler.AppModule):
 					return True
 				elif parent.UIAAutomationId in ("ChatsList", "TopicList"): return
 				# We check whether the element contains phrases that will help us identify it as a message
-				keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
 				name = obj.name[-200:]
-				self.sender_message = "received" if keywords[3] in name else "send" if keywords[2] in name else ""
-				self.end_text = name
-				if self.sender_message or (parent.role == Role.LISTITEM and parent.location.width > 800):
+				sender = ""
+				for k, v in keywordsInMessages.items():
+					if v[3] in name:
+						sender = "received"
+						break
+					elif v[2] in name:
+						sender = "send"
+						break
+				obj.sender_message = sender
+				obj.end_text = name
+				if obj.sender_message or parent.UIAAutomationId == "Messages" or getattr(obj, "UIAAutomationId", "") == "Message_item":
 					clsList.insert(0, Message_list_item)
 			elif conf.get("action_when_pressing_up_arrow_in_text_field") != "normal" and obj.role == Role.EDITABLETEXT and obj.UIAAutomationId == "TextField":
 				# Add processing for pressing the up arrow key to the message input field
