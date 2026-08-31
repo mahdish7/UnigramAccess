@@ -447,18 +447,18 @@ class AppModule(appModuleHandler.AppModule):
 	def chooseNVDAObjectOverlayClasses(self, obj, clsList):
 		import comtypes
 		try:
-			if obj.role == Role.LISTITEM and  obj.name and obj.isFocusable:
-				parent = obj.parent
-				if parent.UIAAutomationId == "ChatFolders":
+			if obj.role == Role.LISTITEM and obj.isFocusable:
+				parent = getattr(obj, "parent", None)
+				if parent and getattr(parent, "UIAAutomationId", "") == "ChatFolders":
 					self.tabs_folder_element = parent
 					if conf.get("voiceFolderNames") and State.SELECTED in obj.states: self.change_chats_folder(obj, parent.UIAAutomationId)
 					return True
-				elif parent.UIAAutomationId == "Navigation":
+				elif parent and getattr(parent, "UIAAutomationId", "") == "Navigation":
 					clsList.insert(0, SettingsPanelListItem)
 					return True
-				elif parent.UIAAutomationId in ("ChatsList", "TopicList"): return
+				elif parent and getattr(parent, "UIAAutomationId", "") in ("ChatsList", "TopicList"): return
 				# We check whether the element contains phrases that will help us identify it as a message
-				name = obj.name[-200:]
+				name = (getattr(obj, "name", "") or "")[-200:]
 				sender = ""
 				for k, v in keywordsInMessages.items():
 					if v[3] in name:
@@ -469,7 +469,7 @@ class AppModule(appModuleHandler.AppModule):
 						break
 				obj.sender_message = sender
 				obj.end_text = name
-				if obj.sender_message or parent.UIAAutomationId == "Messages" or getattr(obj, "UIAAutomationId", "") == "Message_item":
+				if obj.sender_message or (parent and getattr(parent, "UIAAutomationId", "") == "Messages") or getattr(obj, "UIAAutomationId", "") == "Message_item":
 					clsList.insert(0, Message_list_item)
 			elif conf.get("action_when_pressing_up_arrow_in_text_field") != "normal" and obj.role == Role.EDITABLETEXT and obj.UIAAutomationId == "TextField":
 				# Add processing for pressing the up arrow key to the message input field
