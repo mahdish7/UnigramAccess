@@ -81,8 +81,11 @@ class UnigramUIHelper:
 
 	def is_message_object(self, obj):
 		try:
-			if obj.UIAAutomationId == "Message_item": return True
-			else: return False
+			if not obj: return False
+			if getattr(obj, "UIAAutomationId", "") == "Message_item": return True
+			parent = getattr(obj, "parent", None)
+			if parent and getattr(parent, "UIAAutomationId", "") == "Messages": return True
+			return False
 		except Exception: return False
 
 	def get_branch_list(self):

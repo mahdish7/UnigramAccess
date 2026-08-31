@@ -84,10 +84,6 @@ class Message_list_item(ListItem):
 	def script_reply_to_message(self, gesture):
 		self.appModule.activate_option_for_menu((icons_from_context_menu["reply"]), "Messages")
 
-	def script_next_message(self, gesture):
-		if self.parent.next: gesture.send()
-		else: self.appModule.script_moveFocusToTextMessage(gesture)
-
 	def script_next_media(self, gesture, revers=False):
 		self.list_media = self.list_media or [item for item in self.children if item.role == Role.LISTITEM]
 		obj = None
@@ -124,9 +120,6 @@ class Message_list_item(ListItem):
 		index = index if index != -1 else self.name.find(keywords[3])
 		self.index_last_part_in_message = index
 		self.last_part_in_message = self.name[index:]
-		
-		if conf.get("action_when_pressing_up_arrow_in_text_field") == "to_messages":
-			self.bindGesture("kb:downArrow", "next_message")
 
 	__gestures = {
 		"kb:ALT+C": "show_text_message",
