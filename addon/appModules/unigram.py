@@ -345,6 +345,21 @@ class AppModule(appModuleHandler.AppModule):
 		if conf.get("automatically announce activity in chats") and Title_change_tracking.pause:
 			# Since the timer is suspended when the program window is minimized, it needs to be restored as soon as the focus is set on some element in the window
 			Title_change_tracking.restore(self.saved_items)
+		saved_slider_focus = getattr(self.media_helper, 'saved_slider_focus', None)
+		if saved_slider_focus and not self.media_helper._is_slider_element(obj):
+			active_slider = getattr(self.media_helper, 'active_slider', None)
+			if not self.media_helper._is_slider_alive(active_slider):
+				speech.cancelSpeech()
+				self.media_helper.saved_slider_focus = None
+				self.media_helper.active_slider = None
+				try:
+					saved_slider_focus.setFocus()
+				except Exception:
+					pass
+				return True
+			else:
+				self.media_helper.saved_slider_focus = None
+				self.media_helper.active_slider = None
 		if self.isSkipName:
 			speech.cancelSpeech()
 			self.isSkipName -= 1
