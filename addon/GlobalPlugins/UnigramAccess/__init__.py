@@ -5,16 +5,13 @@ import addonHandler
 from scriptHandler import script
 import api
 import gui
-from gui import guiHelper
 from gui.settingsDialogs import SettingsPanel
 import wx
 import os
 addonHandler.initTranslation()
 import threading
-from appModules.cnf import conf, listLanguages, lang
-from appModules.unigram import AppModule
-from ui import message
-from .updater import onCheckForUpdates, no_updates_dialog
+from appModules.cnf import conf, listLanguages
+from .updater import onCheckForUpdates
 
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):

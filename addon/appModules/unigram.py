@@ -13,11 +13,8 @@ voice message controls, call management, and live chat monitoring.
 import re
 
 # NVDA core imports
-import api
 import appModuleHandler
 from controlTypes import Role, State
-import queueHandler
-import scriptHandler
 from scriptHandler import script
 import speech
 from ui import message
@@ -32,7 +29,6 @@ from .data import keywordsInMessages
 from .overlays import (
 	Audio_and_video_button,
 	EditableText,
-	ExplanationCorrectAnswerInQuiz,
 	Message_list_item,
 	SettingsPanelListItem,
 )
@@ -72,7 +68,6 @@ class AppModule(appModuleHandler.AppModule):
 	isDelete = False
 	isOpenProfile = False
 	isSkipName = 0
-	isRecord = False
 	executeContextMenuOption = False
 	isExitFromMedia = False
 
@@ -87,8 +82,6 @@ class AppModule(appModuleHandler.AppModule):
 			Chat_update.restore(self)
 		if conf.get("automatically announce activity in chats") and not Title_change_tracking.active:
 			Title_change_tracking.restore(self.saved_items)
-
-		self.appVersion = self.productVersion
 
 		# Initialize helper modules
 		self.ui_helper = UnigramUIHelper(self)
@@ -265,12 +258,6 @@ class AppModule(appModuleHandler.AppModule):
 				targetButton.doAction()
 			else:
 				CACHED_KEYS["escape"].send()
-			return True
-
-		elif self.isRecord:
-			self.isRecord.setFocus()
-			self.isRecord = False
-			self.isSkipName = 1
 			return True
 
 		elif self.isDelete:
@@ -625,8 +612,8 @@ class AppModule(appModuleHandler.AppModule):
 		description=_("Close audio player"),
 		gesture="kb:ALT+E",
 	)
-	def script_closingVoiceMessage(self, gesture, isMessage=True):
-		return self.media_helper.script_closingVoiceMessage(gesture, isMessage)
+	def script_closingVoiceMessage(self, gesture):
+		return self.media_helper.script_closingVoiceMessage(gesture)
 
 	@script(
 		# Translators: Description for the script that plays/pauses the current voice message.

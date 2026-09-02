@@ -6,9 +6,7 @@ from keyboardHandler import KeyboardInputGesture
 import api
 from ui import message
 import scriptHandler
-from NVDAObjects.UIA import ListItem
 from .unigram_logger import ulog as log
-import appModuleHandler
 from .trackers import Title_change_tracking
 
 class UnigramNavigation:

@@ -28,7 +28,6 @@ def onCheckForUpdates(event = False, is_start = False):
 		return
 	import versionInfo
 	NVDAVersion = (versionInfo.version_year, versionInfo.version_major, versionInfo.version_minor)
-	fp = os.path.join(globalVars.appArgs.configPath, "unigramaccess.nvda-addon")
 	addon_version_str = addonHandler.getCodeAddon().manifest["version"]
 	addon_version = tuple(int(x) for x in addon_version_str.split("."))
 	try: response = urllib.request.urlopen(path_to_server+"version.txt", timeout=3).read().decode('utf-8')

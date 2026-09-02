@@ -15,9 +15,7 @@ addonHandler.initTranslation()
 
 from .cnf import conf
 from .data import icons_from_context_menu
-from .text_window import TextWindow
 from .unigram_formatting import formatChatElementOnFocus
-from .unigram_logger import ulog as log
 from .unigram_utils import BASE_DIR, CACHED_KEYS
 
 
@@ -75,20 +73,6 @@ class UnigramMessages:
 		else:
 			message(_("This message does not contain text"))
 
-	def _script_show_text_message(self, gesture):
-		"""Show focused message text in a popup TextWindow."""
-		obj = api.getFocusObject()
-		if not self.appModule.ui_helper.is_message_object(obj):
-			return False
-		textMessage = next(
-			(item.name for item in obj.children if item.UIAAutomationId in ("TextBlock", "Message", "Question")),
-			False,
-		)
-		if textMessage:
-			TextWindow(textMessage.strip(), _("message text"), readOnly=False)
-		else:
-			message(_("This message does not contain text"))
-
 	def script_moveFocusToTextMessage(self, gesture):
 		"""Toggle focus between the message input field and previous focus object."""
 		obj = api.getFocusObject()
@@ -136,6 +120,9 @@ class UnigramMessages:
 		else:
 			message(_("Button not found"))
 
+	# TODO: Unimplemented / Inactive feature.
+	# Not currently mapped to any gesture or called from AppModule.
+	# Requires 'labels_for_button_more_options' to be defined in data.py to function.
 	def script_showMoreOptions(self, gesture):
 		"""Open the More Options menu in an open chat."""
 		from .data import labels_for_button_more_options
@@ -188,6 +175,9 @@ class UnigramMessages:
 		textMessage = textMessage.replace("%key", keyName)
 		message(textMessage)
 
+	# TODO: Incomplete / Reserved feature.
+	# Sets 'isSetReaction' on appModule, but the focus handler in AppModule
+	# does not currently consume or navigate reaction buttons. Not bound to any gesture.
 	def script_set_reaction(self, gesture):
 		"""Trigger a context menu reaction selection."""
 		obj = api.getFocusObject()
@@ -199,10 +189,6 @@ class UnigramMessages:
 		except (AttributeError, ValueError):
 			return
 		self.appModule.isSetReaction = index
-
-	def script_copy(self, gesture):
-		"""Copy message via context menu."""
-		self.activate_option_for_menu((icons_from_context_menu["copy"]), "Messages")
 
 	def script_selectMessage(self, gesture):
 		"""Switch message to selection mode via context menu."""
