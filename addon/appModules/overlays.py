@@ -4,7 +4,6 @@
 import api
 from controlTypes import Role, State
 import editableText
-from keyboardHandler import KeyboardInputGesture
 from NVDAObjects.UIA import ListItem
 import queueHandler
 import scriptHandler
@@ -220,6 +219,9 @@ class SettingsPanelListItem:
 	}
 
 
+# TODO: Inactive overlay class.
+# Currently not added to clsList in chooseNVDAObjectOverlayClasses.
+# Needs matching conditions in AppModule to inject on quiz explanation controls.
 class ExplanationCorrectAnswerInQuiz:
 	"""Overlay for quiz answer explanation buttons.
 

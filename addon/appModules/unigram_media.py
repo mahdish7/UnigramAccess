@@ -2,10 +2,7 @@
 import addonHandler
 addonHandler.initTranslation()
 from controlTypes import Role, State
-from keyboardHandler import KeyboardInputGesture
 import api
-from winBindings import user32 as winUser
-import mouseHandler
 from ui import message
 import speech
 import core
@@ -80,7 +77,7 @@ class UnigramMedia:
 				pass
 		return None
 
-	def script_closingVoiceMessage(self, gesture, isMessage = True):
+	def script_closingVoiceMessage(self, gesture):
 		targetButton = False
 		for item in self.appModule.ui_helper.getElements()[1:]:
 			try:

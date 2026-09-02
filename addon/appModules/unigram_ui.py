@@ -60,6 +60,8 @@ class UnigramUIHelper:
 		if not settings_panel: return False
 		return next(( item for item in settings_panel.children if State.FOCUSABLE in item.states), settings_panel.firstChild)
 
+	# TODO: Reserved / Unused helper.
+	# Intended to find the contacts dialog list item, but not currently called by any script or navigation handler.
 	def get_contacts_list(self):
 		try:
 			dialog = next((item for item in self.getElements() if item.role == Role.DIALOG and item.firstChild.next.UIAAutomationId == "SearchField" and item.firstChild.next.next.role == Role.LIST and item.firstChild.next.next.UIAAutomationId == "ScrollingHost"), None)
