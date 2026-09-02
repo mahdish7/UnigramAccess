@@ -94,7 +94,7 @@ class UnigramUIHelper:
 		else: return False
 
 	def get_profile_panel(self):
-		list = self.appModule.profile_panel_element
+		list = self.appModule.profilePanelElement
 		if not list or not list.location.width:
 			list = next((item for item in self.getElements() if (item.role == Role.LIST and item.UIAAutomationId == "ScrollingHost" and item.firstChild and item.firstChild.UIAAutomationId in ("Photo", "Segments")) or (item.role == Role.LINK and item.UIAAutomationId == "Photo" and item.next.UIAAutomationId == "Title")), None)
 		if not list:
@@ -102,7 +102,7 @@ class UnigramUIHelper:
 		if list.UIAAutomationId == "Photo":
 			# If the profile does not contain any tabs, then the focus is set to the profile photo
 			return list
-		self.appModule.profile_panel_element = list
+		self.appModule.profilePanelElement = list
 		list2 = list.firstChild
 		for i in range(15):
 			if list2.role == Role.LIST:

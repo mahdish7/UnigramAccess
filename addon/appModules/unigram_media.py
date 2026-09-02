@@ -129,7 +129,7 @@ class UnigramMedia:
 			if is_save_focus:
 				obj.setFocus()
 			else:
-				self.appModule.is_exit_from_media = True
+				self.appModule.isExitFromMedia = True
 		core.callLater(100, spechState)
 
 	def script_recordingVoiceMessage(self, gesture):
