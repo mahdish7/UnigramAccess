@@ -20,6 +20,8 @@ baseDir = os.path.join(os.path.dirname(__file__), "media")
 class UnigramMedia:
 	def __init__(self, appModule):
 		self.appModule = appModule
+		self.saved_slider_focus = None
+		self.active_slider = None
 
 	def script_voiceMessageAcceleration(self, gesture):
 		targetButton = next((item for item in self.appModule.ui_helper.getElements() if item.role == Role.BUTTON and item.UIAAutomationId == "SpeedButton"), False)
@@ -27,6 +29,56 @@ class UnigramMedia:
 			targetButton = next((item for item in self.appModule.ui_helper.getElements()[0].children if item.role == Role.BUTTON and item.UIAAutomationId == "SpeedButton"), False)
 		if targetButton: targetButton.doAction()
 		else: message(_("Nothing is playing right now"))
+
+	def _is_slider_element(self, obj):
+		try:
+			if not obj:
+				return False
+			if getattr(obj, 'role', None) in (Role.UNKNOWN, Role.SLIDER) and getattr(obj, 'UIAAutomationId', None) == "Slider":
+				return True
+			parent = getattr(obj, 'parent', None)
+			if parent and getattr(parent, 'role', None) in (Role.UNKNOWN, Role.SLIDER) and getattr(parent, 'UIAAutomationId', None) == "Slider":
+				return True
+			return False
+		except Exception:
+			return False
+
+
+	def _is_slider_alive(self, slider):
+		if not slider:
+			return False
+		try:
+			loc = slider.location
+			if not loc or loc.width <= 0 or loc.height <= 0:
+				return False
+			states = getattr(slider, 'states', set())
+			if State.INVISIBLE in states or State.UNAVAILABLE in states or State.OFFSCREEN in states:
+				return False
+			_ = slider.name
+			return True
+		except Exception:
+			return False
+
+	def _find_voice_slider(self):
+		slider = self.appModule.saved_items.get("slider")
+		if self._is_slider_alive(slider):
+			return slider
+
+		elements = self.appModule.ui_helper.getElements()
+		for item in elements:
+			if self._is_slider_element(item) and self._is_slider_alive(item):
+				self.appModule.saved_items.save("slider", item)
+				return item
+
+		if elements and elements[0].role == Role.WINDOW:
+			try:
+				for item in elements[0].children:
+					if self._is_slider_element(item) and self._is_slider_alive(item):
+						self.appModule.saved_items.save("slider", item)
+						return item
+			except Exception:
+				pass
+		return None
 
 	def script_closingVoiceMessage(self, gesture, isMessage = True):
 		targetButton = False
@@ -155,66 +207,60 @@ class UnigramMedia:
 
 	def script_toggleVoiceSlider(self, gesture):
 		current_focus = api.getFocusObject()
-		is_slider = lambda obj: getattr(obj, 'role', None) in (Role.UNKNOWN, Role.SLIDER) and getattr(obj, 'UIAAutomationId', None) == "Slider"
-		
-		if is_slider(current_focus):
+
+		if self._is_slider_element(current_focus):
 			# We are on the slider, jump back
-			if hasattr(self, 'saved_slider_focus') and self.saved_slider_focus:
+			saved_focus = getattr(self, 'saved_slider_focus', None)
+			self.saved_slider_focus = None
+			self.active_slider = None
+			if saved_focus:
 				try:
-					self.saved_slider_focus.setFocus()
+					saved_focus.setFocus()
 				except Exception:
 					pass
-				self.saved_slider_focus = None
 			return
 
 		# Find the slider
-		slider = self.appModule.saved_items.get("slider")
-		if not slider or slider.location.width == 0:
-			slider = None
-			for item in self.appModule.ui_helper.getElements():
-				if is_slider(item):
-					slider = item
-					break
-			if not slider and self.appModule.ui_helper.getElements() and self.appModule.ui_helper.getElements()[0].role == Role.WINDOW:
-				for item in self.appModule.ui_helper.getElements()[0].children:
-					if is_slider(item):
-						slider = item
-						break
+		slider = self._find_voice_slider()
 
 		if slider:
 			self.saved_slider_focus = current_focus
-			slider.setFocus()
+			self.active_slider = slider
+			try:
+				slider.setFocus()
+			except Exception:
+				pass
 
 			def monitor_slider():
 				# Stop if saved focus is cleared (e.g. user toggled back manually via Alt+S)
 				if not getattr(self, 'saved_slider_focus', None):
 					return
-				
-				curr = api.getFocusObject()
-				# If user manually moved focus away from the slider, stop monitoring
-				if not is_slider(curr):
-					self.saved_slider_focus = None
-					return
-				
-				# Check if slider is still on screen
-				is_alive = False
-				try:
-					if curr.location and curr.location.width > 0:
-						is_alive = True
-				except Exception:
-					pass
-				
-				if not is_alive:
-					try:
-						self.saved_slider_focus.setFocus()
-					except Exception:
-						pass
-					self.saved_slider_focus = None
-					return
-				
-				core.callLater(500, monitor_slider)
 
-			core.callLater(500, monitor_slider)
+				# Check if slider is still on screen and alive
+				if self._is_slider_alive(slider):
+					curr = api.getFocusObject()
+					if self._is_slider_element(curr):
+						# User is still focused on the slider, continue monitoring
+						core.callLater(300, monitor_slider)
+					else:
+						# User manually navigated focus away while voice was still playing
+						self.saved_slider_focus = None
+						self.active_slider = None
+						return
+				else:
+					# Slider is closed/gone (voice finished playing or player closed)
+					speech.cancelSpeech()
+					saved_focus = getattr(self, 'saved_slider_focus', None)
+					self.saved_slider_focus = None
+					self.active_slider = None
+					if saved_focus:
+						try:
+							saved_focus.setFocus()
+						except Exception:
+							pass
+					return
+
+			core.callLater(300, monitor_slider)
 		else:
 			message(_("Slider not found"))
 
