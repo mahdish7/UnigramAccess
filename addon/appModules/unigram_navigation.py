@@ -71,7 +71,7 @@ class UnigramNavigation:
 	def script_to_tabs_folder(self, gesture):
 		obj = self.appModule.saved_items.get("tabs folder")
 		if obj and obj.location and obj.location.width:
-			el = next((item for item in self.appModule.tabs_folder_element.children if State.SELECTED in item.states), None)
+			el = next((item for item in self.appModule.tabsFolderElement.children if State.SELECTED in item.states), None)
 			if el: el.setFocus()
 			else: message(_("Chat folder list not found"))
 		else:

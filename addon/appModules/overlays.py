@@ -1,40 +1,63 @@
 # -*- coding:utf-8 -*-
-# UI component classes for UnigramAccess addon
+# UnigramAccess: Custom NVDAObject overlay classes for Unigram UI elements.
 
-from NVDAObjects.UIA import ListItem
 import api
 from controlTypes import Role, State
+import editableText
+from keyboardHandler import KeyboardInputGesture
+from NVDAObjects.UIA import ListItem
+import queueHandler
 import scriptHandler
 from scriptHandler import script
-from keyboardHandler import KeyboardInputGesture
-from ui import message
-import queueHandler
-from threading import Timer
-import editableText
 import textInfos
+from threading import Timer
+from ui import message
+
 import addonHandler
 
 addonHandler.initTranslation()
 
-from .data import *
-from .text_window import *
-from .cnf import conf, lang
-
+from .cnf import conf
+from .data import icons_from_context_menu, keywordsInMessages
+from .text_window import TextWindow
 
 
 class Audio_and_video_button:
+	"""Overlay for call Audio/Video toggle buttons.
+
+	Announces the new state after pressing Enter.
+	"""
+
 	def script_enter(self, gesture):
 		gesture.send()
-		if self.UIAAutomationId == "Audio": new_name = self.next.name if self.next else self.name
-		elif self.UIAAutomationId == "Video": new_name = _("Camera on") if self.firstChild.name == "\ue964" else _("Camera off") if self.firstChild.name == "\ue963" else self.name
-		def spechState(): queueHandler.queueFunction(queueHandler.eventQueue, message, new_name)
-		Timer(.1, spechState).start()
-	
+		if self.UIAAutomationId == "Audio":
+			newName = self.next.name if self.next else self.name
+		elif self.UIAAutomationId == "Video":
+			if self.firstChild.name == "\ue964":
+				newName = _("Camera on")
+			elif self.firstChild.name == "\ue963":
+				newName = _("Camera off")
+			else:
+				newName = self.name
+		else:
+			newName = self.name
+
+		def speakState():
+			queueHandler.queueFunction(queueHandler.eventQueue, message, newName)
+
+		Timer(0.1, speakState).start()
+
 	def initOverlayClass(self):
 		self.bindGesture("kb:Enter", "enter")
 
 
 class Message_list_item(ListItem):
+	"""Overlay for message list items in the chat history.
+
+	Provides scripts for replying, editing, viewing text, cycling media,
+	announcing timestamps/reactions, and navigating to replied messages.
+	"""
+
 	selected_media = -1
 	media = None
 	list_media = []
@@ -43,7 +66,11 @@ class Message_list_item(ListItem):
 	last_part_in_message = None
 	index_last_part_in_message = 0
 
-	@script(description=_("Announce the original message, the message that was replied to"), gesture="kb:leftArrow")
+	@script(
+		# Translators: Description for the script that reads the replied-to message.
+		description=_("Announce the original message, the message that was replied to"),
+		gesture="kb:leftArrow",
+	)
 	def script_voice_answer(self, gesture):
 		if self.selected_media > 0:
 			self.script_next_media(gesture, True)
@@ -51,38 +78,72 @@ class Message_list_item(ListItem):
 		answer = next((item for item in self.children if item.UIAAutomationId == "Reply"), None)
 		if answer and answer.name == "":
 			answer = answer.firstChild
-		if scriptHandler.getLastScriptRepeatCount() == 0 and answer: message(answer.name)
-		elif scriptHandler.getLastScriptRepeatCount() == 1 and answer: answer.doAction()
+		if scriptHandler.getLastScriptRepeatCount() == 0 and answer:
+			message(answer.name)
+		elif scriptHandler.getLastScriptRepeatCount() == 1 and answer:
+			answer.doAction()
 
-	@script(description=_("Show message text in popup window"), gesture="kb:ALT+C")
+	@script(
+		# Translators: Description for the script that shows the message text in a popup window.
+		description=_("Show message text in popup window"),
+		gesture="kb:ALT+C",
+	)
 	def script_show_text_message(self, gesture):
-		text_message = next((item.name for item in self.children if item.UIAAutomationId in ("TextBlock", "Message", "Question")), "")
-		recognized_text = next((item.name for item in self.children if item.UIAAutomationId == "RecognizedText"), "")
-		if not text_message and not recognized_text:
+		textMessage = next(
+			(item.name for item in self.children if item.UIAAutomationId in ("TextBlock", "Message", "Question")),
+			"",
+		)
+		recognizedText = next(
+			(item.name for item in self.children if item.UIAAutomationId == "RecognizedText"),
+			"",
+		)
+		if not textMessage and not recognizedText:
 			message(_("This message does not contain text"))
 			return
-		text_message = text_message.strip().replace("‍", "")
-		recognized_text = recognized_text.strip().replace("‍", "")
-		if text_message and recognized_text:
-			text = "\n\n".join([text_message, recognized_text])
+		textMessage = textMessage.strip().replace("\u200d", "")
+		recognizedText = recognizedText.strip().replace("\u200d", "")
+		if textMessage and recognizedText:
+			text = "\n\n".join([textMessage, recognizedText])
 		else:
-			text = text_message or recognized_text
+			text = textMessage or recognizedText
 		TextWindow(text, _("message text"), readOnly=False)
 
-	@script(description=_("Open comments"), gesture="kb:control+ALT+C")
+	@script(
+		# Translators: Description for the script that opens the comments thread.
+		description=_("Open comments"),
+		gesture="kb:control+ALT+C",
+	)
 	def script_openComments(self, gesture):
-		targetButton = next((item for item in reversed(self.children) if item.role == Role.LINK and item.UIAAutomationId == "Thread"), False)
+		targetButton = next(
+			(item for item in reversed(self.children) if item.role == Role.LINK and item.UIAAutomationId == "Thread"),
+			False,
+		)
 		if targetButton:
 			targetButton.doAction()
-		else: message(_("Button to open comments not found"))
+		else:
+			message(_("Button to open comments not found"))
 
-	@script(description=_("Edit message"), gesture="kb:backspace")
+	@script(
+		# Translators: Description for the script that opens the edit dialog for the focused message.
+		description=_("Edit message"),
+		gesture="kb:backspace",
+	)
 	def script_edit_message(self, gesture):
-		self.appModule.activate_option_for_menu((icons_from_context_menu["edit"]), "Messages")
-	
-	@script(description=_("Reply to message"), gesture="kb:enter")
+		self.appModule.msg_helper.activate_option_for_menu(
+			(icons_from_context_menu["edit"]),
+			"Messages",
+		)
+
+	@script(
+		# Translators: Description for the script that replies to the focused message.
+		description=_("Reply to message"),
+		gesture="kb:enter",
+	)
 	def script_reply_to_message(self, gesture):
-		self.appModule.activate_option_for_menu((icons_from_context_menu["reply"]), "Messages")
+		self.appModule.msg_helper.activate_option_for_menu(
+			(icons_from_context_menu["reply"]),
+			"Messages",
+		)
 
 	def script_next_media(self, gesture, revers=False):
 		self.list_media = self.list_media or [item for item in self.children if item.role == Role.LISTITEM]
@@ -90,26 +151,38 @@ class Message_list_item(ListItem):
 		if revers:
 			self.selected_media -= 1
 			obj = self.list_media[self.selected_media]
-		elif self.selected_media < len(self.list_media)-1:
+		elif self.selected_media < len(self.list_media) - 1:
 			self.selected_media += 1
 			obj = self.list_media[self.selected_media]
-		if not obj: return
+		if not obj:
+			return
 		self.media = obj
-		if obj.firstChild.UIAAutomationId == "Subtitle": name = _("Photo")
-		elif obj.firstChild.UIAAutomationId == "Texture": name = _("Video")
+		if obj.firstChild.UIAAutomationId == "Subtitle":
+			name = _("Photo")
+		elif obj.firstChild.UIAAutomationId == "Texture":
+			name = _("Video")
 		else:
-			name = next((item.name for item in obj.children if item.UIAAutomationId in ("Title",)) , "Медіа")
+			name = next((item.name for item in obj.children if item.UIAAutomationId in ("Title",)), "Медіа")
 		message(name)
 		api.setNavigatorObject(obj.simpleFirstChild)
 
-	@script(description=_("Announces the time a message was sent or received, as well as a list of reactions. Double-clicking toggles the announcement mode for this information."), gesture="kb:ALT+W")
+	@script(
+		# Translators: Description for the script that announces message time and reactions.
+		description=_(
+			"Announces the time a message was sent or received, as well as a list of reactions. "
+			"Double-clicking toggles the announcement mode for this information."
+		),
+		gesture="kb:ALT+W",
+	)
 	def script_toggle_sounding_message_information(self, gesture):
 		if scriptHandler.getLastScriptRepeatCount() == 0:
 			message(self.last_part_in_message)
 		elif scriptHandler.getLastScriptRepeatCount() == 1:
 			conf.set("announce_end_of_message", not conf.get("announce_end_of_message"))
-			if conf.get("announce_end_of_message"): message(_("The display of message sending or receiving time and the list of installed emojis is enabled."))
-			else: message(_("The display of message sending or receiving time and the list of installed emojis is  disabled."))
+			if conf.get("announce_end_of_message"):
+				message(_("The display of message sending or receiving time and the list of installed emojis is enabled."))
+			else:
+				message(_("The display of message sending or receiving time and the list of installed emojis is  disabled."))
 
 	def initOverlayClass(self):
 		self.positionInfo = self.parent.positionInfo
@@ -117,7 +190,8 @@ class Message_list_item(ListItem):
 		keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
 		self.keywords = keywords
 		index = self.name.find(keywords[2])
-		index = index if index != -1 else self.name.find(keywords[3])
+		if index == -1:
+			index = self.name.find(keywords[3])
 		self.index_last_part_in_message = index
 		self.last_part_in_message = self.name[index:]
 
@@ -131,10 +205,14 @@ class Message_list_item(ListItem):
 
 
 class SettingsPanelListItem:
+	"""Overlay for navigation panel list items.
+
+	Activates the item and then jumps focus to the last message.
+	"""
 
 	def script_activate_element(self, gesture):
 		self.firstChild.doAction()
-		self.appModule.script_toLastMessage(gesture)
+		self.appModule.nav_helper.script_toLastMessage(gesture)
 
 	__gestures = {
 		"kb:enter": "activate_element",
@@ -143,12 +221,20 @@ class SettingsPanelListItem:
 
 
 class ExplanationCorrectAnswerInQuiz:
+	"""Overlay for quiz answer explanation buttons.
+
+	Opens the explanation text in a TextWindow popup.
+	"""
+
 	def script_activate_element(self, gesture):
 		gesture.send()
-		elements = self.appModule.getElements()
-		try: obj = elements[1].firstChild.firstChild.firstChild
-		except Exception: obj = None
-		if not obj: return False
+		elements = self.appModule.ui_helper.getElements()
+		try:
+			obj = elements[1].firstChild.firstChild.firstChild
+		except Exception:
+			obj = None
+		if not obj:
+			return False
 		TextWindow(obj.name, _("Explanation"), readOnly=False)
 
 	__gestures = {
@@ -158,6 +244,11 @@ class ExplanationCorrectAnswerInQuiz:
 
 
 class EditableText(editableText.EditableText):
+	"""Overlay for the chat message compose field.
+
+	Overrides up-arrow behavior: when the text field is empty, either jumps to
+	the last message or blocks the key, based on user configuration.
+	"""
 
 	def script_caret_moveByLine(self, gesture):
 		if gesture.mainKeyName != "upArrow":
@@ -169,7 +260,8 @@ class EditableText(editableText.EditableText):
 			pass
 		if info and info.text == "":
 			if conf.get("action_when_pressing_up_arrow_in_text_field") == "to_messages":
-				self.appModule.script_toLastMessage(None)
-			else: message("")
+				self.appModule.nav_helper.script_toLastMessage(None)
+			else:
+				message("")
 			return
 		return super().script_caret_moveByLine(gesture)
