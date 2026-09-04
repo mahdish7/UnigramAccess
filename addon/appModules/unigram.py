@@ -645,7 +645,24 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:control+D",
 	)
 	def script_cancelVoiceMessageRecording(self, gesture):
-		return self.media_helper.script_cancelVoiceMessageRecording(gesture)
+		import scriptHandler
+
+		# Double press: Cycle voice recording indicator setting
+		if scriptHandler.getLastScriptRepeatCount() == 1:
+			self.media_helper.cycle_voice_recording_indicator()
+			return
+
+		# Single press priority 1: Active voice message recording takes precedence
+		if self.media_helper.is_voice_recording():
+			self.media_helper.cancel_voice_recording(gesture)
+			return
+
+		# Single press priority 2: Active reply or editing session in the composer header
+		if self.msg_helper.cancel_reply_or_edit():
+			return
+
+		# Fallback: Neither voice recording nor reply/edit active; pass gesture to Telegram
+		gesture.send()
 
 	@script(
 		# Translators: Description for the script that converts a voice message to text.

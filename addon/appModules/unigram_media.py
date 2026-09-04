@@ -170,37 +170,49 @@ class UnigramMedia:
 			obj.doAction()
 			lastFocus.setFocus()
 
-	def script_cancelVoiceMessageRecording(self, gesture):
-		import scriptHandler
-		if scriptHandler.getLastScriptRepeatCount() == 1:
-			if conf.get("voiceMessageRecordingIndicator") == "none":
-				conf.set("voiceMessageRecordingIndicator", "text")
-				message(_("Voice recording notifications set to text"))
-			elif conf.get("voiceMessageRecordingIndicator") == "text":
-				conf.set("voiceMessageRecordingIndicator", "audio")
-				message(_("Voice recording notifications set to sounds"))
-			elif conf.get("voiceMessageRecordingIndicator") == "audio":
-				conf.set("voiceMessageRecordingIndicator", "none")
-				message(_("Recording voice messages has standard behavior"))
-			return
-		if conf.get("voiceMessageRecordingIndicator") == "none":
-			gesture.send()
-			return
-		obj = next((item for item in reversed(self.appModule.ui_helper.getElements()) if (item.UIAAutomationId == "ElapsedLabel") or (item.role == Role.BUTTON and item.UIAAutomationId == "ComposerHeaderCancel")), False)
-		lastFocus = api.getFocusObject()
-		if obj and obj.UIAAutomationId == "ComposerHeaderCancel":
-			obj.doAction()
-			lastFocus.setFocus()
-			if obj.previous and obj.previous.name == "\uea4a": message(_("Reply canceled"))
-			else: message(_("Edit canceled"))
-		elif obj and obj.UIAAutomationId == "ElapsedLabel":
-			if conf.get("voiceMessageRecordingIndicator") == "audio":
-				playWaveFile(os.path.join(baseDir, "cancel_voice_message_recording.wav"))
-			else:
-				message(_("Recording canceled"))
+	def get_elapsed_label(self):
+		"""Find ElapsedLabel indicating active voice recording."""
+		for item in reversed(self.appModule.ui_helper.getElements()):
+			if getattr(item, "UIAAutomationId", None) == "ElapsedLabel":
+				return item
+		return None
+
+	def is_voice_recording(self):
+		"""Check if voice recording is currently active."""
+		return bool(self.get_elapsed_label())
+
+	def cancel_voice_recording(self, gesture):
+		"""Cancel an ongoing voice recording."""
+		indicator = conf.get("voiceMessageRecordingIndicator")
+		if indicator == "audio":
+			playWaveFile(os.path.join(baseDir, "cancel_voice_message_recording.wav"))
+		elif indicator == "text":
+			message(_("Recording canceled"))
 		gesture.send()
-		lastFocus.setFocus()
-		lastFocus.setFocus()
+		last_focus = api.getFocusObject()
+		if last_focus:
+			try:
+				last_focus.setFocus()
+			except Exception:
+				pass
+		return True
+
+	def cycle_voice_recording_indicator(self):
+		"""Cycle notification mode between none, text, and audio."""
+		current = conf.get("voiceMessageRecordingIndicator")
+		if current == "none":
+			conf.set("voiceMessageRecordingIndicator", "text")
+			message(_("Voice recording notifications set to text"))
+		elif current == "text":
+			conf.set("voiceMessageRecordingIndicator", "audio")
+			message(_("Voice recording notifications set to sounds"))
+		elif current == "audio":
+			conf.set("voiceMessageRecordingIndicator", "none")
+			message(_("Recording voice messages has standard behavior"))
+
+	def script_cancelVoiceMessageRecording(self, gesture):
+		"""Delegate to AppModule dispatcher for backward compatibility."""
+		return self.appModule.script_cancelVoiceMessageRecording(gesture)
 
 	def script_toggleVoiceSlider(self, gesture):
 		current_focus = api.getFocusObject()

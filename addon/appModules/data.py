@@ -79,3 +79,13 @@ phrase_administrator_in_message = {
 	"cs": ("Správce", "Vlastník"),
 	"ru": ("Администратор", "Владелец"),
 }
+
+# Keywords for identifying action type in ComposerHeaderCancel button across interface languages
+composer_header_cancel_types = {
+	"reply": {
+		"en": ("reply",),
+	},
+	"edit": {
+		"en": ("editing", "edit"),
+	},
+}

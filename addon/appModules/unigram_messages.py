@@ -14,8 +14,9 @@ import addonHandler
 addonHandler.initTranslation()
 
 from .cnf import conf
-from .data import icons_from_context_menu
+from .data import composer_header_cancel_types, icons_from_context_menu
 from .unigram_formatting import formatChatElementOnFocus
+from .unigram_logger import ulog as log
 from .unigram_utils import BASE_DIR, CACHED_KEYS
 
 
@@ -349,3 +350,44 @@ class UnigramMessages:
 		"""Delete current message or chat from both sides."""
 		if not self.appModule.isDelete and not self.startDeleteMessage(True):
 			gesture.send()
+
+	def get_composer_cancel_button(self):
+		"""Find the Cancel button in the composer header (reply or edit mode)."""
+		for item in reversed(self.appModule.ui_helper.getElements()):
+			if item.role == Role.BUTTON and getattr(item, "UIAAutomationId", None) == "ComposerHeaderCancel":
+				return item
+		return None
+
+	def cancel_reply_or_edit(self):
+		"""Cancel active message reply or editing session.
+
+		Returns True if a composer cancel action was performed, False otherwise.
+		"""
+		btn = self.get_composer_cancel_button()
+		if not btn:
+			return False
+
+		last_focus = api.getFocusObject()
+		btn_name = (getattr(btn, "name", None) or "").strip().lower()
+		reply_kws = [kw for kws in composer_header_cancel_types.get("reply", {}).values() for kw in kws]
+		edit_kws = [kw for kws in composer_header_cancel_types.get("edit", {}).values() for kw in kws]
+		is_reply = any(kw in btn_name for kw in reply_kws)
+		is_edit = any(kw in btn_name for kw in edit_kws)
+
+		try:
+			btn.doAction()
+		except Exception as e:
+			log.debug(f"Failed to invoke ComposerHeaderCancel: {e}")
+			return False
+
+		if last_focus:
+			try:
+				last_focus.setFocus()
+			except Exception:
+				pass
+
+		if is_reply:
+			message(_("Reply canceled"))
+		elif is_edit:
+			message(_("Edit canceled"))
+		return True
