@@ -6,8 +6,9 @@ from keyboardHandler import KeyboardInputGesture
 import api
 from ui import message
 import scriptHandler
-from .unigram_logger import ulog as log
+from .data import unread_messages_keywords
 from .trackers import Title_change_tracking
+from .unigram_logger import ulog as log
 
 class UnigramNavigation:
 	def __init__(self, appModule):
@@ -113,21 +114,77 @@ class UnigramNavigation:
 			if isGroupCall: message(isGroupCall)
 		else: message(_("No open chat"))
 
+	def _is_unread_messages_separator(self, obj):
+		"""Check if a message list item represents the unread messages separator."""
+		if not obj:
+			return False
+
+		try:
+			# Primary detection: Match item name against verified dictionary keywords
+			unread_kws = [kw for kws in unread_messages_keywords.values() for kw in kws]
+			name = (getattr(obj, "name", None) or "").strip().lower()
+			if any(kw in name for kw in unread_kws):
+				return True
+
+			first_child = getattr(obj, "firstChild", None)
+			if first_child and getattr(first_child, "role", None) == Role.BUTTON:
+				child_name = (getattr(first_child, "name", None) or "").strip().lower()
+				if any(kw in child_name for kw in unread_kws):
+					return True
+
+				# FALLBACK (TEMPORARY):
+				# For unverified languages not yet added to the dictionary, safely detect
+				# the separator button via the down-arrow icon glyph (\ue0e5).
+				# This fallback may be removed once dictionary keywords for all supported
+				# languages are verified through manual inspection.
+				for item in getattr(first_child, "children", []):
+					if getattr(item, "name", None) == "\ue0e5":
+						return True
+		except Exception:
+			pass
+
+		return False
+
 	def script_goToTheLastUnreadMessage(self, gesture):
 		messages = self.appModule.ui_helper.getMessagesElement()
-		try: lastObj = messages.lastChild
-		except Exception:
-			if not messages: message(_("No open chat"))
-			elif not messages.lastChild: message(_("This chat is empty"))
+		if not messages:
+			message(_("No open chat"))
 			return False
-		targetButton = False
-		while lastObj:
-			if lastObj.firstChild.role== Role.BUTTON  and lastObj.firstChild.firstChild.next.name == "\ue0e5":
-				targetButton = lastObj
+
+		try:
+			last_obj = messages.lastChild
+		except Exception:
+			last_obj = None
+
+		if not last_obj:
+			message(_("This chat is empty"))
+			return False
+
+		target_item = None
+		while last_obj:
+			if self._is_unread_messages_separator(last_obj):
+				target_item = last_obj
 				break
-			else: lastObj = lastObj.previous
-		if targetButton: targetButton.setFocus()
-		else: message(_("There are no unread messages in this chat"))
+			try:
+				last_obj = last_obj.previous
+			except Exception:
+				break
+
+		if target_item:
+			try:
+				# Focus the inner button directly if focusable, otherwise the list item
+				first_child = getattr(target_item, "firstChild", None)
+				if first_child and getattr(first_child, "role", None) == Role.BUTTON and getattr(first_child, "isFocusable", False):
+					first_child.setFocus()
+				else:
+					target_item.setFocus()
+			except Exception:
+				try:
+					target_item.setFocus()
+				except Exception:
+					pass
+		else:
+			message(_("There are no unread messages in this chat"))
 
 	def script_showMenu(self, gesture):
 		try:

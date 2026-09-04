@@ -88,4 +88,9 @@ composer_header_cancel_types = {
 	"edit": {
 		"en": ("editing", "edit"),
 	},
-}
+}
+
+# Verified keywords for identifying the 'Unread Messages' separator element across interface languages
+unread_messages_keywords = {
+	"en": ("unread messages",),
+}
