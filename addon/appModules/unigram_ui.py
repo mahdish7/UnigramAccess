@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 from controlTypes import Role, State
 import api
+from .data import contacts_dialog_titles
 from .unigram_logger import ulog as log
 
 class UnigramUIHelper:
@@ -65,35 +66,30 @@ class UnigramUIHelper:
 		try:
 			curr = api.getFocusObject()
 			dialog = None
-			contacts_list = None
 
-			# Fast check: Check if current focus is already inside the Contacts dialog or list
+			# Check if current focus is inside the Contacts dialog
 			while curr:
 				role = getattr(curr, "role", None)
 				name = getattr(curr, "name", "") or ""
-				aut_id = getattr(curr, "UIAAutomationId", "") or ""
-				if role == Role.DIALOG or name == "Contacts":
+				if role == Role.DIALOG and name in contacts_dialog_titles.values():
 					dialog = curr
-					break
-				if role == Role.LIST and aut_id == "ScrollingHost":
-					contacts_list = curr
 					break
 				curr = getattr(curr, "parent", None)
 
-			# If focus is not inside Contacts dialog, return immediately without expensive tree traversal
-			if not dialog and not contacts_list:
+			# If focus is not inside the Contacts dialog, return immediately
+			if not dialog:
 				return False
 
-			# Locate the ScrollingHost list inside the dialog if not already found
-			if not contacts_list and dialog:
-				child = getattr(dialog, "firstChild", None)
-				while child:
-					c_role = getattr(child, "role", None)
-					c_id = getattr(child, "UIAAutomationId", "")
-					if c_role == Role.LIST or c_id == "ScrollingHost":
-						contacts_list = child
-						break
-					child = getattr(child, "next", None)
+			# Locate the ScrollingHost list inside the dialog
+			contacts_list = None
+			child = getattr(dialog, "firstChild", None)
+			while child:
+				c_role = getattr(child, "role", None)
+				c_id = getattr(child, "UIAAutomationId", "")
+				if c_role == Role.LIST and c_id == "ScrollingHost":
+					contacts_list = child
+					break
+				child = getattr(child, "next", None)
 
 			if not contacts_list:
 				return False

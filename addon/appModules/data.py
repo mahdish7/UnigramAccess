@@ -112,3 +112,8 @@ chat_deletion_keywords = {
 		"en": ("bot",),
 	},
 }
+
+# Verified titles for identifying the Contacts dialog across interface languages
+contacts_dialog_titles = {
+	"en": "Contacts",
+}
