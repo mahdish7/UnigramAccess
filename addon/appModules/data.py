@@ -99,3 +99,16 @@ unread_messages_keywords = {
 composer_header_title_replacements = {
 	"Edit": _("Editing"),
 }
+
+# Keywords for identifying chat types in deletion dialog across interface languages
+chat_deletion_keywords = {
+	"channel": {
+		"en": ("channel",),
+	},
+	"group": {
+		"en": ("group",),
+	},
+	"bot": {
+		"en": ("bot",),
+	},
+}

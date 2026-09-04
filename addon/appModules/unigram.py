@@ -47,6 +47,7 @@ from .unigram_formatting import (
 	resolveUnlabeledElement,
 )
 from .unigram_logger import ulog as log
+from .unigram_chats import UnigramChats
 from .unigram_media import UnigramMedia
 from .unigram_messages import UnigramMessages
 from .unigram_navigation import UnigramNavigation
@@ -92,6 +93,7 @@ class AppModule(appModuleHandler.AppModule):
 		self.nav_helper = UnigramNavigation(self)
 		self.call_helper = UnigramCalls(self)
 		self.msg_helper = UnigramMessages(self)
+		self.chats_helper = UnigramChats(self)
 		self.media_helper = UnigramMedia(self)
 
 	# ── Overlay Class Injection ─────────────────────────────────────────
@@ -165,6 +167,29 @@ class AppModule(appModuleHandler.AppModule):
 			log.debugException(f"Handled expected exception during chooseNVDAObjectOverlayClasses: {e}")
 		except Exception as e:
 			log.error(f"Unexpected exception in chooseNVDAObjectOverlayClasses: {e}", exc_info=True)
+
+	def getScript(self, gesture):
+		if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":
+			# Record confirmation / cancellation on Enter or Space
+			gesture_ids = getattr(gesture, "identifiers", []) or []
+			vk_code = getattr(gesture, "vkCode", None)
+			is_enter = (vk_code == 13) or any(i in ("kb:enter", "kb:numpadEnter", "kb:numpadenter") for i in gesture_ids)
+			is_space = (vk_code == 32) or any(i == "kb:space" for i in gesture_ids)
+
+			if is_enter or is_space:
+				try:
+					focus_obj = api.getFocusObject()
+					auto_id = getattr(focus_obj, "UIAAutomationId", "") or ""
+					if is_enter:
+						self.isDelete["confirmed_dismissal"] = "secondary" if auto_id == "SecondaryButton" else "primary"
+						log.debug(f"Delete dialog: confirmed dismissal via {self.isDelete['confirmed_dismissal']} (Enter on {auto_id})")
+					elif is_space and auto_id in ("PrimaryButton", "SecondaryButton"):
+						self.isDelete["confirmed_dismissal"] = "secondary" if auto_id == "SecondaryButton" else "primary"
+						log.debug(f"Delete dialog: confirmed dismissal via {auto_id} (Space)")
+				except Exception as e:
+					log.debug(f"Error checking focus in getScript: {e}")
+
+		return super().getScript(gesture)
 
 	# ── Focus Event Handler ─────────────────────────────────────────────
 
@@ -265,8 +290,12 @@ class AppModule(appModuleHandler.AppModule):
 			return True
 
 		elif self.isDelete:
-			self.msg_helper.deleteMessageAndChat(obj)
-			return True
+			target = self.isDelete.get("target") if isinstance(self.isDelete, dict) else None
+			if target == "chats":
+				consumed = self.chats_helper.handle_deletion_step(obj)
+			else:
+				consumed = self.msg_helper.handle_deletion_step(obj)
+			return bool(consumed)
 
 		return False
 
@@ -555,18 +584,20 @@ class AppModule(appModuleHandler.AppModule):
 	@script(
 		# Translators: Description for the script that deletes a message or chat.
 		description=_("Delete a message or chat"),
-		gesture="kb:delete",
+		gestures=["kb:delete", "kb:shift+delete"],
 	)
 	def script_deletion(self, gesture):
-		return self.msg_helper.script_deletion(gesture)
-
-	@script(
-		# Translators: Description for the script that deletes a message or chat from both sides.
-		description=_("Delete message or chat from both sides"),
-		gesture="kb:shift+delete",
-	)
-	def script_completeDeletion(self, gesture):
-		return self.msg_helper.script_completeDeletion(gesture)
+		"""Unified deletion handler for both single-side (Delete) and two-sided (Shift+Delete) deletion."""
+		is_shift = any("shift" in i.lower() for i in getattr(gesture, "identifiers", []))
+		obj = api.getFocusObject()
+		if self.ui_helper.is_message_object(obj):
+			if not self.msg_helper.start_delete_message(isCompleteDeletion=is_shift):
+				gesture.send()
+		elif self.chats_helper.is_chat_item(obj):
+			if not self.chats_helper.start_delete_chat(isCompleteDeletion=is_shift):
+				gesture.send()
+		else:
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that switches the message to selection mode.
@@ -793,7 +824,10 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(gesture="kb:escape")
 	def script_action_escape_key(self, gesture):
-		"""Handle Escape key: restore focus when exiting full-screen media viewer."""
+		"""Handle Escape key: restore focus when exiting full-screen media viewer or delete dialog."""
+		if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":
+			self.isDelete["confirmed_dismissal"] = "escape"
+			log.debug("Delete dialog: confirmed dismissal via Escape")
 		gesture.send()
 		if self.isExitFromMedia:
 			lastFocusObject = self.saved_items.get("last focus object")
