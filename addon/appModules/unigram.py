@@ -26,7 +26,10 @@ addonHandler.initTranslation()
 
 # Local module imports
 from .cnf import conf
-from .data import keywordsInMessages
+from .data import (
+	composer_header_title_replacements,
+	keywordsInMessages,
+)
 from .overlays import (
 	Audio_and_video_button,
 	EditableText,
@@ -306,19 +309,23 @@ class AppModule(appModuleHandler.AppModule):
 		elif obj.role == Role.EDITABLETEXT:
 			try:
 				# Determine if this is a message input field and check if its title needs changing
-				if obj.UIAAutomationId == "TextField" and (
-					(obj.previous and obj.previous.UIAAutomationId == "ComposerHeaderCancel")
-					or (obj.previous and obj.previous.previous and obj.previous.previous.UIAAutomationId == "ComposerHeaderCancel")
-				):
-					label = (
-						obj.previous.previous.previous
-						if obj.previous and obj.previous.UIAAutomationId == "ButtonMore"
-						else obj.previous.previous
-					)
-					if label.name == "\uea4b":
-						obj.name = _("Editing")
-					elif label.name == "\uea4a":
-						obj.name = _("Reply")
+				if getattr(obj, "UIAAutomationId", "") == "TextField":
+					# Look for ComposerHeaderReference among immediate previous siblings
+					prev = getattr(obj, "previous", None)
+					ref = None
+					steps = 0
+					while prev and steps < 6:
+						if getattr(prev, "UIAAutomationId", "") == "ComposerHeaderReference":
+							ref = prev
+							break
+						prev = getattr(prev, "previous", None)
+						steps += 1
+
+					if ref:
+						title = getattr(ref, "firstChild", None)
+						raw_name = getattr(title, "name", "") if (title and getattr(title, "UIAAutomationId", "") == "TitleLabel") else (getattr(ref, "name", "") or "")
+						if raw_name:
+							obj.name = composer_header_title_replacements.get(raw_name, raw_name)
 			except Exception:
 				pass
 

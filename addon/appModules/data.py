@@ -94,3 +94,8 @@ composer_header_cancel_types = {
 unread_messages_keywords = {
 	"en": ("unread messages",),
 }
+
+# Replacements for composer header titles to improve announcement clarity
+composer_header_title_replacements = {
+	"Edit": _("Editing"),
+}
