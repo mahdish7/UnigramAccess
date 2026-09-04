@@ -13,6 +13,7 @@ voice message controls, call management, and live chat monitoring.
 import re
 
 # NVDA core imports
+import api
 import appModuleHandler
 from controlTypes import Role, State
 from scriptHandler import script
@@ -175,7 +176,7 @@ class AppModule(appModuleHandler.AppModule):
 		if objId or objName:
 			role = getattr(obj, "role", None)
 			roleName = getattr(role, "name", str(role)) if role else "Unknown"
-			log.debug(f"Focus changed: Role: {roleName} ({role}) - ID: '{objId}' - Name: '{objName}'")
+			log.debug(f"Focus changed: Role: {roleName} ({role}) - ID: '{objId}'")
 
 		# Restore background timers if window was minimized
 		if self._restoreBackgroundTimers():
@@ -387,6 +388,23 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:ALT+1",
 	)
 	def script_toChatList(self, gesture, arg=False):
+		# Priority 1: If Contacts dialog is active, focus the contacts list
+		contacts = self.ui_helper.get_contacts_list()
+		if contacts:
+			try:
+				focusObj = api.getFocusObject()
+				if focusObj == contacts or (
+					getattr(focusObj, "role", None) == Role.LISTITEM
+					and getattr(focusObj, "parent", None) == getattr(contacts, "parent", None)
+				):
+					message(focusObj.name)
+				else:
+					contacts.setFocus()
+			except Exception as e:
+				log.debugException(f"script_toChatList: contacts.setFocus error: {e}")
+			return True
+
+		# Priority 2: Default navigation (Chat list, or Settings if chat list is not present)
 		return self.nav_helper.script_toChatList(gesture, arg)
 
 	@script(

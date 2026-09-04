@@ -60,14 +60,52 @@ class UnigramUIHelper:
 		if not settings_panel: return False
 		return next(( item for item in settings_panel.children if State.FOCUSABLE in item.states), settings_panel.firstChild)
 
-	# TODO: Reserved / Unused helper.
-	# Intended to find the contacts dialog list item, but not currently called by any script or navigation handler.
 	def get_contacts_list(self):
+		"""Find and return the contacts list or its first contact item in the contacts dialog."""
 		try:
-			dialog = next((item for item in self.getElements() if item.role == Role.DIALOG and item.firstChild.next.UIAAutomationId == "SearchField" and item.firstChild.next.next.role == Role.LIST and item.firstChild.next.next.UIAAutomationId == "ScrollingHost"), None)
-			if not dialog: return False
-			first_item = next((item for item in dialog.children if item.role == Role.LISTITEM), None)
-			return first_item
+			curr = api.getFocusObject()
+			dialog = None
+			contacts_list = None
+
+			# Fast check: Check if current focus is already inside the Contacts dialog or list
+			while curr:
+				role = getattr(curr, "role", None)
+				name = getattr(curr, "name", "") or ""
+				aut_id = getattr(curr, "UIAAutomationId", "") or ""
+				if role == Role.DIALOG or name == "Contacts":
+					dialog = curr
+					break
+				if role == Role.LIST and aut_id == "ScrollingHost":
+					contacts_list = curr
+					break
+				curr = getattr(curr, "parent", None)
+
+			# If focus is not inside Contacts dialog, return immediately without expensive tree traversal
+			if not dialog and not contacts_list:
+				return False
+
+			# Locate the ScrollingHost list inside the dialog if not already found
+			if not contacts_list and dialog:
+				child = getattr(dialog, "firstChild", None)
+				while child:
+					c_role = getattr(child, "role", None)
+					c_id = getattr(child, "UIAAutomationId", "")
+					if c_role == Role.LIST or c_id == "ScrollingHost":
+						contacts_list = child
+						break
+					child = getattr(child, "next", None)
+
+			if not contacts_list:
+				return False
+
+			# Find the first contact item (Role.LISTITEM), skipping header action buttons
+			item = getattr(contacts_list, "firstChild", None)
+			while item:
+				if getattr(item, "role", None) == Role.LISTITEM:
+					return item
+				item = getattr(item, "next", None)
+
+			return contacts_list
 		except Exception:
 			log.debugException("Error getting contacts list")
 			return False
