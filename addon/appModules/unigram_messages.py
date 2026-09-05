@@ -446,7 +446,6 @@ class UnigramMessages:
 		State 0: Find and click delete in context menu.
 		State 1: Handle confirmation dialog (RevokeCheck checkbox + PrimaryButton).
 		State "awaiting_confirmation": Track dialog interaction and restore focus on close.
-		State 2+: Announce result and restore focus.
 		"""
 		if not conf.get("confirmation_at_deletion"):
 			speech.cancelSpeech()
@@ -504,11 +503,9 @@ class UnigramMessages:
 
 			# Automatic confirmation mode:
 			log.debug("Message deletion: confirmation_at_deletion is False, invoking PrimaryButton")
+			self.appModule.isDelete["confirmed_dismissal"] = "primary"
+			self.appModule.isDelete["state"] = "awaiting_confirmation"
 			primary_button.doAction()
-
-			# Restore focus prioritizing initial, then next, then previous message
-			self.restore_deletion_focus()
-			self.appModule.isDelete["state"] = 2
 			return True
 
 		elif state == "awaiting_confirmation":
@@ -531,19 +528,6 @@ class UnigramMessages:
 				log.debug("Message deletion was cancelled, focus returned to initial object")
 
 			return False
-
-		elif state == 2:
-			if not self._is_message_item(obj):
-				log.debug("Message deletion state 2: ignoring intermediate element")
-				return True
-			log.debug(f"Message deletion state {state} completed, announcing result")
-			if self.appModule.isDelete.get("message") == "audio":
-				playWaveFile(os.path.join(BASE_DIR, "delete.wav"))
-			else:
-				message(self.appModule.isDelete.get("message", ""))
-			message(obj.name)
-			self.appModule.isDelete = False
-			return True
 
 		return False
 
