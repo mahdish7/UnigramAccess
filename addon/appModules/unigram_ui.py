@@ -4,6 +4,37 @@ import api
 from .data import contacts_dialog_titles
 from .unigram_logger import ulog as log
 
+
+class Saved_items:
+	"""Window-handle-keyed cache for frequently accessed UI elements.
+
+	Avoids repeated expensive UIA tree traversals by storing references to
+	elements like profile name, chats list, messages list, and slider.
+	"""
+
+	_items = {}
+
+	def get(self, key):
+		import comtypes
+		windowId = api.getFocusObject().windowHandle
+		try:
+			obj = self._items[windowId][key]
+			if hasattr(obj, "name"):
+				_ = obj.name
+			return obj
+		except comtypes.COMError:
+			del self._items[windowId][key]
+			return False
+		except Exception:
+			return False
+
+	def save(self, key, obj):
+		windowId = api.getFocusObject().windowHandle
+		if windowId not in self._items:
+			self._items[windowId] = {}
+		self._items[windowId][key] = obj
+
+
 class UnigramUIHelper:
 	def __init__(self, appModule):
 		self.appModule = appModule

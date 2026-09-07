@@ -5,7 +5,10 @@ import os
 
 import api
 from controlTypes import Role, State
+import core
 from nvwave import playWaveFile
+import queueHandler
+import scriptHandler
 import speech
 from ui import message
 
@@ -21,6 +24,60 @@ from .data import (
 from .unigram_formatting import formatChatElementOnFocus
 from .unigram_logger import ulog as log
 from .unigram_utils import BASE_DIR, CACHED_KEYS
+
+
+class Title_change_tracking:
+	"""Polling loop that monitors chat title/status changes.
+
+	Detects typing indicators, online/offline transitions, and member count
+	updates in the foreground chat, announcing them to the user.
+	Uses core.callLater with a 500 ms interval.
+	"""
+
+	active = False
+	pause = False
+	interval = 0.5
+	savedItems = False
+
+	@classmethod
+	def tick(cls):
+		if not cls.active or cls.pause:
+			return
+		title = cls.savedItems.get("profile name")
+		if not title or not title.isInForeground:
+			cls.pause = True
+			return False
+		lastProfileName = cls.savedItems.get("last profile name") or ("",)
+		if title.childCount > 1 and title.lastChild.name != lastProfileName[-1]:
+			if title.firstChild.name == lastProfileName[0]:
+				# Announce changes only if not related to switching to another chat
+				text = title.lastChild.name
+				queueHandler.queueFunction(queueHandler.eventQueue, message, text)
+			newTitle = [item.name for item in title.children]
+			cls.savedItems.save("last profile name", newTitle)
+		core.callLater(int(cls.interval * 1000), cls.tick)
+
+	@classmethod
+	def toggle(cls, savedItems=False):
+		if not conf.get("automatically announce activity in chats") or not savedItems:
+			cls.savedItems = savedItems
+			cls.active = True
+			cls.pause = False
+			conf.set("automatically announce activity in chats", True)
+			core.callLater(int(cls.interval * 1000), cls.tick)
+			return True
+		else:
+			cls.active = False
+			conf.set("automatically announce activity in chats", False)
+			return False
+
+	@classmethod
+	def restore(cls, savedItems=False):
+		cls.pause = False
+		cls.active = True
+		cls.savedItems = savedItems
+		cls.savedItems.save("last profile name", None)
+		core.callLater(int(cls.interval * 1000), cls.tick)
 
 
 class UnigramChats:
@@ -340,3 +397,32 @@ class UnigramChats:
 			return False
 
 		return False
+
+	def script_read_profile_name(self, gesture):
+		"""Announce chat title; pressed twice: enable or disable tracking of changes in the chat title."""
+		if scriptHandler.getLastScriptRepeatCount() == 1:
+			if Title_change_tracking.toggle(self.appModule.saved_items): message(_("Chat activity tracking is enabled"))
+			else: message(_("Chat activity tracking is disabled"))
+			return
+		isGroupCall = False
+		title = False
+		obj = self.appModule.saved_items.get("profile name")
+		if obj and obj.location.width != 0:
+			title = obj
+			message(obj.name)
+		for item in self.appModule.ui_helper.getElements():
+			if not title and item.role == Role.BUTTON and item.UIAAutomationId == "Profile":
+				message(item.name)
+				title = item
+		if not title:
+			profile_panel = self.appModule.ui_helper.get_profile_panel()
+			if profile_panel:
+				header = next((item for item in profile_panel.children if item.UIAAutomationId == "HeaderDetailsPresenter"), None)
+				if header:
+					title = header
+					message(header.name)
+		if not title:
+			message(_("Failed to read chat title"))
+		if title:
+			self.appModule.saved_items.save("profile name", title)
+

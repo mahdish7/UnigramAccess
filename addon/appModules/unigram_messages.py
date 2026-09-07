@@ -5,7 +5,9 @@ import os
 
 import api
 from controlTypes import Role, State
+import core
 from nvwave import playWaveFile
+import queueHandler
 import speech
 from ui import message
 
@@ -14,9 +16,86 @@ import addonHandler
 addonHandler.initTranslation()
 
 from .cnf import conf
-from .data import composer_header_cancel_types, icons_from_context_menu
+from .data import composer_header_cancel_types, icons_from_context_menu, keywordsInMessages
 from .unigram_logger import ulog as log
 from .unigram_utils import BASE_DIR, CACHED_KEYS
+
+
+class Chat_update:
+	"""Polling loop that tracks new incoming messages in the active chat.
+
+	When live chat mode is enabled (ALT+L), monitors message count changes
+	and automatically announces new received messages.
+	Uses core.callLater with a 300 ms interval.
+	"""
+
+	active = False
+	pause = False
+	interval = 0.3
+	app = False
+
+	@classmethod
+	def tick(cls):
+		if not cls.active or cls.pause:
+			return
+		try:
+			lastMessage = cls.app.ui_helper.getMessagesElement().lastChild
+		except Exception:
+			lastMessage = False
+		if not lastMessage or not lastMessage.isInForeground:
+			cls.pause = True
+			return False
+		# First item = chat name where the last message was recorded
+		# Second item = the message index
+		lastSavedMessage = cls.app.saved_items.get("last message") or ("", "")
+		# If there is a problem getting the message index, terminate and retry
+		try:
+			lastMessage.positionInfo["indexInGroup"]
+			lastMessage.positionInfo["similarItemsInGroup"]
+		except Exception:
+			core.callLater(int(cls.interval * 1000), cls.tick)
+			return
+		if (
+			lastMessage.positionInfo["indexInGroup"] != lastSavedMessage[1]
+			and lastMessage.positionInfo["indexInGroup"] == lastMessage.positionInfo["similarItemsInGroup"]
+		):
+			try:
+				title = cls.app.saved_items.get("profile name").firstChild.name
+			except Exception:
+				title = False
+			keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
+			if ((title == lastSavedMessage[0]) or not title) and keywords[3] in lastMessage.name[-60:]:
+				from .unigram_formatting import formatMessageOnFocus
+
+				text = formatMessageOnFocus(lastMessage.firstChild, cls.app.saved_items)
+				queueHandler.queueFunction(queueHandler.eventQueue, message, text)
+			try:
+				newMessage = (title, lastMessage.positionInfo["indexInGroup"])
+				cls.app.saved_items.save("last message", newMessage)
+			except Exception:
+				pass
+		core.callLater(int(cls.interval * 1000), cls.tick)
+
+	@classmethod
+	def toggle(cls, app=False):
+		if not conf.get("automatically announce new messages") or not app:
+			cls.active = True
+			conf.set("automatically announce new messages", True)
+			cls.app = app
+			core.callLater(int(cls.interval * 1000), cls.tick)
+			return True
+		else:
+			cls.active = False
+			conf.set("automatically announce new messages", False)
+			return False
+
+	@classmethod
+	def restore(cls, app=False):
+		cls.pause = False
+		cls.active = True
+		cls.app = app
+		cls.app.saved_items.save("last message", None)
+		core.callLater(int(cls.interval * 1000), cls.tick)
 
 
 class UnigramMessages:
@@ -572,3 +651,11 @@ class UnigramMessages:
 		elif is_edit:
 			message(_("Edit canceled"))
 		return True
+
+	def script_toggle_live_chat(self, gesture):
+		"""Toggle real-time background announcement of incoming messages."""
+		if Chat_update.toggle(self.appModule):
+			message(_("Automatic reading of messages is enabled"))
+		else:
+			message(_("Automatic reading of new messages is disabled"))
+
