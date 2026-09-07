@@ -38,7 +38,6 @@ from .overlays import (
 	SettingsPanelListItem,
 )
 from .text_window import TextWindow
-from .trackers import Chat_update, Saved_items, Title_change_tracking
 from .unigram_calls import UnigramCalls
 from .unigram_formatting import (
 	announceFolderChange,
@@ -50,11 +49,11 @@ from .unigram_formatting import (
 	resolveUnlabeledElement,
 )
 from .unigram_logger import ulog as log
-from .unigram_chats import UnigramChats
+from .unigram_chats import Title_change_tracking, UnigramChats
 from .unigram_media import UnigramMedia
-from .unigram_messages import UnigramMessages
+from .unigram_messages import Chat_update, UnigramMessages
 from .unigram_navigation import UnigramNavigation
-from .unigram_ui import UnigramUIHelper
+from .unigram_ui import Saved_items, UnigramUIHelper
 from .unigram_utils import CACHED_KEYS
 
 
@@ -496,14 +495,6 @@ class AppModule(appModuleHandler.AppModule):
 		return self.nav_helper.script_move_focus_to_list_threads(gesture)
 
 	@script(
-		# Translators: Description for the script that announces the chat name and status.
-		description=_("Announce the name and status of an open chat"),
-		gesture="kb:ALT+T",
-	)
-	def script_read_profile_name(self, gesture):
-		return self.nav_helper.script_read_profile_name(gesture)
-
-	@script(
 		# Translators: Description for the script that opens the navigation menu.
 		description=_("Open navigation menu"),
 		gesture="kb:ALT+M",
@@ -550,6 +541,16 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_go_to_next_search_result(self, gesture):
 		return self.nav_helper.script_go_to_next_search_result(gesture)
+
+	# ── Chat Scripts ────────────────────────────────────────────────────
+
+	@script(
+		# Translators: Description for the script that announces the chat name and status.
+		description=_("Announce the name and status of an open chat"),
+		gesture="kb:ALT+T",
+	)
+	def script_read_profile_name(self, gesture):
+		return self.chats_helper.script_read_profile_name(gesture)
 
 	# ── Message Scripts ─────────────────────────────────────────────────
 
@@ -788,10 +789,7 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_toggle_live_chat(self, gesture):
 		"""Toggle real-time background announcement of incoming messages."""
-		if Chat_update.toggle(self):
-			message(_("Automatic reading of messages is enabled"))
-		else:
-			message(_("Automatic reading of new messages is disabled"))
+		return self.msg_helper.script_toggle_live_chat(gesture)
 
 	@script(
 		# Translators: Description for the script that displays the shortcut list.

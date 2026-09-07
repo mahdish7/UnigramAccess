@@ -5,9 +5,7 @@ from controlTypes import Role, State
 from keyboardHandler import KeyboardInputGesture
 import api
 from ui import message
-import scriptHandler
 from .data import unread_messages_keywords
-from .trackers import Title_change_tracking
 from .unigram_logger import ulog as log
 
 class UnigramNavigation:
@@ -92,27 +90,6 @@ class UnigramNavigation:
 		profile_panel = self.appModule.ui_helper.get_profile_panel()
 		if profile_panel: profile_panel.setFocus()
 		else: message(_("There is no open profile"))
-
-	def script_read_profile_name(self, gesture):
-		if scriptHandler.getLastScriptRepeatCount() == 1:
-			if Title_change_tracking.toggle(self.appModule.saved_items): message(_("Chat activity tracking is enabled"))
-			else: message(_("Chat activity tracking is disabled"))
-			return
-		isGroupCall = False
-		title = False
-		obj = self.appModule.saved_items.get("profile name")
-		if obj and obj.location.width != 0:
-			title = obj
-			message(obj.name)
-		for item in self.appModule.ui_helper.getElements():
-			if not title and item.role == Role.BUTTON and item.UIAAutomationId == "Profile":
-				message(item.name)
-				title = item
-			elif item.role == Role.LINK and item.UIAAutomationId == "GroupCall": isGroupCall = item.firstChild.name
-		if title:
-			self.appModule.saved_items.save("profile name", title)
-			if isGroupCall: message(isGroupCall)
-		else: message(_("No open chat"))
 
 	def _is_unread_messages_separator(self, obj):
 		"""Check if a message list item represents the unread messages separator."""
