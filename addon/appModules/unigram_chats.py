@@ -147,7 +147,7 @@ class UnigramChats:
 		next_obj (second condition) or prev_obj (third condition).
 
 		Returns:
-			str: 'initial', 'next', 'previous', or 'fallback' depending on which candidate was focused,
+			str: 'initial', 'next', or 'previous' depending on which candidate was focused,
 			or False if no candidate could be focused.
 		"""
 		if not isinstance(self.appModule.isDelete, dict):
@@ -167,12 +167,7 @@ class UnigramChats:
 				log.debug(f"Successfully restored focus to {name} chat candidate (role={getattr(candidate, 'role', None)})")
 				return name
 
-		log.debug("No valid chat candidate could be focused; attempting fallback to chat list.")
-		try:
-			self.appModule.nav_helper.script_toChatList(False)
-			return "fallback"
-		except Exception:
-			pass
+		log.warning("Chat focus restoration failed: None of the three candidates (initial, next, previous) could be identified or focused")
 		return False
 
 	def start_delete_chat(self, isCompleteDeletion=False):
@@ -385,14 +380,17 @@ class UnigramChats:
 			focused_candidate = self.restore_deletion_focus()
 			self.appModule.isDelete = False
 
-			if focused_candidate in ("next", "previous", "fallback"):
-				log.debug("Chat was deleted, announcing result")
+			if dismiss_source == "primary" and focused_candidate != "initial":
+				log.debug(f"Chat was deleted (dismissal={dismiss_source}), announcing result")
 				if delete_msg == "audio":
 					playWaveFile(os.path.join(BASE_DIR, "delete.wav"))
 				elif delete_msg:
 					message(delete_msg)
-			elif focused_candidate == "initial":
-				log.debug("Chat deletion was cancelled, focus returned to initial object")
+			else:
+				log.debug(f"Chat deletion was cancelled via {dismiss_source}")
+
+			if not focused_candidate:
+				log.warning(f"Chat deletion: none of the three candidates (initial, next, previous) could be identified or focused (dismissal={dismiss_source})")
 
 			return False
 
