@@ -11,6 +11,7 @@ import os
 import queueHandler
 from .unigram_logger import ulog as log
 from .cnf import conf
+from .unigram_utils import isActivelyDownloading
 
 baseDir = os.path.join(os.path.dirname(__file__), "media")
 
@@ -19,6 +20,8 @@ class UnigramMedia:
 		self.appModule = appModule
 		self.saved_slider_focus = None
 		self.active_slider = None
+		self.last_progress_percentage = None
+		self._is_monitoring_download = False
 
 	def script_voiceMessageAcceleration(self, gesture):
 		targetButton = next((item for item in self.appModule.ui_helper.getElements() if item.role == Role.BUTTON and item.UIAAutomationId == "SpeedButton"), False)
@@ -305,3 +308,53 @@ class UnigramMedia:
 			except Exception: message("Conversion started")
 			self.waiting_for_recognition(button)
 		else: message(_("Button not found"))
+
+	def start_download_monitoring(self, obj):
+		"""Poll download progress in real time (500ms) while focus remains on the actively downloading media button."""
+		if conf.get("voicingPerformanceIndicators") == "none":
+			return
+		if not obj or getattr(obj, "UIAAutomationId", "") not in ("Button", "Download"):
+			return
+
+		if not isActivelyDownloading(getattr(obj, "name", "")):
+			return
+
+		if getattr(self, "_is_monitoring_download", False):
+			return
+
+		self._is_monitoring_download = True
+		self.last_progress_percentage = None
+
+		def monitor():
+			if conf.get("voicingPerformanceIndicators") == "none":
+				self._is_monitoring_download = False
+				return
+
+			curr = api.getFocusObject()
+			if curr != obj:
+				self._is_monitoring_download = False
+				return
+
+			if not isActivelyDownloading(getattr(curr, "name", "")):
+				self._is_monitoring_download = False
+				return
+
+			val = getattr(curr, "value", None)
+			if val is not None:
+				try:
+					clean_val = int(float(str(val).strip("% ")))
+				except (ValueError, TypeError):
+					clean_val = None
+
+				if clean_val is not None and clean_val != self.last_progress_percentage:
+					if self.last_progress_percentage is not None:
+						speech.cancelSpeech()
+					self.last_progress_percentage = clean_val
+					message(f"{clean_val}%")
+					if clean_val >= 100:
+						self._is_monitoring_download = False
+						return
+
+			core.callLater(500, monitor)
+
+		core.callLater(500, monitor)

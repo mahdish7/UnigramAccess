@@ -8,6 +8,8 @@ from keyboardHandler import KeyboardInputGesture
 import mouseHandler
 from winBindings import user32 as winUser
 
+from .data import active_download_keywords
+
 
 # Path to the media assets directory (WAV files for audio cues).
 BASE_DIR = os.path.join(os.path.dirname(__file__), "media")
@@ -36,3 +38,13 @@ def fixedDoAction(obj):
 	mouseHandler.executeMouseEvent(winUser.MOUSEEVENTF.LEFTDOWN, 0, 0)
 	mouseHandler.executeMouseEvent(winUser.MOUSEEVENTF.LEFTUP, 0, 0)
 	winUser.dll.SetCursorPos(point.x, point.y)
+
+
+def isActivelyDownloading(name):
+	"""Check if an element label indicates an actively downloading media button."""
+	if not name:
+		return False
+	base_name = name.split(": ")[0] if ": " in name else name
+	base_name_lower = base_name.lower()
+	return any(kw in base_name_lower for kw_list in active_download_keywords.values() for kw in kw_list)
+

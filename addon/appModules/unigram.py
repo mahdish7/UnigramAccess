@@ -33,6 +33,7 @@ from .data import (
 from .overlays import (
 	Audio_and_video_button,
 	EditableText,
+	Media_download_button,
 	Message_list_item,
 	SettingsPanelListItem,
 )
@@ -42,6 +43,7 @@ from .unigram_calls import UnigramCalls
 from .unigram_formatting import (
 	announceFolderChange,
 	formatChatElementOnFocus,
+	formatMediaButtonName,
 	formatMediaButtonOnFocus,
 	formatMessageOnFocus,
 	processPollAnswerOptions,
@@ -161,6 +163,9 @@ class AppModule(appModuleHandler.AppModule):
 			elif obj.role in (Role.SLIDER, Role.UNKNOWN) and getattr(obj, "UIAAutomationId", "") == "Slider":
 				self.saved_items.save("slider", obj)
 
+			elif getattr(obj, "UIAAutomationId", "") in ("Button", "Download") and getattr(obj, "role", None) in (Role.BUTTON, Role.LINK):
+				clsList.insert(0, Media_download_button)
+
 			elif conf.get("voicingPerformanceIndicators") == "none" and obj.role == Role.PROGRESSBAR:
 				clsList.pop(0)
 
@@ -221,6 +226,30 @@ class AppModule(appModuleHandler.AppModule):
 
 		# Format and enrich focused object
 		self._formatFocusedObject(obj)
+
+		if getattr(obj, "UIAAutomationId", "") in ("Button", "Download"):
+			self.media_helper.start_download_monitoring(obj)
+
+		nextHandler()
+
+	def event_nameChange(self, obj, nextHandler):
+		if getattr(obj, "UIAAutomationId", "") in ("Button", "Download"):
+			raw_name = ""
+			uia_elem = getattr(obj, "UIAElement", None)
+			if uia_elem:
+				try:
+					raw_name = getattr(uia_elem, "CurrentName", "") or getattr(uia_elem, "currentName", "") or ""
+				except Exception:
+					pass
+			if not raw_name:
+				try:
+					raw_name = obj._get_name()
+				except Exception:
+					pass
+			if raw_name:
+				obj.name = formatMediaButtonName(obj, raw_name)
+			if obj == api.getFocusObject():
+				self.media_helper.start_download_monitoring(obj)
 
 		nextHandler()
 
@@ -751,19 +780,6 @@ class AppModule(appModuleHandler.AppModule):
 
 	# ── Utility Scripts ─────────────────────────────────────────────────
 
-	@script(
-		# Translators: Description for the script that toggles progress bar announcements.
-		description=_("Toggle progress bar announcements"),
-		gesture="kb:ALT+U",
-	)
-	def script_toggleVoicingPerformanceIndicators(self, gesture):
-		"""Toggle between announcing all progress bars and suppressing them."""
-		if conf.get("voicingPerformanceIndicators") == "none":
-			conf.set("voicingPerformanceIndicators", "all")
-			message(_("Announce all progress bars"))
-		else:
-			conf.set("voicingPerformanceIndicators", "none")
-			message(_("Do not announce any progress bars"))
 
 	@script(
 		# Translators: Description for the script that toggles live chat automatic message reading.
