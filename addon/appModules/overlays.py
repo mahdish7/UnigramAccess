@@ -161,7 +161,15 @@ class Message_list_item(ListItem):
 		elif obj.firstChild.UIAAutomationId == "Texture":
 			name = _("Video")
 		else:
-			name = next((item.name for item in obj.children if item.UIAAutomationId in ("Title",)), "Медіа")
+			title_elem = next((item for item in obj.children if getattr(item, "UIAAutomationId", "") == "Title"), None)
+			if title_elem and getattr(title_elem, "name", ""):
+				name = title_elem.name.strip()
+				trim_elem = next((item for item in obj.children if getattr(item, "UIAAutomationId", "") == "TitleTrim"), None)
+				if trim_elem and getattr(trim_elem, "name", ""):
+					name += trim_elem.name.strip()
+			else:
+				# Translators: Fallback label announced for unknown media items in a message.
+				name = _("Media")
 		message(name)
 		api.setNavigatorObject(obj.simpleFirstChild)
 
