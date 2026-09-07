@@ -78,7 +78,6 @@ Use Unigram in a more comfortable and productive way. This addon provides many h
 
 ### Settings & Miscellaneous
 * **NVDA+ALT+U**: Open UnigramAccess settings window.
-* **ALT+U**: Toggle progress bar announcements.
 * **ALT+H**: Show a list of all UnigramAccess shortcuts.
 
 ## Changes in version 1.0.0

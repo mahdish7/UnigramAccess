@@ -117,3 +117,9 @@ chat_deletion_keywords = {
 contacts_dialog_titles = {
 	"en": "Contacts",
 }
+
+# Keywords for identifying active download state in media buttons across interface languages
+active_download_keywords = {
+	"en": ("cancel",),
+}
+

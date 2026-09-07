@@ -19,6 +19,22 @@ addonHandler.initTranslation()
 from .cnf import conf
 from .data import icons_from_context_menu, keywordsInMessages
 from .text_window import TextWindow
+from .unigram_utils import isActivelyDownloading
+
+
+class Media_download_button:
+	"""Overlay class for media download and action buttons.
+
+	Suppresses misleading/static percentage when idle (Bug 7).
+	"""
+
+	def _get_value(self):
+		# Suppress misleading/static percentage when idle (Bug 7)
+		if not isActivelyDownloading(getattr(self, "name", "")):
+			return None
+		return super()._get_value()
+
+	value = property(_get_value)
 
 
 class Audio_and_video_button:

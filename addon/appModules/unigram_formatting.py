@@ -18,6 +18,7 @@ from .data import (
 	phrase_administrator_in_message,
 )
 from .unigram_logger import ulog as log
+from .unigram_utils import isActivelyDownloading
 
 
 def formatMessageOnFocus(obj, savedItems):
@@ -226,13 +227,18 @@ def resolveUnlabeledElement(obj):
 		obj.name = "/. ".join(name)
 
 
-def formatMediaButtonOnFocus(obj):
-	"""Append file/media name and size or duration to the media button label."""
-	if not conf.get("voiceMediaButtonDetails"):
-		return
+def formatMediaButtonName(obj, raw_name=""):
+	"""Append file/media name and size or duration to the raw media button name."""
+	if not raw_name:
+		raw_name = getattr(obj, "name", "") or ""
+
+	base_name = raw_name.split(": ")[0] if ": " in raw_name else raw_name
+	if not conf.get("voiceMediaButtonDetails") or isActivelyDownloading(base_name):
+		return base_name
+
 	parent = getattr(obj, "parent", None)
 	if not parent:
-		return
+		return base_name
 	children = getattr(parent, "children", [])
 	title_elem = next((item for item in children if getattr(item, "UIAAutomationId", "") == "Title"), None)
 	trim_elem = next((item for item in children if getattr(item, "UIAAutomationId", "") == "TitleTrim"), None)
@@ -258,5 +264,12 @@ def formatMediaButtonOnFocus(obj):
 
 	if details:
 		summary = ", ".join(details)
-		if not title or title not in obj.name:
-			obj.name = f"{obj.name}: {summary}"
+		return f"{base_name}: {summary}" if base_name else summary
+	return base_name
+
+
+def formatMediaButtonOnFocus(obj):
+	"""Append file/media name and size or duration to the media button label."""
+	if not conf.get("voiceMediaButtonDetails"):
+		return
+	obj.name = formatMediaButtonName(obj, getattr(obj, "name", "") or "")
