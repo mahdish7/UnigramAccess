@@ -11,15 +11,9 @@ class UnigramUIHelper:
 	def getMessagesElement(self):
 		obj = self.appModule.saved_items.get("messages")
 		if not obj or not obj.location or not obj.location.width:
-			# obj = next((item for item in self.getElements() if item.UIAAutomationId == "Messages"), False)
-			obj = None
-			item = self.get_first_item()
-			while item:
-				if item.UIAAutomationId == "Messages":
-					obj = item
-					item = None
-				else: item = item.next
-			if obj: self.appModule.saved_items.save("messages", obj)
+			obj = next((item for item in self.getElements() if getattr(item, "UIAAutomationId", "") == "Messages"), None)
+			if obj:
+				self.appModule.saved_items.save("messages", obj)
 		return obj
 
 	def getChatsListElement(self):
@@ -48,13 +42,42 @@ class UnigramUIHelper:
 			log.warning("Chats list element could not be found.")
 		return targetList
 
+	def getMainContainer(self):
+		container = self.appModule.saved_items.get("main_container")
+		if container and getattr(container, "location", None) and container.location.width:
+			return container
+
+		fg = api.getForegroundObject()
+		if not fg:
+			return None
+		if getattr(fg, "windowClassName", "") == "Windows.UI.Core.CoreWindow":
+			self.appModule.saved_items.save("main_container", fg)
+			return fg
+		queue = list(getattr(fg, "children", []))
+		while queue:
+			item = queue.pop(0)
+			if getattr(item, "windowClassName", "") == "Windows.UI.Core.CoreWindow":
+				self.appModule.saved_items.save("main_container", item)
+				return item
+			if getattr(item, "role", None) == Role.PANE:
+				queue.extend(getattr(item, "children", []))
+		return None
+
 	def getElements(self):
-		try: return api.getForegroundObject().lastChild.previous.children
-		except Exception: return []
-	
+		try:
+			container = self.getMainContainer()
+			if container:
+				return container.children
+		except Exception:
+			log.debugException("Error getting elements from main container")
+		return []
+
 	def get_first_item(self):
-		try: return api.getForegroundObject().lastChild.previous.firstChild
-		except Exception: return []
+		try:
+			container = self.getMainContainer()
+			return getattr(container, "firstChild", None)
+		except Exception:
+			return None
 
 	def get_settings_panel(self):
 		settings_panel = next((item for item in self.getElements() if item.role in (Role.PANE, Role.LIST) and item.UIAAutomationId in ("ScrollingHost", "List", "") and ((item.previous and item.previous.UIAAutomationId == "DetailHeaderPresenter")  or item.location.width > 320)), None)
