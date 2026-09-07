@@ -43,6 +43,7 @@ spec = (
 	"confirmation_at_deletion = boolean(default=False)",
 	"actionDescriptionForLinks = boolean(default=True)",
 	"voiceFullDescriptionOfLinkToYoutube = boolean(default=True)",
+	"voiceMediaButtonDetails = boolean(default=True)",
 	"isAnnouncesAnswers = boolean(default=True)",
 	"is_automatically_check_for_updates = boolean(default=True)",
 	"isFixedToggleButton = boolean(default=False)",

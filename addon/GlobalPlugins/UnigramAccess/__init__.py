@@ -143,6 +143,9 @@ class UnigramAccessSettings(SettingsPanel):
 		# Announcement of the full description of YouTube links
 		self.voiceFullDescriptionOfLinkToYoutube = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Read full video description in YouTube URLs")))
 		self.voiceFullDescriptionOfLinkToYoutube.SetValue(conf.get("voiceFullDescriptionOfLinkToYoutube"))
+		# Announce file details on media buttons
+		self.voiceMediaButtonDetails = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Announce file details (name, size, duration) on media buttons")))
+		self.voiceMediaButtonDetails.SetValue(conf.get("voiceMediaButtonDetails"))
 		# Report if the message contains a reaction
 		self.voice_the_presence_of_a_reaction = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Announce if the message contains a reaction")))
 		self.voice_the_presence_of_a_reaction.SetValue(conf.get("voice_the_presence_of_a_reaction"))
@@ -199,6 +202,7 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("action_when_pressing_up_arrow_in_text_field", self.get_key(self.list_actions_when_pressing_up_arrow_in_text_field, self.action_when_pressing_up_arrow_in_text_field.GetStringSelection()))
 		conf.set("actionDescriptionForLinks", self.actionDescriptionForLinks.IsChecked())
 		conf.set("voiceFullDescriptionOfLinkToYoutube", self.voiceFullDescriptionOfLinkToYoutube.IsChecked())
+		conf.set("voiceMediaButtonDetails", self.voiceMediaButtonDetails.IsChecked())
 		conf.set("voice_the_presence_of_a_reaction", self.voice_the_presence_of_a_reaction.IsChecked())
 		conf.set("isFixedToggleButton", self.isFixedToggleButton.IsChecked())
 		conf.set("is_automatically_check_for_updates", self.is_automatically_check_for_updates.IsChecked())

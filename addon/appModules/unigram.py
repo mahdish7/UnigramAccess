@@ -42,6 +42,7 @@ from .unigram_calls import UnigramCalls
 from .unigram_formatting import (
 	announceFolderChange,
 	formatChatElementOnFocus,
+	formatMediaButtonOnFocus,
 	formatMessageOnFocus,
 	processPollAnswerOptions,
 	resolveUnlabeledElement,
@@ -358,38 +359,20 @@ class AppModule(appModuleHandler.AppModule):
 			except Exception:
 				pass
 
-		elif obj.role == Role.LINK:
+		elif obj.role in (Role.BUTTON, Role.LINK):
 			try:
-				if obj.UIAAutomationId in ("Button", "Download") and obj.parent.parent.parent.UIAAutomationId == "Messages":
-					# Announcing the name and size of the file
-					def formatFileInfo(title, subtitle):
-						arr = subtitle.split(" - ")
-						for index, value in enumerate(arr):
-							if ":" in value:
-								arr[index] = _("Duration") + ": " + arr[index]
-							else:
-								arr[index] = _("Size") + ": " + arr[index]
-						subtitle = ". ".join(arr)
-						return ": " + title + ". " + subtitle
-
-					if obj.next.UIAAutomationId == "Title" and obj.next.next.UIAAutomationId == "Subtitle":
-						obj.name += formatFileInfo(obj.next.name, obj.next.next.name)
-					elif obj.next.next.UIAAutomationId == "Title" and obj.next.next.next.UIAAutomationId == "Subtitle":
-						obj.name += formatFileInfo(obj.next.next.name, obj.next.next.next.name)
-				elif obj.parent.UIAAutomationId in ("TextBlock", "Message"):
+				if getattr(obj, "UIAAutomationId", "") in ("Button", "Download"):
+					formatMediaButtonOnFocus(obj)
+				elif obj.role == Role.LINK and getattr(getattr(obj, "parent", None), "UIAAutomationId", "") in ("TextBlock", "Message"):
 					speech.cancelSpeech()
-			except Exception:
-				pass
-
-		elif obj.role == Role.BUTTON:
-			try:
-				# Add labels for call buttons
-				if obj.UIAAutomationId == "Audio" and obj.firstChild.name == "\ue720" and obj.next.UIAAutomationId == "AudioInfo":
-					obj.name = obj.next.name
-				elif obj.UIAAutomationId == "Video" and obj.firstChild.name == "\ue963":
-					obj.name = _("Enable video")
-				elif obj.UIAAutomationId == "Video" and obj.firstChild.name == "\ue964":
-					obj.name = _("Disable video")
+				elif obj.role == Role.BUTTON:
+					# Add labels for call buttons
+					if obj.UIAAutomationId == "Audio" and getattr(obj.firstChild, "name", "") == "\ue720" and getattr(obj.next, "UIAAutomationId", "") == "AudioInfo":
+						obj.name = obj.next.name
+					elif obj.UIAAutomationId == "Video" and getattr(obj.firstChild, "name", "") == "\ue963":
+						obj.name = _("Enable video")
+					elif obj.UIAAutomationId == "Video" and getattr(obj.firstChild, "name", "") == "\ue964":
+						obj.name = _("Disable video")
 			except Exception:
 				pass
 
