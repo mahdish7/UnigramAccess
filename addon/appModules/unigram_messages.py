@@ -381,7 +381,7 @@ class UnigramMessages:
 		next_obj (second condition) or prev_obj (third condition).
 
 		Returns:
-			str: 'initial', 'next', 'previous', or 'fallback' depending on which candidate was focused,
+			str: 'initial', 'next', or 'previous' depending on which candidate was focused,
 			or False if no candidate could be focused.
 		"""
 		if not isinstance(self.appModule.isDelete, dict):
@@ -401,12 +401,7 @@ class UnigramMessages:
 				log.debug(f"Successfully restored focus to {name} message candidate (role={getattr(candidate, 'role', None)})")
 				return name
 
-		log.debug("No valid message candidate could be focused; attempting fallback to message field.")
-		try:
-			self.script_toMessageField(None)
-			return "fallback"
-		except Exception:
-			pass
+		log.warning("Message focus restoration failed: None of the three candidates (initial, next, previous) could be identified or focused")
 		return False
 
 	def start_delete_message(self, isCompleteDeletion=False):
@@ -597,14 +592,17 @@ class UnigramMessages:
 			focused_candidate = self.restore_deletion_focus()
 			self.appModule.isDelete = False
 
-			if focused_candidate in ("next", "previous", "fallback"):
-				log.debug("Message was deleted, announcing result")
+			if dismiss_source == "primary" and focused_candidate != "initial":
+				log.debug(f"Message was deleted (dismissal={dismiss_source}), announcing result")
 				if delete_msg == "audio":
 					playWaveFile(os.path.join(BASE_DIR, "delete.wav"))
 				elif delete_msg:
 					message(delete_msg)
-			elif focused_candidate == "initial":
-				log.debug("Message deletion was cancelled, focus returned to initial object")
+			else:
+				log.debug(f"Message deletion was cancelled via {dismiss_source}")
+
+			if not focused_candidate:
+				log.warning(f"Message deletion: none of the three candidates (initial, next, previous) could be identified or focused (dismissal={dismiss_source})")
 
 			return False
 
