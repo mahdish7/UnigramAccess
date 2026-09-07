@@ -224,3 +224,39 @@ def resolveUnlabeledElement(obj):
 	elif obj.childCount > 1:
 		name = [item.name for item in obj.children if item.name != ""]
 		obj.name = "/. ".join(name)
+
+
+def formatMediaButtonOnFocus(obj):
+	"""Append file/media name and size or duration to the media button label."""
+	if not conf.get("voiceMediaButtonDetails"):
+		return
+	parent = getattr(obj, "parent", None)
+	if not parent:
+		return
+	children = getattr(parent, "children", [])
+	title_elem = next((item for item in children if getattr(item, "UIAAutomationId", "") == "Title"), None)
+	trim_elem = next((item for item in children if getattr(item, "UIAAutomationId", "") == "TitleTrim"), None)
+	subtitle_elem = next((item for item in children if getattr(item, "UIAAutomationId", "") == "Subtitle"), None)
+	if not subtitle_elem:
+		overlay = next((item for item in children if getattr(item, "UIAAutomationId", "") == "Overlay"), None)
+		if overlay and getattr(getattr(overlay, "firstChild", None), "UIAAutomationId", "") == "Subtitle":
+			subtitle_elem = overlay.firstChild
+
+	title = ""
+	if title_elem and getattr(title_elem, "name", ""):
+		title = title_elem.name.strip()
+		if trim_elem and getattr(trim_elem, "name", ""):
+			title += trim_elem.name.strip()
+
+	subtitle = getattr(subtitle_elem, "name", "").strip() if subtitle_elem else ""
+
+	details = []
+	if title:
+		details.append(title)
+	if subtitle:
+		details.append(subtitle)
+
+	if details:
+		summary = ", ".join(details)
+		if not title or title not in obj.name:
+			obj.name = f"{obj.name}: {summary}"
