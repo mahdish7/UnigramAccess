@@ -33,24 +33,12 @@ def formatMessageOnFocus(obj, savedItems):
 	header = False
 	senderMessage = getattr(obj, "sender_message", "")
 
+	if isPollMessage(obj):
+		formatPollMessage(obj)
+
 	item = obj.firstChild
 	while item:
-		if item.UIAAutomationId == "Question":
-			# Processing messages containing a poll
-			options, votes = "", ""
-			for el in obj.children:
-				if el.UIAAutomationId == "Votes":
-					votes = ". " + el.name + ". "
-				elif el.role == Role.TOGGLEBUTTON and el.firstChild.role == Role.PROGRESSBAR:
-					if el.childCount == 3:
-						options += processPollAnswerOptions(el)
-					elif el.childCount == 2:
-						options += el.children[1].name + ", "
-			if options:
-				options = _("Answer options") + ": " + options
-			obj.name = obj.name.replace(item.name + ", ", item.name + votes + options)
-
-		elif (
+		if (
 			conf.get("actionDescriptionForLinks")
 			and item.role == Role.LINK
 			and len(item.name) > 30
@@ -177,17 +165,68 @@ def formatChatElementOnFocus(obj):
 	return obj.name
 
 
-def processPollAnswerOptions(obj):
-	"""Format a poll answer option, marking it as correct if applicable."""
-	tmpEl = obj.firstChild
-	isCorrectAnswer = False
-	while tmpEl.next:
-		tmpEl = tmpEl.next
-		if tmpEl.name == "\uf13e":
-			isCorrectAnswer = True
-	# Translators: Label prepended to the correct answer in quiz polls.
-	_("Right answer")  # Ensure this phrase appears in the translation dictionary
-	return f'{"" if not isCorrectAnswer else _("Right answer") + ": "}{obj.name}, '
+def isPollMessage(obj) -> bool:
+	"""Check if an NVDAObject represents a poll or quiz message."""
+	if not obj or not hasattr(obj, "children"):
+		return False
+	children = obj.children or []
+	has_type = any(getattr(c, "UIAAutomationId", "") == "Type" for c in children)
+	has_poll_items = any(
+		c.role == Role.TOGGLEBUTTON or getattr(c, "UIAAutomationId", "") == "Votes"
+		for c in children
+	)
+	return has_type and has_poll_items
+
+
+def formatPollMessage(obj) -> str:
+	"""Enrich a poll message with explanation and details if present."""
+	try:
+		children = obj.children or []
+		text_blocks_before_type = []
+		type_name = ""
+		for child in children:
+			auto_id = getattr(child, "UIAAutomationId", "")
+			if auto_id == "Type":
+				type_name = child.name.strip() if child.name else ""
+				break
+			if auto_id == "TextBlock" or child.role == Role.STATICTEXT:
+				val = child.name.strip() if child.name else ""
+				if val:
+					text_blocks_before_type.append(val)
+
+		# If there are 2 or more TextBlocks before Type, the preceding ones are
+		# the Explanation (توضیحات) and the last one is the Question.
+		if len(text_blocks_before_type) >= 2:
+			explanation = "\n".join(text_blocks_before_type[:-1])
+			question = text_blocks_before_type[-1]
+			# Translators: Label for the explanation/description of a poll or quiz.
+			explanation_text = f"{_('Explanation')}: {explanation}"
+
+			if question and question in obj.name:
+				obj.name = obj.name.replace(question, f"{question}. {explanation_text}")
+			elif type_name and type_name in obj.name:
+				obj.name = obj.name.replace(type_name, f"{type_name}. {explanation_text}")
+			else:
+				obj.name = f"{explanation_text}. {obj.name}"
+	except Exception as e:
+		log.error(f"Error formatting poll message: {e}")
+	return obj.name
+
+
+def formatPollOption(obj) -> str:
+	"""Format a focused poll answer option toggle button."""
+	try:
+		children = obj.children or []
+		for child in children:
+			if child.name == "\uf13e":
+				# Translators: Label prepended to the correct answer in quiz polls.
+				prefix = _("Right answer") + ": "
+				if not obj.name.startswith(prefix):
+					obj.name = prefix + obj.name
+				break
+	except Exception as e:
+		log.error(f"Error formatting poll option: {e}")
+	return obj.name
 
 
 def announceFolderChange(obj, savedItems):
