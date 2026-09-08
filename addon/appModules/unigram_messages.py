@@ -6,6 +6,7 @@ import os
 import api
 from controlTypes import Role, State
 import core
+from keyboardHandler import KeyboardInputGesture
 from nvwave import playWaveFile
 import queueHandler
 import speech
@@ -107,6 +108,38 @@ class UnigramMessages:
 
 	def __init__(self, appModule):
 		self.appModule = appModule
+
+	def to_last_message(self):
+		"""Move focus or caret to the last message in the active chat.
+
+		Returns:
+			bool: True if handled (caret moved, message focused, or announced empty),
+				  False if no active chat message list is present.
+		"""
+		focusObj = api.getFocusObject()
+		if self.appModule.ui_helper.is_message_object(focusObj):
+			parent = getattr(focusObj, "parent", None)
+			if parent and getattr(parent, "next", None):
+				KeyboardInputGesture.fromName("end").send()
+			else:
+				message(getattr(focusObj, "name", ""))
+			return True
+
+		obj = self.appModule.ui_helper.getMessagesElement()
+		if obj:
+			last_child = getattr(obj, "lastChild", None)
+			if last_child:
+				try:
+					last_child.setFocus()
+					KeyboardInputGesture.fromName("end").send()
+					return True
+				except Exception:
+					pass
+			else:
+				message(_("This chat is empty"))
+				return True
+
+		return False
 
 	def script_instantView(self, gesture):
 		"""Open Telegram Instant View for the focused message."""

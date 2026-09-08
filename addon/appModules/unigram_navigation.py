@@ -14,57 +14,38 @@ class UnigramNavigation:
 
 	def script_toChatList(self, gesture, arg = False):
 		log.info("Executing toChatList shortcut.")
-		obj = api.getFocusObject()
-		lastFocusChatElement = self.appModule.saved_items.get("last focused chat")
-		if lastFocusChatElement and lastFocusChatElement.location and lastFocusChatElement.location.width:
-			if obj == lastFocusChatElement: message(obj.name)
-			else: lastFocusChatElement.setFocus()
-			return
-		try: targetList = self.appModule.ui_helper.getChatsListElement()
-		except Exception: targetList = None
-		if not targetList:
-			if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_categories_list():
-				return True
-			if not arg: message(_("Chat list not found"))
-			return
-		if targetList.firstChild:
-			targetList = targetList.firstChild
-			if targetList.role == Role.BUTTON and targetList.next: targetList =  targetList.next
-			if targetList.role and targetList.role == Role.LISTITEM:
-				targetList.setFocus()
-				return
-		if not arg: message(_("Chat list is empty"))
-
-	def script_toLastMessage(self, gesture):
-		focusObj = api.getFocusObject()
-		if self.appModule.ui_helper.is_message_object(focusObj):
-			if focusObj.parent.next: KeyboardInputGesture.fromName("end").send()
-			else: message(focusObj.name)
+		# Priority 1: Focus the main chats list
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_chats_list():
 			return True
 
-		obj = self.appModule.ui_helper.getMessagesElement()
-		if obj:
-			if obj.lastChild:
-				try:
-					obj.lastChild.setFocus()
-					KeyboardInputGesture.fromName("end").send()
-					return True
-				except Exception:
-					pass
-			else:
-				message(_("This chat is empty"))
-				return True
+		# Priority 2: If Contacts dialog is active, focus the contacts list
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_contacts_list():
+			return True
 
-		branch_list = self.appModule.ui_helper.get_branch_list()
-		if branch_list:
-			branch_list.firstChild.setFocus()
-			return
-		profile_panel = self.appModule.ui_helper.get_profile_panel()
-		if profile_panel:
-			profile_panel.setFocus()
-			return
+		# Priority 3: If in Settings, focus settings categories list
+		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_categories_list():
+			return True
+
+		if not arg:
+			message(_("Chat list not found"))
+
+	def script_toLastMessage(self, gesture):
+		# Priority 1: Focus or move caret to last message in active chat
+		if getattr(self.appModule, "msg_helper", None) and self.appModule.msg_helper.to_last_message():
+			return True
+
+		# Priority 2: Focus forum topics / threads list if present
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_threads_list():
+			return True
+
+		# Priority 3: Focus profile information panel if open
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_profile_panel():
+			return True
+
+		# Priority 4: Focus settings detail panel if in settings
 		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_detail_panel():
-			return
+			return True
+
 		message(_("No open chat"))
 
 	def script_to_tabs_folder(self, gesture):
@@ -84,14 +65,14 @@ class UnigramNavigation:
 			else: message(_("Chat folder list not found"))
 
 	def script_move_focus_to_list_threads(self, gesture):
-		branch_list = self.appModule.ui_helper.get_branch_list()
-		if branch_list: branch_list.firstChild.setFocus()
-		else: message(_("No list with threads was found"))
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_threads_list():
+			return True
+		message(_("No list with threads was found"))
 
 	def script_to_open_profile(self, gesture):
-		profile_panel = self.appModule.ui_helper.get_profile_panel()
-		if profile_panel: profile_panel.setFocus()
-		else: message(_("There is no open profile"))
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_profile_panel():
+			return True
+		message(_("There is no open profile"))
 
 	def _is_unread_messages_separator(self, obj):
 		"""Check if a message list item represents the unread messages separator."""

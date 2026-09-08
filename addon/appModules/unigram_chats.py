@@ -86,6 +86,94 @@ class UnigramChats:
 	def __init__(self, appModule):
 		self.appModule = appModule
 
+	def to_contacts_list(self):
+		"""Focus the contacts list if the Contacts dialog is currently open.
+
+		Returns:
+			bool: True if inside Contacts dialog and handled, False otherwise.
+		"""
+		contacts = self.appModule.ui_helper.get_contacts_list()
+		if contacts:
+			try:
+				focusObj = api.getFocusObject()
+				if focusObj == contacts or (
+					getattr(focusObj, "role", None) == Role.LISTITEM
+					and getattr(focusObj, "parent", None) == getattr(contacts, "parent", None)
+				):
+					message(getattr(focusObj, "name", ""))
+				else:
+					contacts.setFocus()
+			except Exception as e:
+				log.debugException(f"to_contacts_list: contacts.setFocus error: {e}")
+			return True
+		return False
+
+	def to_chats_list(self):
+		"""Focus the chats list (last focused chat item or first item).
+
+		Returns:
+			bool: True if handled, False if chat list was not found or inside modal dialog.
+		"""
+		# If currently inside a modal dialog (such as Contacts dialog), yield to dialog handlers
+		curr = api.getFocusObject()
+		while curr:
+			if getattr(curr, "role", None) == Role.DIALOG:
+				return False
+			curr = getattr(curr, "parent", None)
+
+		obj = api.getFocusObject()
+		lastFocusChatElement = self.appModule.saved_items.get("last focused chat")
+		if lastFocusChatElement and getattr(lastFocusChatElement, "location", None) and lastFocusChatElement.location.width:
+			if obj == lastFocusChatElement:
+				message(getattr(obj, "name", ""))
+			else:
+				lastFocusChatElement.setFocus()
+			return True
+
+		try:
+			targetList = self.appModule.ui_helper.getChatsListElement()
+		except Exception:
+			targetList = None
+
+		if not targetList:
+			return False
+
+		first = getattr(targetList, "firstChild", None)
+		if first:
+			target = first
+			if getattr(target, "role", None) == Role.BUTTON and getattr(target, "next", None):
+				target = target.next
+			if getattr(target, "role", None) == Role.LISTITEM:
+				target.setFocus()
+				return True
+
+		message(_("Chat list is empty"))
+		return True
+
+	def to_threads_list(self):
+		"""Focus the forum topics/threads list in a supergroup.
+
+		Returns:
+			bool: True if threads list was found and focused, False otherwise.
+		"""
+		branch_list = self.appModule.ui_helper.get_branch_list()
+		if branch_list and getattr(branch_list, "firstChild", None):
+			branch_list.firstChild.setFocus()
+			return True
+		return False
+
+	def to_profile_panel(self):
+		"""Focus the profile information panel.
+
+		Returns:
+			bool: True if profile panel was found and focused, False otherwise.
+		"""
+		profile_panel = self.appModule.ui_helper.get_profile_panel()
+		if profile_panel:
+			profile_panel.setFocus()
+			return True
+		return False
+
 	def is_chat_item(self, obj):
 		"""Check whether an NVDAObject is an item in the chats list."""
 		try:
