@@ -23,9 +23,7 @@ class UnigramNavigation:
 		try: targetList = self.appModule.ui_helper.getChatsListElement()
 		except Exception: targetList = None
 		if not targetList:
-			settings_list = self.appModule.ui_helper.get_settings_list()
-			if settings_list:
-				settings_list.setFocus()
+			if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_categories_list():
 				return True
 			if not arg: message(_("Chat list not found"))
 			return
@@ -43,27 +41,31 @@ class UnigramNavigation:
 			if focusObj.parent.next: KeyboardInputGesture.fromName("end").send()
 			else: message(focusObj.name)
 			return True
+
 		obj = self.appModule.ui_helper.getMessagesElement()
-		try:
-			obj.lastChild.setFocus()
-			KeyboardInputGesture.fromName("end").send()
-		except Exception:
-			if obj and not obj.lastChild:
+		if obj:
+			if obj.lastChild:
+				try:
+					obj.lastChild.setFocus()
+					KeyboardInputGesture.fromName("end").send()
+					return True
+				except Exception:
+					pass
+			else:
 				message(_("This chat is empty"))
 				return True
-			branch_list = self.appModule.ui_helper.get_branch_list()
-			if branch_list:
-				branch_list.firstChild.setFocus()
-				return
-			profile_panel = self.appModule.ui_helper.get_profile_panel()
-			if profile_panel:
-				profile_panel.setFocus()
-				return
-			settings_panel = self.appModule.ui_helper.get_settings_panel()
-			if settings_panel:
-				settings_panel.setFocus()
-				return
-			message(_("No open chat"))
+
+		branch_list = self.appModule.ui_helper.get_branch_list()
+		if branch_list:
+			branch_list.firstChild.setFocus()
+			return
+		profile_panel = self.appModule.ui_helper.get_profile_panel()
+		if profile_panel:
+			profile_panel.setFocus()
+			return
+		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_detail_panel():
+			return
+		message(_("No open chat"))
 
 	def script_to_tabs_folder(self, gesture):
 		obj = self.appModule.saved_items.get("tabs folder")

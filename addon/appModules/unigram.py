@@ -53,6 +53,7 @@ from .unigram_chats import Title_change_tracking, UnigramChats
 from .unigram_media import UnigramMedia
 from .unigram_messages import Chat_update, UnigramMessages
 from .unigram_navigation import UnigramNavigation
+from .unigram_settings import UnigramSettings
 from .unigram_ui import Saved_items, UnigramUIHelper
 from .unigram_utils import CACHED_KEYS
 
@@ -92,6 +93,7 @@ class AppModule(appModuleHandler.AppModule):
 
 		# Initialize helper modules
 		self.ui_helper = UnigramUIHelper(self)
+		self.settings_helper = UnigramSettings(self)
 		self.nav_helper = UnigramNavigation(self)
 		self.call_helper = UnigramCalls(self)
 		self.msg_helper = UnigramMessages(self)
