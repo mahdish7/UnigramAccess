@@ -354,8 +354,6 @@ class AppModule(appModuleHandler.AppModule):
 				obj.name = ", ".join([item.name for item in obj.children[1:]])
 			elif obj.name == "Unigram.Entities.StoragePhoto":
 				obj.name = _("Image")
-			elif obj.name == "Unigram.ViewModels.Folders.FilterFlag":
-				obj.name = obj.children[1].name
 			elif obj.name.startswith("chatTheme {"):
 				obj.name = obj.firstChild.name
 			elif obj.name.startswith("forumTopic {\n  info = forumTopicInfo {"):
