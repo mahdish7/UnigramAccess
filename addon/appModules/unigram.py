@@ -45,7 +45,7 @@ from .unigram_formatting import (
 	formatMediaButtonName,
 	formatMediaButtonOnFocus,
 	formatMessageOnFocus,
-	processPollAnswerOptions,
+	formatPollOption,
 	resolveUnlabeledElement,
 )
 from .unigram_logger import ulog as log
@@ -414,12 +414,7 @@ class AppModule(appModuleHandler.AppModule):
 						obj.name,
 						flags=re.S,
 					)
-				if (
-					obj.firstChild.UIAAutomationId == "Loading"
-					and obj.lastChild.UIAAutomationId == "Votes"
-					and obj.childCount == 3
-				):
-					obj.name = processPollAnswerOptions(obj)
+				formatPollOption(obj)
 			except Exception:
 				pass
 
