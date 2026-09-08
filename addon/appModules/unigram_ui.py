@@ -110,10 +110,6 @@ class UnigramUIHelper:
 		except Exception:
 			return None
 
-	def get_settings_panel(self):
-		settings_panel = next((item for item in self.getElements() if item.role in (Role.PANE, Role.LIST) and item.UIAAutomationId in ("ScrollingHost", "List", "") and ((item.previous and item.previous.UIAAutomationId == "DetailHeaderPresenter")  or item.location.width > 320)), None)
-		if not settings_panel: return False
-		return next(( item for item in settings_panel.children if State.FOCUSABLE in item.states), settings_panel.firstChild)
 
 	def get_contacts_list(self):
 		"""Find and return the contacts list or its first contact item in the contacts dialog."""
@@ -160,14 +156,6 @@ class UnigramUIHelper:
 			log.debugException("Error getting contacts list")
 			return False
 
-	def get_settings_list(self):
-		a = next((item for item in self.getElements() if item.role == Role.PANE and item.UIAAutomationId == "ScrollingHost" and item.firstChild.next.UIAAutomationId == "Title" and item.firstChild.next.next.UIAAutomationId == "Identity"), None)
-		if not a:
-			return False
-		try: b = a.firstChild.next.next.next.next.firstChild
-		except Exception: b = False
-		if b: return b
-		else: return False
 
 	def is_message_object(self, obj):
 		try:

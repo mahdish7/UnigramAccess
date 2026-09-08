@@ -230,12 +230,15 @@ class Message_list_item(ListItem):
 class SettingsPanelListItem:
 	"""Overlay for navigation panel list items.
 
-	Activates the item and then jumps focus to the last message.
+	Activates the item and jumps focus to the settings right-side detail panel.
 	"""
 
 	def script_activate_element(self, gesture):
 		self.firstChild.doAction()
-		self.appModule.nav_helper.script_toLastMessage(gesture)
+		if getattr(self.appModule, "settings_helper", None):
+			self.appModule.settings_helper.to_detail_panel()
+		else:
+			self.appModule.nav_helper.script_toLastMessage(gesture)
 
 	__gestures = {
 		"kb:enter": "activate_element",
