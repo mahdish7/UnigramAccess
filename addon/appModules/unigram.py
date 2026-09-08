@@ -437,23 +437,6 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:ALT+1",
 	)
 	def script_toChatList(self, gesture, arg=False):
-		# Priority 1: If Contacts dialog is active, focus the contacts list
-		contacts = self.ui_helper.get_contacts_list()
-		if contacts:
-			try:
-				focusObj = api.getFocusObject()
-				if focusObj == contacts or (
-					getattr(focusObj, "role", None) == Role.LISTITEM
-					and getattr(focusObj, "parent", None) == getattr(contacts, "parent", None)
-				):
-					message(focusObj.name)
-				else:
-					contacts.setFocus()
-			except Exception as e:
-				log.debugException(f"script_toChatList: contacts.setFocus error: {e}")
-			return True
-
-		# Priority 2: Default navigation (Chat list, or Settings if chat list is not present)
 		return self.nav_helper.script_toChatList(gesture, arg)
 
 	@script(
