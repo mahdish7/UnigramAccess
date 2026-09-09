@@ -171,19 +171,27 @@ class UnigramMessages:
 			message(_("Button not found"))
 
 	def script_copyMessage(self, gesture):
-		"""Copy message text or focused link to clipboard."""
-		gesture.send()
-		obj = api.getFocusObject()
-		if obj.parent.UIAAutomationId in ("Message", "TextBlock"):
-			textMessage = obj.name
-			mes = _("Link copied")
-		else:
+		"""Copy focused link directly, or pass Ctrl+C to Telegram for native handling."""
+		try:
+			obj = api.getFocusObject()
+		except Exception:
+			obj = None
+
+		# If focused on a link, copy the link directly and do NOT send to Telegram
+		# (otherwise Telegram would copy the entire message instead of the link)
+		if obj and obj.role == Role.LINK:
+			try:
+				link_text = (getattr(obj, "name", "") or getattr(obj, "value", "") or "").strip()
+			except Exception:
+				link_text = ""
+			if link_text:
+				api.copyToClip(link_text)
+				message(_("Link copied"))
 			return
-		if textMessage:
-			api.copyToClip(textMessage.strip())
-			message(mes)
-		else:
-			message(_("This message does not contain text"))
+
+		# In all other cases (messages, edit fields, media, etc.), let Telegram handle it natively.
+		# Crucial: No COM calls after gesture.send() to prevent UI freezes.
+		gesture.send()
 
 	def script_moveFocusToTextMessage(self, gesture):
 		"""Toggle focus between the message input field and previous focus object."""
