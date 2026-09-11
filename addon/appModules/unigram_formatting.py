@@ -196,6 +196,7 @@ def formatPollMessage(obj) -> str:
 
 		# If there are 2 or more TextBlocks before Type, the preceding ones are
 		# the Explanation (توضیحات) and the last one is the Question.
+		question = ""
 		if len(text_blocks_before_type) >= 2:
 			explanation = "\n".join(text_blocks_before_type[:-1])
 			question = text_blocks_before_type[-1]
@@ -208,6 +209,19 @@ def formatPollMessage(obj) -> str:
 				obj.name = obj.name.replace(type_name, f"{type_name}. {explanation_text}")
 			else:
 				obj.name = f"{explanation_text}. {obj.name}"
+		elif text_blocks_before_type:
+			question = text_blocks_before_type[-1]
+
+		# Add total votes count if present
+		votes_elem = next((c for c in children if getattr(c, "UIAAutomationId", "") == "Votes"), None)
+		if votes_elem and votes_elem.name:
+			votes_text = votes_elem.name.strip()
+			if question and question in obj.name:
+				obj.name = obj.name.replace(question, f"{question}, {votes_text}")
+			elif type_name and type_name in obj.name:
+				obj.name = obj.name.replace(type_name, f"{type_name}, {votes_text}")
+			else:
+				obj.name = f"{obj.name}, {votes_text}"
 	except Exception as e:
 		log.error(f"Error formatting poll message: {e}")
 	return obj.name
