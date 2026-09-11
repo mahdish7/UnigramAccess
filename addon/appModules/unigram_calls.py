@@ -11,7 +11,7 @@ import addonHandler
 
 addonHandler.initTranslation()
 
-from .unigram_utils import fixedDoAction
+from .unigram_utils import clickElementWithMouse
 
 
 class UnigramCalls:
@@ -75,7 +75,7 @@ class UnigramCalls:
 		if targetButton:
 			lastFocus = api.getFocusObject()
 			message(targetButton.name)
-			fixedDoAction(targetButton)
+			clickElementWithMouse(targetButton)
 			lastFocus.setFocus()
 
 	def script_microphone(self, gesture):
@@ -107,7 +107,7 @@ class UnigramCalls:
 
 				Timer(0.1, speakState).start()
 				return True
-			fixedDoAction(targetButton)
+			clickElementWithMouse(targetButton)
 			obj.setFocus()
 
 			def speakState():
@@ -145,7 +145,7 @@ class UnigramCalls:
 
 				Timer(0.1, speakState).start()
 				return
-			fixedDoAction(targetButton)
+			clickElementWithMouse(targetButton)
 			obj.setFocus()
 
 			def speakState():
