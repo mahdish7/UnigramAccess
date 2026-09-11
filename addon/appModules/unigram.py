@@ -509,16 +509,16 @@ class AppModule(appModuleHandler.AppModule):
 		description=_("Go to the next search result"),
 		gesture="kb:F3",
 	)
-	def script_go_to_previous_search_result(self, gesture):
-		return self.nav_helper.script_go_to_previous_search_result(gesture)
+	def script_go_to_next_search_result(self, gesture):
+		return self.nav_helper.script_go_to_next_search_result(gesture)
 
 	@script(
 		# Translators: Description for the script that goes to the previous search result.
 		description=_("Go to the previous search result"),
 		gesture="kb:shift+F3",
 	)
-	def script_go_to_next_search_result(self, gesture):
-		return self.nav_helper.script_go_to_next_search_result(gesture)
+	def script_go_to_previous_search_result(self, gesture):
+		return self.nav_helper.script_go_to_previous_search_result(gesture)
 
 	# ── Chat Scripts ────────────────────────────────────────────────────
 

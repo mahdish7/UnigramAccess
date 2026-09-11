@@ -178,18 +178,26 @@ class UnigramNavigation:
 			btn.doAction()
 		else: message(_("Button not found"))
 	
-	def script_go_to_previous_search_result(self, gesture):
-		obj = api.getFocusObject()
-		btn = next((element for element in self.appModule.ui_helper.getElements()
-			if element.UIAAutomationId == "SearchPrevious"and element.role == Role.BUTTON), None)
-		if btn and State.FOCUSABLE in btn.states: btn.doAction()
-		elif btn: message(_("No next search result"))
-		else: message(_("Button not found"))
-	
 	def script_go_to_next_search_result(self, gesture):
+		"""Navigate to the next search result (upwards in chat history, clicking SearchPrevious)."""
 		obj = api.getFocusObject()
 		btn = next((element for element in self.appModule.ui_helper.getElements()
-			if element.UIAAutomationId == "SearchNext"and element.role == Role.BUTTON), None)
-		if btn and State.FOCUSABLE in btn.states: btn.doAction()
-		elif btn: message(_("No previous search result"))
-		else: message(_("Button not found"))
+			if element.UIAAutomationId == "SearchPrevious" and element.role == Role.BUTTON), None)
+		if btn and State.FOCUSABLE in btn.states:
+			btn.doAction()
+		elif btn:
+			message(_("No next search result"))
+		else:
+			message(_("Button not found"))
+
+	def script_go_to_previous_search_result(self, gesture):
+		"""Navigate to the previous search result (downwards towards newer messages, clicking SearchNext)."""
+		obj = api.getFocusObject()
+		btn = next((element for element in self.appModule.ui_helper.getElements()
+			if element.UIAAutomationId == "SearchNext" and element.role == Role.BUTTON), None)
+		if btn and State.FOCUSABLE in btn.states:
+			btn.doAction()
+		elif btn:
+			message(_("No previous search result"))
+		else:
+			message(_("Button not found"))
