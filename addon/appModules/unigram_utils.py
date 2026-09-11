@@ -8,6 +8,8 @@ from keyboardHandler import KeyboardInputGesture
 import mouseHandler
 from winBindings import user32 as winUser
 
+import time
+
 from .data import active_download_keywords
 
 
@@ -25,19 +27,31 @@ CACHED_KEYS = {
 }
 
 
-def fixedDoAction(obj):
-	"""Perform a physical left-click on the center of an element.
+def clickElementWithMouse(obj):
+	"""Perform a physical mouse click on an element using standard UIA clickable coordinates.
 
-	Some UWP buttons do not respond to UIA invoke/doAction.
-	This workaround moves the cursor, clicks, then restores the cursor position.
+	Moves the cursor to the element's clickable point, executes the primary click,
+	and restores the cursor to its original position.
 	"""
-	p = obj.location.center
-	point = ctypes.wintypes.POINT()
-	winUser.dll.GetCursorPos(ctypes.byref(point))
-	winUser.dll.SetCursorPos(p.x, p.y)
-	mouseHandler.executeMouseEvent(winUser.MOUSEEVENTF.LEFTDOWN, 0, 0)
-	mouseHandler.executeMouseEvent(winUser.MOUSEEVENTF.LEFTUP, 0, 0)
-	winUser.dll.SetCursorPos(point.x, point.y)
+	res = obj.UIAElement.GetClickablePoint()
+	if isinstance(res, tuple):
+		pt, got_clickable = res
+		if not got_clickable:
+			return False
+	else:
+		pt = res
+
+	orig_pos = ctypes.wintypes.POINT()
+	winUser.dll.GetCursorPos(ctypes.byref(orig_pos))
+
+	try:
+		winUser.dll.SetCursorPos(pt.x, pt.y)
+		time.sleep(0.015)
+		mouseHandler.doPrimaryClick()
+		time.sleep(0.015)
+		return True
+	finally:
+		winUser.dll.SetCursorPos(orig_pos.x, orig_pos.y)
 
 
 def isActivelyDownloading(name):
