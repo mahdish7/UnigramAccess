@@ -384,14 +384,16 @@ class AppModule(appModuleHandler.AppModule):
 					formatMediaButtonOnFocus(obj)
 				elif obj.role == Role.LINK and getattr(getattr(obj, "parent", None), "UIAAutomationId", "") in ("TextBlock", "Message"):
 					speech.cancelSpeech()
-				elif obj.role == Role.BUTTON:
+				elif obj.role in (Role.BUTTON, Role.TOGGLEBUTTON):
 					# Add labels for call buttons
 					if obj.UIAAutomationId == "Audio" and getattr(obj.firstChild, "name", "") == "\ue720" and getattr(obj.next, "UIAAutomationId", "") == "AudioInfo":
 						obj.name = obj.next.name
-					elif obj.UIAAutomationId == "Video" and getattr(obj.firstChild, "name", "") == "\ue963":
-						obj.name = _("Enable video")
-					elif obj.UIAAutomationId == "Video" and getattr(obj.firstChild, "name", "") == "\ue964":
-						obj.name = _("Disable video")
+					elif obj.UIAAutomationId == "Video":
+						first_child_name = getattr(getattr(obj, "firstChild", None), "name", "")
+						if first_child_name == "\ue963" or obj.name == "Enable video":
+							obj.name = _("Enable video")
+						elif first_child_name == "\ue964" or obj.name == "Disable video":
+							obj.name = _("Disable video")
 			except Exception:
 				pass
 
