@@ -17,9 +17,9 @@ import addonHandler
 addonHandler.initTranslation()
 
 from .cnf import conf
-from .data import composer_header_cancel_types, icons_from_context_menu, keywordsInMessages
+from .data import composer_header_cancel_types, keywordsInMessages
 from .unigram_logger import ulog as log
-from .unigram_utils import BASE_DIR, CACHED_KEYS
+from .unigram_utils import BASE_DIR, CACHED_KEYS, find_and_activate_context_menu_item
 
 
 class Chat_update:
@@ -310,32 +310,27 @@ class UnigramMessages:
 			return
 		self.appModule.isSetReaction = index
 
-	def script_selectMessage(self, gesture):
+	def script_selectMessage(self, gesture, obj=None):
 		"""Switch message to selection mode via context menu."""
-		self.activate_option_for_menu((icons_from_context_menu["select"]), "Messages")
+		return self.activate_option_for_menu("select", "Messages", obj=obj)
 
 	def script_forwardMessage(self, gesture):
 		"""Forward message via context menu."""
-		self.activate_option_for_menu((icons_from_context_menu["forward"]), "Messages")
+		self.activate_option_for_menu("forward", "Messages")
 
 	def script_readMessage(self, gesture):
 		"""Mark chat as read/unread via context menu."""
-		self.activate_option_for_menu(
-			(icons_from_context_menu["read"], icons_from_context_menu["unread"]),
-			"ChatsList",
-		)
+		self.activate_option_for_menu("read", "ChatsList")
 
 	def script_save_file(self, gesture):
 		"""Save attached file via context menu."""
-		self.activate_option_for_menu((icons_from_context_menu["save_as"]), "Messages")
+		self.activate_option_for_menu("save_as", "Messages")
 
 	def script_attach(self, gesture):
 		"""Pin/unpin message or chat via context menu."""
-		self.activate_option_for_menu(
-			(icons_from_context_menu["attach"], icons_from_context_menu["unpin"]),
-		)
+		self.activate_option_for_menu("pin")
 
-	def activate_option_for_menu(self, option, listName=False):
+	def activate_option_for_menu(self, option, listName=False, obj=None):
 		"""Open context menu and automatically select a specific option.
 
 		Sets the execute_context_menu_option flag which event_gainFocus
@@ -343,7 +338,8 @@ class UnigramMessages:
 		"""
 		if self.appModule.executeContextMenuOption:
 			return False
-		obj = api.getFocusObject()
+		if obj is None:
+			obj = api.getFocusObject()
 		if listName == "Messages" and not self.appModule.ui_helper.is_message_object(obj):
 			return False
 		elif listName == "ChatsList" and obj.parent.UIAAutomationId and obj.parent.UIAAutomationId != listName:
@@ -353,9 +349,10 @@ class UnigramMessages:
 			and obj.parent.UIAAutomationId
 			and obj.parent.UIAAutomationId != "ChatsList"
 		):
-			return
+			return False
 		self.appModule.executeContextMenuOption = option
 		CACHED_KEYS["Applications"].send()
+		return True
 
 	def _is_message_item(self, item):
 		"""Determine if item is an actual message (and not a date header, separator, or container)."""
@@ -570,20 +567,14 @@ class UnigramMessages:
 		log.debug(f"Message deletion step: state={state}, role={getattr(obj, 'role', None)}, auto_id={auto_id}")
 
 		if state == 0:
-			if obj.role == Role.MENUITEM:
-				for item in obj.parent.children:
-					if item.firstChild and item.firstChild.name == icons_from_context_menu["delete"]:
-						self.appModule.isDelete["state"] = 1
-						log.debug("Message deletion: Clicked delete in context menu")
-						item.doAction()
-						return True
-				log.warning("Message deletion: Delete option not found in context menu")
-				self.appModule.isDelete = False
-				CACHED_KEYS["escape"].send()
+			if find_and_activate_context_menu_item(obj, "delete", close_on_failure=True):
+				self.appModule.isDelete["state"] = 1
+				log.debug("Message deletion: Clicked delete in context menu")
 				return True
 			else:
+				log.warning("Message deletion: Delete option not found in context menu")
 				self.appModule.isDelete = False
-				return False
+				return True
 
 		elif state == 1 and (obj.role in (Role.CHECKBOX, Role.BUTTON, Role.DIALOG, Role.PANE) or auto_id in ("PrimaryButton", "SecondaryButton", "RevokeCheck", "CheckBox")):
 			checkbox, primary_button, secondary_button = self._resolve_dialog_elements(obj)

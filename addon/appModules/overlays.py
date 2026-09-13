@@ -17,7 +17,7 @@ import addonHandler
 addonHandler.initTranslation()
 
 from .cnf import conf
-from .data import icons_from_context_menu, keywordsInMessages
+from .data import keywordsInMessages
 from .text_window import TextWindow
 from .unigram_utils import isActivelyDownloading
 
@@ -144,10 +144,7 @@ class Message_list_item(ListItem):
 		gesture="kb:backspace",
 	)
 	def script_edit_message(self, gesture):
-		self.appModule.msg_helper.activate_option_for_menu(
-			(icons_from_context_menu["edit"]),
-			"Messages",
-		)
+		self.appModule.msg_helper.activate_option_for_menu("edit", "Messages")
 
 	@script(
 		# Translators: Description for the script that replies to the focused message.
@@ -155,10 +152,7 @@ class Message_list_item(ListItem):
 		gesture="kb:enter",
 	)
 	def script_reply_to_message(self, gesture):
-		self.appModule.msg_helper.activate_option_for_menu(
-			(icons_from_context_menu["reply"]),
-			"Messages",
-		)
+		self.appModule.msg_helper.activate_option_for_menu("reply", "Messages")
 
 	def script_next_media(self, gesture, revers=False):
 		self.list_media = self.list_media or [item for item in self.children if item.role == Role.LISTITEM]

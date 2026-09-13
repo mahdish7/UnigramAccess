@@ -17,13 +17,10 @@ import addonHandler
 addonHandler.initTranslation()
 
 from .cnf import conf
-from .data import (
-	chat_deletion_keywords,
-	icons_from_context_menu,
-)
+from .data import chat_deletion_keywords
 from .unigram_formatting import formatChatElementOnFocus
 from .unigram_logger import ulog as log
-from .unigram_utils import BASE_DIR, CACHED_KEYS
+from .unigram_utils import BASE_DIR, CACHED_KEYS, find_and_activate_context_menu_item
 
 
 class Title_change_tracking:
@@ -85,6 +82,14 @@ class UnigramChats:
 
 	def __init__(self, appModule):
 		self.appModule = appModule
+
+	def select_chat(self):
+		"""Switch focused chat to selection mode via context menu."""
+		if self.appModule.executeContextMenuOption:
+			return False
+		self.appModule.executeContextMenuOption = "select"
+		CACHED_KEYS["Applications"].send()
+		return True
 
 	def to_contacts_list(self):
 		"""Focus the contacts list if the Contacts dialog is currently open.
@@ -383,20 +388,14 @@ class UnigramChats:
 		log.debug(f"Chat deletion step: state={state}, role={getattr(obj, 'role', None)}, auto_id={auto_id}")
 
 		if state == 0:
-			if obj.role == Role.MENUITEM:
-				for item in obj.parent.children:
-					if item.firstChild and item.firstChild.name == icons_from_context_menu["delete"]:
-						self.appModule.isDelete["state"] = 1
-						log.debug("Chat deletion: Clicked delete in context menu")
-						item.doAction()
-						return True
-				log.warning("Chat deletion: Delete option not found in context menu")
-				self.appModule.isDelete = False
-				CACHED_KEYS["escape"].send()
+			if find_and_activate_context_menu_item(obj, "delete", close_on_failure=True):
+				self.appModule.isDelete["state"] = 1
+				log.debug("Chat deletion: Clicked delete in context menu")
 				return True
 			else:
+				log.warning("Chat deletion: Delete option not found in context menu")
 				self.appModule.isDelete = False
-				return False
+				return True
 
 		elif state == 1 and (obj.role in (Role.CHECKBOX, Role.BUTTON, Role.DIALOG, Role.PANE) or auto_id in ("PrimaryButton", "SecondaryButton", "RevokeCheck", "CheckBox")):
 			checkbox, primary_button, secondary_button = self._resolve_dialog_elements(obj)
