@@ -247,6 +247,45 @@ class SettingsPanelListItem:
 	}
 
 
+class SettingsRadioListItem:
+	"""Overlay for settings list items wrapping an inner RadioButton (e.g. Proxy, Language, etc.).
+
+	Reports radio button role and checked state, and activates the inner radio on Space.
+	"""
+
+	def _get_role(self):
+		return Role.RADIOBUTTON
+
+	role = property(_get_role)
+
+	def _get_states(self):
+		states = super()._get_states()
+		states.add(State.CHECKABLE)
+		child = getattr(self, "firstChild", None)
+		if child and getattr(child, "role", None) == Role.RADIOBUTTON:
+			if State.CHECKED in getattr(child, "states", set()):
+				states.add(State.CHECKED)
+			else:
+				states.discard(State.CHECKED)
+		return states
+
+	states = property(_get_states)
+
+	def script_activate_radio(self, gesture):
+		child = getattr(self, "firstChild", None)
+		if child and getattr(child, "role", None) == Role.RADIOBUTTON:
+			child.doAction()
+			self.setFocus()
+		else:
+			self.doAction()
+
+	__gestures = {
+		"kb:space": "activate_radio",
+	}
+
+
+
+
 # TODO: Inactive overlay class.
 # Currently not added to clsList in chooseNVDAObjectOverlayClasses.
 # Needs matching conditions in AppModule to inject on quiz explanation controls.
