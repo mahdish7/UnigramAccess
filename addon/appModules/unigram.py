@@ -55,7 +55,7 @@ from .unigram_messages import Chat_update, UnigramMessages
 from .unigram_navigation import UnigramNavigation
 from .unigram_settings import UnigramSettings
 from .unigram_ui import Saved_items, UnigramUIHelper
-from .unigram_utils import CACHED_KEYS
+from .unigram_utils import CACHED_KEYS, find_and_activate_context_menu_item
 
 
 class AppModule(appModuleHandler.AppModule):
@@ -306,18 +306,9 @@ class AppModule(appModuleHandler.AppModule):
 			return True
 
 		elif self.executeContextMenuOption:
-			try:
-				targetButton = next(
-					(item for item in obj.parent.children if item.firstChild.name in self.executeContextMenuOption),
-					False,
-				)
-			except Exception:
-				targetButton = False
+			target = self.executeContextMenuOption
 			self.executeContextMenuOption = False
-			if targetButton:
-				targetButton.doAction()
-			else:
-				CACHED_KEYS["escape"].send()
+			find_and_activate_context_menu_item(obj, target, close_on_failure=True)
 			return True
 
 		elif self.isDelete:
@@ -591,12 +582,20 @@ class AppModule(appModuleHandler.AppModule):
 			gesture.send()
 
 	@script(
-		# Translators: Description for the script that switches the message to selection mode.
+		# Translators: Description for the script that switches the message or chat to selection mode.
 		description=_("Switch to selection mode"),
 		gesture="kb:control+space",
 	)
 	def script_selectMessage(self, gesture):
-		return self.msg_helper.script_selectMessage(gesture)
+		obj = api.getFocusObject()
+		if self.chats_helper.is_chat_item(obj):
+			if not self.chats_helper.select_chat():
+				gesture.send()
+		elif self.ui_helper.is_message_object(obj):
+			if not self.msg_helper.script_selectMessage(gesture, obj=obj):
+				gesture.send()
+		else:
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that forwards the focused message.

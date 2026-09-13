@@ -81,20 +81,19 @@ class UnigramMedia:
 		return None
 
 	def script_closingVoiceMessage(self, gesture):
-		targetButton = False
-		for item in self.appModule.ui_helper.getElements()[1:]:
-			try:
-				if item.previous and item.previous.role == Role.TOGGLEBUTTON and item.previous.UIAAutomationId == "ShuffleButton":
-					targetButton = item
-					break
-			except Exception:
-				continue
+		slider = self._find_voice_slider()
+		targetButton = slider.previous if (slider and slider.previous and slider.previous.role == Role.BUTTON) else None
 		if targetButton:
 			lastFocus = api.getFocusObject()
 			targetButton.doAction()
-			lastFocus.setFocus()
+			if lastFocus:
+				try:
+					lastFocus.setFocus()
+				except Exception:
+					pass
 			message(_("The audio player has been closed"))
-		else: message(_("Nothing is playing right now"))
+		else:
+			message(_("Nothing is playing right now"))
 
 	def script_pauseVoiceMessage(self, gesture):
 		targetButton = next((item for item in self.appModule.ui_helper.getElements() if item.role == Role.BUTTON and item.UIAAutomationId == "PlaybackButton"), False)

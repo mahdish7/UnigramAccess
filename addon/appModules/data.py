@@ -39,7 +39,7 @@ icons_from_context_menu = {
 	"save_as": "\ue792",
 	"select": "\ue97e",
 	"read": "\ue91d",
-	"unread": "\ue91c"
+	"unread": "\ue91c",
 }
 
 labels_for_buttons = {
@@ -121,5 +121,33 @@ contacts_dialog_titles = {
 # Keywords for identifying active download state in media buttons across interface languages
 active_download_keywords = {
 	"en": ("cancel",),
+}
+
+# Verified keywords for identifying context menu options across interface languages
+context_menu_items = {
+	"select": {
+		"en": ("select",),
+	},
+	"delete": {
+		"en": ("delete",),
+	},
+	"forward": {
+		"en": ("forward",),
+	},
+	"reply": {
+		"en": ("reply",),
+	},
+	"edit": {
+		"en": ("edit",),
+	},
+	"save_as": {
+		"en": ("save as",),
+	},
+	"pin": {
+		"en": ("pin", "unpin"),
+	},
+	"read": {
+		"en": ("mark as read", "mark as unread"),
+	},
 }
 

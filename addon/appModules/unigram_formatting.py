@@ -144,23 +144,20 @@ def formatChatElementOnFocus(obj):
 
 	Handles 'beforeName', 'afterName', and "don'tVoice" modes.
 	"""
-	# If the user does not want to change the order, return immediately for speed
-	if conf.get("voiceTypeAfterChatName") == "beforeName":
-		return obj.name
-
-	item = obj.firstChild
-	while item:
-		if item.UIAAutomationId == "TitleLabel":
-			title = item.name
-			chatType = obj.name.split(", ")[0] if not obj.name.startswith(title) else ""
-			if not chatType:
+	if conf.get("voiceTypeAfterChatName") != "beforeName":
+		item = obj.firstChild
+		while item:
+			if item.UIAAutomationId == "TitleLabel":
+				title = item.name
+				chatType = obj.name.split(", ")[0] if not obj.name.startswith(title) else ""
+				if not chatType:
+					break
+				elif conf.get("voiceTypeAfterChatName") == "afterName":
+					obj.name = obj.name.replace(chatType + ", " + title, title + ", " + chatType, 1)
+				elif conf.get("voiceTypeAfterChatName") == "don'tVoice":
+					obj.name = obj.name.replace(chatType + ", ", "", 1)
 				break
-			elif conf.get("voiceTypeAfterChatName") == "afterName":
-				obj.name = obj.name.replace(chatType + ", " + title, title + ", " + chatType, 1)
-			elif conf.get("voiceTypeAfterChatName") == "don'tVoice":
-				obj.name = obj.name.replace(chatType + ", ", "", 1)
-			break
-		item = item.next
+			item = item.next
 
 	return obj.name
 
