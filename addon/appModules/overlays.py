@@ -62,8 +62,9 @@ class Audio_and_video_button:
 
 		Timer(0.1, speakState).start()
 
-	def initOverlayClass(self):
-		self.bindGesture("kb:Enter", "enter")
+	__gestures = {
+		"kb:enter": "enter",
+	}
 
 
 class Message_list_item(ListItem):
