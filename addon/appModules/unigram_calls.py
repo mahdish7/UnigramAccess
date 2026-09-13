@@ -62,93 +62,151 @@ class UnigramCalls:
 
 	def script_callCancellation(self, gesture):
 		"""Hang up, decline an incoming call, or leave a voice chat."""
+		elements = self.appModule.ui_helper.getElements()
 		targetButton = next(
 			(
 				item
-				for item in self.appModule.ui_helper.getElements()[1:]
-				if (item.UIAAutomationId == "Accept" and item.previous and item.previous.UIAAutomationId == "Audio")
-				or (item.UIAAutomationId == "Leave" and item.firstChild and item.firstChild.name == "\ue711")
-				or (item.previous and item.previous.UIAAutomationId == "Audio" and item.firstChild and item.firstChild.name == "\ue711")
+				for item in elements
+				if getattr(item, "role", None) in (Role.BUTTON, Role.LINK)
+				and (
+					getattr(item, "UIAAutomationId", "") in ("Leave", "Dismiss")
+					or (getattr(item, "UIAAutomationId", "") == "Accept" and item.previous and getattr(item.previous, "UIAAutomationId", "") == "Audio")
+				)
 			),
 			False,
 		)
 		if targetButton:
 			lastFocus = api.getFocusObject()
-			message(targetButton.name)
+			btn_name = getattr(targetButton, "name", "") or _("Leave")
+			message(btn_name)
 			clickElementWithMouse(targetButton)
-			lastFocus.setFocus()
+			if lastFocus:
+				try:
+					lastFocus.setFocus()
+				except Exception:
+					pass
+			return True
+		return False
+
+	@staticmethod
+	def _getMicrophoneState(button):
+		"""Determine whether microphone is on or off based strictly on button name."""
+		try:
+			name = button.UIAElement.CurrentName or ""
+		except Exception:
+			name = getattr(button, "name", "") or ""
+
+		name_lower = name.strip().lower()
+		if "unmute" in name_lower:
+			return _("Microphone off")
+		elif "mute" in name_lower or "live" in name_lower:
+			return _("Microphone on")
+		return None
+
+	@staticmethod
+	def _getVideoState(button):
+		"""Determine whether camera is on or off based strictly on button name."""
+		try:
+			name = button.UIAElement.CurrentName or ""
+		except Exception:
+			name = getattr(button, "name", "") or ""
+
+		name_lower = name.strip().lower()
+		if "disable video" in name_lower:
+			return _("Camera on")
+		elif "enable video" in name_lower:
+			return _("Camera off")
+		return None
 
 	def script_microphone(self, gesture):
 		"""Toggle microphone mute/unmute state."""
 		obj = api.getFocusObject()
-		targetButton = False
-		isVoiceChat = False
-		for item in self.appModule.ui_helper.getElements():
-			if (
-				item.UIAAutomationId == "Audio"
-				and item.previous
-				and item.previous.UIAAutomationId == "Video"
-				and item.next
-				and item.next.UIAAutomationId == "Accept"
-			):
-				targetButton = item
-				break
-			elif item.UIAAutomationId == "Audio" and item.next.UIAAutomationId == "AudioInfo":
-				targetButton = item
-				isVoiceChat = True
-				break
+		targetButton = next(
+			(
+				item
+				for item in self.appModule.ui_helper.getElements()
+				if getattr(item, "UIAAutomationId", "") == "Audio"
+				and getattr(item, "role", None) in (Role.BUTTON, Role.TOGGLEBUTTON)
+			),
+			None,
+		)
+
 		if targetButton:
-			if isVoiceChat:
-				targetButton.doAction()
-				obj.setFocus()
+			try:
+				clickElementWithMouse(targetButton)
+			except Exception:
+				try:
+					targetButton.doAction()
+				except Exception:
+					pass
 
-				def speakState():
-					queueHandler.queueFunction(queueHandler.eventQueue, message, targetButton.next.name)
+			if obj:
+				try:
+					obj.setFocus()
+				except Exception:
+					pass
 
-				Timer(0.1, speakState).start()
-				return True
-			clickElementWithMouse(targetButton)
-			obj.setFocus()
+			def speakAudioState():
+				btn = next(
+					(
+						item
+						for item in self.appModule.ui_helper.getElements()
+						if getattr(item, "UIAAutomationId", "") == "Audio"
+						and getattr(item, "role", None) in (Role.BUTTON, Role.TOGGLEBUTTON)
+					),
+					targetButton,
+				)
+				state_text = self._getMicrophoneState(btn)
+				if state_text:
+					queueHandler.queueFunction(queueHandler.eventQueue, message, state_text)
 
-			def speakState():
-				queueHandler.queueFunction(queueHandler.eventQueue, message, targetButton.name)
-
-			Timer(0.1, speakState).start()
+			Timer(0.2, speakAudioState).start()
+			return True
+		return False
 
 	def script_video(self, gesture):
 		"""Toggle camera on/off."""
 		obj = api.getFocusObject()
-		targetButton = False
-		isVoiceChat = False
-		for item in self.appModule.ui_helper.getElements():
-			if (
-				item.UIAAutomationId == "Video"
-				and item.next.UIAAutomationId == "Audio"
-				and item.next.next.UIAAutomationId == "Accept"
-			):
-				targetButton = item
-				break
-			elif item.UIAAutomationId == "Video" and item.next.UIAAutomationId == "VideoInfo":
-				targetButton = item
-				isVoiceChat = True
-				break
+		targetButton = next(
+			(
+				item
+				for item in self.appModule.ui_helper.getElements()
+				if getattr(item, "UIAAutomationId", "") == "Video"
+				and getattr(item, "role", None) in (Role.BUTTON, Role.TOGGLEBUTTON)
+			),
+			None,
+		)
+
 		if targetButton:
-			if isVoiceChat:
-				targetButton.doAction()
-				obj.setFocus()
+			try:
+				clickElementWithMouse(targetButton)
+			except Exception:
+				try:
+					targetButton.doAction()
+				except Exception:
+					pass
 
-				def speakState():
-					if targetButton.firstChild.name == "\ue964":
-						queueHandler.queueFunction(queueHandler.eventQueue, message, _("Camera on"))
-					elif targetButton.firstChild.name == "\ue963":
-						queueHandler.queueFunction(queueHandler.eventQueue, message, _("Camera off"))
+			if obj:
+				try:
+					obj.setFocus()
+				except Exception:
+					pass
 
-				Timer(0.1, speakState).start()
-				return
-			clickElementWithMouse(targetButton)
-			obj.setFocus()
+			def speakVideoState():
+				btn = next(
+					(
+						item
+						for item in self.appModule.ui_helper.getElements()
+						if getattr(item, "UIAAutomationId", "") == "Video"
+						and getattr(item, "role", None) in (Role.BUTTON, Role.TOGGLEBUTTON)
+					),
+					targetButton,
+				)
+				state_text = self._getVideoState(btn)
+				if state_text:
+					queueHandler.queueFunction(queueHandler.eventQueue, message, state_text)
 
-			def speakState():
-				queueHandler.queueFunction(queueHandler.eventQueue, message, targetButton.name)
+			Timer(0.2, speakVideoState).start()
+			return True
+		return False
 
-			Timer(0.1, speakState).start()

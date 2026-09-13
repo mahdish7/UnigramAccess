@@ -169,6 +169,15 @@ msgstr "دوربین روشن"
 msgid "Camera off"
 msgstr "دوربین خاموش"
 
+#: addon\appModules\unigram_calls.py
+msgid "Microphone on"
+msgstr "میکروفون روشن"
+
+#: addon\appModules\unigram_calls.py
+msgid "Microphone off"
+msgstr "میکروفون خاموش"
+
+
 #: addon\appModules\unigram.py:55
 msgid "Edit message"
 msgstr "پیام را ویرایش کن."

@@ -68,21 +68,6 @@ def formatMessageOnFocus(obj, savedItems):
 
 		item = item.next
 
-	# Checking if a message is a call
-	try:
-		if (
-			obj.firstChild.role == Role.LINK
-			and not obj.firstChild.name
-			and obj.childCount == 7
-			and obj.children[1].UIAAutomationId == "TitleLabel"
-			and obj.children[3].role == Role.STATICTEXT
-		):
-			a = obj.children[1].name
-			b = ",".join(obj.children[3].name.split(",")[1:])
-			obj.name = obj.name.replace(a, a + b)
-			obj.index_last_part_in_message += len(b)
-	except Exception:
-		pass
 
 	# Checking whether to add a message sender name
 	profileName = savedItems.get("profile name")

@@ -45,22 +45,31 @@ class Audio_and_video_button:
 
 	def script_enter(self, gesture):
 		gesture.send()
-		if self.UIAAutomationId == "Audio":
-			newName = self.next.name if self.next else self.name
-		elif self.UIAAutomationId == "Video":
-			if self.firstChild.name == "\ue964":
-				newName = _("Camera on")
-			elif self.firstChild.name == "\ue963":
-				newName = _("Camera off")
-			else:
-				newName = self.name
-		else:
-			newName = self.name
 
 		def speakState():
-			queueHandler.queueFunction(queueHandler.eventQueue, message, newName)
+			try:
+				cur_name = self.UIAElement.CurrentName or ""
+			except Exception:
+				cur_name = getattr(self, "name", "") or ""
 
-		Timer(0.1, speakState).start()
+			newName = None
+			if self.UIAAutomationId == "Audio":
+				name_lower = cur_name.strip().lower()
+				if "unmute" in name_lower:
+					newName = _("Microphone off")
+				elif "mute" in name_lower or "live" in name_lower:
+					newName = _("Microphone on")
+			elif self.UIAAutomationId == "Video":
+				name_lower = cur_name.strip().lower()
+				if "disable video" in name_lower:
+					newName = _("Camera on")
+				elif "enable video" in name_lower:
+					newName = _("Camera off")
+
+			if newName:
+				queueHandler.queueFunction(queueHandler.eventQueue, message, newName)
+
+		Timer(0.2, speakState).start()
 
 	__gestures = {
 		"kb:enter": "enter",
