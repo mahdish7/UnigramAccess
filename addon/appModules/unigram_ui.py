@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 from controlTypes import Role, State
 import api
+from .cnf import conf
 from .data import contacts_dialog_titles
 from .unigram_logger import ulog as log
 
@@ -121,7 +122,8 @@ class UnigramUIHelper:
 			while curr:
 				role = getattr(curr, "role", None)
 				name = getattr(curr, "name", "") or ""
-				if role == Role.DIALOG and name in contacts_dialog_titles.values():
+				expected_title = contacts_dialog_titles.get(conf.get("lang"))
+				if role == Role.DIALOG and expected_title and name == expected_title:
 					dialog = curr
 					break
 				curr = getattr(curr, "parent", None)

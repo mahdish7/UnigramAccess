@@ -788,6 +788,318 @@ msgstr ""
 "تعامل آسان با پیام‌های چت اضافه می‌کند و همچنین بسیاری از پیشرفت‌های جزئی را "
 "اضافه می‌کند که کار در Unigram را بسیار آسان‌تر می‌کند."
 
+msgid "Conversion started"
+msgstr "تبدیل آغاز شد"
+
+msgid "This voice message is already converted to text"
+msgstr "این پیام صوتی قبلاً به متن تبدیل شده است"
+
+msgid "Converting this voice message is already in process"
+msgstr "تبدیل این پیام صوتی در حال انجام است"
+
+msgid "Recording a voice message will not be available until the edit field is empty"
+msgstr "برای ضبط پیام صوتی، کادر نوشتن پیام باید کاملاً خالی باشد"
+
+msgid "Chat activity tracking is enabled"
+msgstr "ردگیری فعالیتهای این گفتگو فعال شد"
+
+msgid "Chat activity tracking is disabled"
+msgstr "ردگیری فعالیتهای این گفتگو غیرفعال شد"
+
+msgid "Failed to read chat title"
+msgstr "عنوان گفتگو پیدا نشد"
+
+msgid "Automatic reading of messages is enabled"
+msgstr "خواندن خودکار پیامها فعال شد"
+
+msgid "Automatic reading of new messages is disabled"
+msgstr "خواندن خودکار پیامهای جدید غیرفعال شد"
+
+msgid "No list with threads was found"
+msgstr "فهرست تاپیکهای گروه پیدا نشد"
+
+msgid "No next search result"
+msgstr "نتیجهای برای جستجوی بعدی وجود ندارد"
+
+msgid "No previous search result"
+msgstr "نتیجهای برای جستجوی قبلی وجود ندارد"
+
+msgid "Data not found"
+msgstr "دادهای یافت نشد"
+
+msgid "Slider not found"
+msgstr "نوار پخش صوتی یافت نشد"
+
+msgid "The display of message sending or receiving time and the list of installed emojis is enabled."
+msgstr "اعلام زمان پیام و واکنشها فعال شد."
+
+msgid "The display of message sending or receiving time and the list of installed emojis is  disabled."
+msgstr "اعلام زمان پیام و واکنشها غیرفعال شد."
+
+msgid "Log file has been cleared successfully."
+msgstr "فایل لاگ با موفقیت حذف شد."
+
+msgid "Success"
+msgstr "عملیات موفق"
+
+msgid "Action when pressing the up arrow in the message edit field"
+msgstr "عملکرد کلید جهتنمای بالا در کادر نوشتن پیام:"
+
+msgid "Do nothing"
+msgstr "کاری انجام نده"
+
+msgid "Activate editing of last sent message"
+msgstr "ویرایش آخرین پیام ارسالشده"
+
+msgid "Move focus to the last message in a chat"
+msgstr "رفتن به آخرین پیام گفتگو"
+
+msgid "Announce the phrases \"Administrator\" and \"Owner\" on messages in communities"
+msgstr "اعلام عنوانهای «مدیر» و «مالک» در پیامهای گروهها و کانالها"
+
+msgid "Announce file details (name, size, duration) on media buttons"
+msgstr "اعلام جزئیات فایل (نام، اندازه و مدتزمان) روی دکمههای رسانه"
+
+msgid "Add-on log level:"
+msgstr "سطح ثبت وقایع (لاگ) افزونه:"
+
+msgid "Disabled"
+msgstr "غیرفعال"
+
+msgid "Error"
+msgstr "خطاها"
+
+msgid "Warning"
+msgstr "هشدارها"
+
+msgid "Info"
+msgstr "اطلاعات"
+
+msgid "Debug"
+msgstr "اشکالزدایی (دیباگ)"
+
+msgid "Open Log File"
+msgstr "باز کردن فایل لاگ"
+
+msgid "Clear Log File"
+msgstr "حذف فایل لاگ"
+
+msgid "Explanation"
+msgstr "توضیحات"
+
+msgid "Media"
+msgstr "رسانه"
+
+msgid "List of shortcuts"
+msgstr "فهرست کلیدهای میانبر"
+
+msgid "Belarus"
+msgstr "بلاروسی"
+
+msgid "Romanian"
+msgstr "رومانیایی"
+
+msgid "Show a list of all UnigramAccess shortcuts"
+msgstr "نمایش فهرست کلیدهای میانبر"
+
+msgid "Toggle focus to voice slider"
+msgstr "رفتن به نوار پخش پیام صوتی"
+
+msgid "Play or stop focused media"
+msgstr "پخش یا توقف رسانه متمرکزشده"
+
+msgid "Start or stop recording a voice message"
+msgstr "شروع یا توقف ضبط پیام صوتی"
+
+msgid "Cancel voice message recording or cycle notification mode"
+msgstr "لغو ضبط پیام صوتی یا تغییر حالت اعلان (با دو بار فشردن)"
+
+msgid "Convert voice message to text"
+msgstr "تبدیل پیام صوتی به متن"
+
+msgid "Enable automatic reading of new messages in the current chat"
+msgstr "فعال یا غیرفعالسازی خواندن خودکار پیامهای جدید در گفتگوی فعلی"
+
+msgid "Move focus to the list of group threads"
+msgstr "رفتن به فهرست تاپیکهای گروه"
+
+msgid "Go to the end"
+msgstr "رفتن به انتهای گفتوگو"
+
+msgid "Go to the list with search results"
+msgstr "رفتن به فهرست نتایج جستجو"
+
+msgid "Go to the next search result"
+msgstr "رفتن به نتیجه بعدی جستجو"
+
+msgid "Go to the previous search result"
+msgstr "رفتن به نتیجه قبلی جستجو"
+
+msgid "Announce the original message, the message that was replied to"
+msgstr "اعلام پیامی که به آن پاسخ داده شده است (با دو بار فشردن: به همان پیام منتقل میشود)"
+
+msgid "Announces the time a message was sent or received, as well as a list of reactions. Double-clicking toggles the announcement mode for this information."
+msgstr "زمان ارسال یا دریافت پیام و فهرست واکنشها را اعلام میکند. با دو بار فشردن، حالت اعلام این اطلاعات تغییر میکند."
+
+msgid "This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"
+msgstr "این افزونه کلیدهای میانبر متعددی را جهت پیمایش سریع در بخشهای مختلف برنامه یونیگرام، تعامل و مدیریت آسان پیامها و گفتگوها، و بهبودهای کاربردی فراوان برای کاربران صفحهخوان فراهم میکند."
+
+msgid "Conversion started"
+msgstr "تبدیل آغاز شد"
+
+msgid "This voice message is already converted to text"
+msgstr "این پیام صوتی قبلاً به متن تبدیل شده است"
+
+msgid "Converting this voice message is already in process"
+msgstr "تبدیل این پیام صوتی در حال انجام است"
+
+msgid "Recording a voice message will not be available until the edit field is empty"
+msgstr "برای ضبط پیام صوتی، کادر نوشتن پیام باید کاملاً خالی باشد"
+
+msgid "Chat activity tracking is enabled"
+msgstr "ردگیری فعالیتهای این گفتگو فعال شد"
+
+msgid "Chat activity tracking is disabled"
+msgstr "ردگیری فعالیتهای این گفتگو غیرفعال شد"
+
+msgid "Failed to read chat title"
+msgstr "عنوان گفتگو پیدا نشد"
+
+msgid "Automatic reading of messages is enabled"
+msgstr "خواندن خودکار پیامها فعال شد"
+
+msgid "Automatic reading of new messages is disabled"
+msgstr "خواندن خودکار پیامهای جدید غیرفعال شد"
+
+msgid "No list with threads was found"
+msgstr "فهرست تاپیکهای گروه پیدا نشد"
+
+msgid "No next search result"
+msgstr "نتیجهای برای جستجوی بعدی وجود ندارد"
+
+msgid "No previous search result"
+msgstr "نتیجهای برای جستجوی قبلی وجود ندارد"
+
+msgid "Data not found"
+msgstr "دادهای یافت نشد"
+
+msgid "Slider not found"
+msgstr "نوار پخش صوتی یافت نشد"
+
+msgid "The display of message sending or receiving time and the list of installed emojis is enabled."
+msgstr "اعلام زمان پیام و واکنشها فعال شد."
+
+msgid "The display of message sending or receiving time and the list of installed emojis is  disabled."
+msgstr "اعلام زمان پیام و واکنشها غیرفعال شد."
+
+msgid "Log file has been cleared successfully."
+msgstr "فایل لاگ با موفقیت حذف شد."
+
+msgid "Success"
+msgstr "عملیات موفق"
+
+msgid "Action when pressing the up arrow in the message edit field"
+msgstr "عملکرد کلید جهتنمای بالا در کادر نوشتن پیام:"
+
+msgid "Do nothing"
+msgstr "کاری انجام نده"
+
+msgid "Activate editing of last sent message"
+msgstr "ویرایش آخرین پیام ارسالشده"
+
+msgid "Move focus to the last message in a chat"
+msgstr "رفتن به آخرین پیام گفتگو"
+
+msgid "Announce the phrases \"Administrator\" and \"Owner\" on messages in communities"
+msgstr "اعلام عنوانهای «مدیر» و «مالک» در پیامهای گروهها و کانالها"
+
+msgid "Announce file details (name, size, duration) on media buttons"
+msgstr "اعلام جزئیات فایل (نام، اندازه و مدتزمان) روی دکمههای رسانه"
+
+msgid "Add-on log level:"
+msgstr "سطح ثبت وقایع (لاگ) افزونه:"
+
+msgid "Disabled"
+msgstr "غیرفعال"
+
+msgid "Error"
+msgstr "خطاها"
+
+msgid "Warning"
+msgstr "هشدارها"
+
+msgid "Info"
+msgstr "اطلاعات"
+
+msgid "Debug"
+msgstr "اشکالزدایی (دیباگ)"
+
+msgid "Open Log File"
+msgstr "باز کردن فایل لاگ"
+
+msgid "Clear Log File"
+msgstr "حذف فایل لاگ"
+
+msgid "Explanation"
+msgstr "توضیحات"
+
+msgid "Media"
+msgstr "رسانه"
+
+msgid "List of shortcuts"
+msgstr "فهرست کلیدهای میانبر"
+
+msgid "Belarus"
+msgstr "بلاروسی"
+
+msgid "Romanian"
+msgstr "رومانیایی"
+
+msgid "Show a list of all UnigramAccess shortcuts"
+msgstr "نمایش فهرست کلیدهای میانبر"
+
+msgid "Toggle focus to voice slider"
+msgstr "رفتن به نوار پخش پیام صوتی"
+
+msgid "Play or stop focused media"
+msgstr "پخش یا توقف رسانه متمرکزشده"
+
+msgid "Start or stop recording a voice message"
+msgstr "شروع یا توقف ضبط پیام صوتی"
+
+msgid "Cancel voice message recording or cycle notification mode"
+msgstr "لغو ضبط پیام صوتی یا تغییر حالت اعلان (با دو بار فشردن)"
+
+msgid "Convert voice message to text"
+msgstr "تبدیل پیام صوتی به متن"
+
+msgid "Enable automatic reading of new messages in the current chat"
+msgstr "فعال یا غیرفعالسازی خواندن خودکار پیامهای جدید در گفتگوی فعلی"
+
+msgid "Move focus to the list of group threads"
+msgstr "رفتن به فهرست تاپیکهای گروه"
+
+msgid "Go to the end"
+msgstr "رفتن به انتهای گفتوگو"
+
+msgid "Go to the list with search results"
+msgstr "رفتن به فهرست نتایج جستجو"
+
+msgid "Go to the next search result"
+msgstr "رفتن به نتیجه بعدی جستجو"
+
+msgid "Go to the previous search result"
+msgstr "رفتن به نتیجه قبلی جستجو"
+
+msgid "Announce the original message, the message that was replied to"
+msgstr "اعلام پیامی که به آن پاسخ داده شده است (با دو بار فشردن: به همان پیام منتقل میشود)"
+
+msgid "Announces the time a message was sent or received, as well as a list of reactions. Double-clicking toggles the announcement mode for this information."
+msgstr "زمان ارسال یا دریافت پیام و فهرست واکنشها را اعلام میکند. با دو بار فشردن، حالت اعلام این اطلاعات تغییر میکند."
+
+msgid "This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"
+msgstr "این افزونه کلیدهای میانبر متعددی را جهت پیمایش سریع در بخشهای مختلف برنامه یونیگرام، تعامل و مدیریت آسان پیامها و گفتگوها، و بهبودهای کاربردی فراوان برای کاربران صفحهخوان فراهم میکند."
+
 #~ msgid "Announce some progress bars"
 #~ msgstr "گفته شدن بعضی از نوارهای پیشرفت."
 

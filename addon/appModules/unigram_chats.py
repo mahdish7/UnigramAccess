@@ -417,9 +417,10 @@ class UnigramChats:
 				btn_name = (getattr(primary_button, "name", "") or "").lower()
 				chk_name = (getattr(checkbox, "name", "") or "").lower()
 
-				channel_kws = [kw for kws in chat_deletion_keywords.get("channel", {}).values() for kw in kws]
-				group_kws = [kw for kws in chat_deletion_keywords.get("group", {}).values() for kw in kws]
-				bot_kws = [kw for kws in chat_deletion_keywords.get("bot", {}).values() for kw in kws]
+				lang = conf.get("lang")
+				channel_kws = chat_deletion_keywords.get("channel", {}).get(lang, ())
+				group_kws = chat_deletion_keywords.get("group", {}).get(lang, ())
+				bot_kws = chat_deletion_keywords.get("bot", {}).get(lang, ())
 
 				if any(k in btn_name for k in channel_kws):
 					self.appModule.isDelete["message"] = _("You left the channel")

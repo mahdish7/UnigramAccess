@@ -5,6 +5,7 @@ from controlTypes import Role, State
 from keyboardHandler import KeyboardInputGesture
 import api
 from ui import message
+from .cnf import conf
 from .data import unread_messages_keywords
 from .unigram_logger import ulog as log
 
@@ -80,8 +81,7 @@ class UnigramNavigation:
 			return False
 
 		try:
-			# Primary detection: Match item name against verified dictionary keywords
-			unread_kws = [kw for kws in unread_messages_keywords.values() for kw in kws]
+			unread_kws = unread_messages_keywords.get(conf.get("lang"), ())
 			name = (getattr(obj, "name", None) or "").strip().lower()
 			if any(kw in name for kw in unread_kws):
 				return True

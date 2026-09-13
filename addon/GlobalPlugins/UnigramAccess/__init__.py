@@ -64,7 +64,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 
 
 class UnigramAccessSettings(SettingsPanel):
-	title = "UnigramAccess"
+	title = _("UnigramAccess")
 	listVoiceTypeAfterChatName = {
 		"beforeName": _("Before chat name"),
 		"afterName": _("After chat name"),
