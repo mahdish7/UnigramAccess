@@ -90,32 +90,24 @@ class UnigramCalls:
 
 	@staticmethod
 	def _getMicrophoneState(button):
-		"""Determine whether microphone is on or off based strictly on button name."""
-		try:
-			name = button.UIAElement.CurrentName or ""
-		except Exception:
-			name = getattr(button, "name", "") or ""
-
-		name_lower = name.strip().lower()
-		if "unmute" in name_lower:
-			return _("Microphone off")
-		elif "mute" in name_lower or "live" in name_lower:
-			return _("Microphone on")
+		"""Determine whether microphone is on or off based strictly on icon glyphs."""
+		first_child = getattr(button, "firstChild", None)
+		child_name = getattr(first_child, "name", "") if first_child else ""
+		if child_name == "\ue720":
+			return _("Microphone turned on")
+		elif child_name in ("\ue74f", "\uf781"):
+			return _("Microphone turned off")
 		return None
 
 	@staticmethod
 	def _getVideoState(button):
-		"""Determine whether camera is on or off based strictly on button name."""
-		try:
-			name = button.UIAElement.CurrentName or ""
-		except Exception:
-			name = getattr(button, "name", "") or ""
-
-		name_lower = name.strip().lower()
-		if "disable video" in name_lower:
-			return _("Camera on")
-		elif "enable video" in name_lower:
-			return _("Camera off")
+		"""Determine whether camera is on or off based strictly on icon glyphs."""
+		first_child = getattr(button, "firstChild", None)
+		child_name = getattr(first_child, "name", "") if first_child else ""
+		if child_name == "\ue964":
+			return _("Camera turned on")
+		elif child_name == "\ue963":
+			return _("Camera turned off")
 		return None
 
 	def script_microphone(self, gesture):

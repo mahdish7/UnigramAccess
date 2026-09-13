@@ -177,6 +177,27 @@ msgstr "میکروفون روشن"
 msgid "Microphone off"
 msgstr "میکروفون خاموش"
 
+#: addon\appModules\unigram_calls.py
+msgid "Microphone turned on"
+msgstr "میکروفون روشن شد"
+
+#: addon\appModules\unigram_calls.py
+msgid "Microphone turned off"
+msgstr "میکروفون خاموش شد"
+
+#: addon\appModules\unigram_calls.py
+msgid "Camera turned on"
+msgstr "دوربین روشن شد"
+
+#: addon\appModules\unigram_calls.py
+msgid "Camera turned off"
+msgstr "دوربین خاموش شد"
+
+#: addon\globalPlugins\UnigramAccess\__init__.py
+msgid "Read incoming caller name"
+msgstr "خواندن نام تماس‌گیرنده"
+
+
 
 #: addon\appModules\unigram.py:55
 msgid "Edit message"
