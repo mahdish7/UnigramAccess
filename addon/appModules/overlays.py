@@ -47,24 +47,21 @@ class Audio_and_video_button:
 		gesture.send()
 
 		def speakState():
-			try:
-				cur_name = self.UIAElement.CurrentName or ""
-			except Exception:
-				cur_name = getattr(self, "name", "") or ""
-
 			newName = None
 			if self.UIAAutomationId == "Audio":
-				name_lower = cur_name.strip().lower()
-				if "unmute" in name_lower:
-					newName = _("Microphone off")
-				elif "mute" in name_lower or "live" in name_lower:
-					newName = _("Microphone on")
+				first_child = getattr(self, "firstChild", None)
+				child_name = getattr(first_child, "name", "") if first_child else ""
+				if child_name == "\ue720":
+					newName = _("Microphone turned on")
+				elif child_name in ("\ue74f", "\uf781"):
+					newName = _("Microphone turned off")
 			elif self.UIAAutomationId == "Video":
-				name_lower = cur_name.strip().lower()
-				if "disable video" in name_lower:
-					newName = _("Camera on")
-				elif "enable video" in name_lower:
-					newName = _("Camera off")
+				first_child = getattr(self, "firstChild", None)
+				child_name = getattr(first_child, "name", "") if first_child else ""
+				if child_name == "\ue964":
+					newName = _("Camera turned on")
+				elif child_name == "\ue963":
+					newName = _("Camera turned off")
 
 			if newName:
 				queueHandler.queueFunction(queueHandler.eventQueue, message, newName)

@@ -4,6 +4,7 @@ import globalVars
 import addonHandler
 from scriptHandler import script
 import api
+import ui
 import gui
 from gui.settingsDialogs import SettingsPanel
 import wx
@@ -34,28 +35,84 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def script_open_settings_dialog(self, gesture, arg = False):
 		wx.CallAfter(gui.mainFrame.popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, UnigramAccessSettings)
 
+	@staticmethod
+	def _getIncomingCallNotification():
+		"""Locate the incoming call toast notification window on the desktop."""
+		desktop = api.getDesktopObject()
+		for item in getattr(desktop, "children", []):
+			first_child = getattr(item, "firstChild", None)
+			if first_child and getattr(first_child, "UIAAutomationId", "") == "ToastCenterScrollViewer":
+				for toast in getattr(first_child, "children", []):
+					if getattr(toast, "UIAAutomationId", "") == "PriorityToastView":
+						return toast
+		return None
+
+	@staticmethod
+	def _getCallerName(toast):
+		"""Extract the caller's name from the incoming call toast notification."""
+		title_obj = next(
+			(c for c in getattr(toast, "children", []) if getattr(c, "UIAAutomationId", "") == "Title"),
+			None,
+		)
+		if title_obj:
+			return getattr(title_obj, "name", "") or ""
+		return ""
+
+	# Read caller name on incoming call
+	@script(description=_("Read incoming caller name"), gesture="kb:ALT+T")
+	def script_readIncomingCallerName(self, gesture):
+		toast = self._getIncomingCallNotification()
+		if toast:
+			caller = self._getCallerName(toast)
+			if caller:
+				ui.message(caller)
+				return
+		import appModuleHandler
+		appMod = appModuleHandler.getAppModuleFromProcessID(api.getFocusObject().processID)
+		if appMod and hasattr(appMod, "script_read_profile_name"):
+			appMod.script_read_profile_name(gesture)
+			return
+		gesture.send()
+
 	# Call answer
 	@script(description=_("Accept call"), gesture="kb:ALT+Y")
 	def script_answeringCall(self, gesture):
 		gesture.send()
-		desktop = api.getDesktopObject()
-		notification = next((item.firstChild.firstChild for item in desktop.children if item.firstChild and hasattr(item.firstChild, "UIAAutomationId") and item.firstChild.UIAAutomationId == "ToastCenterScrollViewer"), False)
-		if not notification:
+		toast = self._getIncomingCallNotification()
+		if not toast:
 			return
-		button = next((item for item in notification.children if item.UIAAutomationId == "VerbButton"), None)
-		if button: button.doAction()
+		button = next(
+			(
+				c for c in getattr(toast, "children", [])
+				if getattr(c, "UIAAutomationId", "") == "VerbButton" and getattr(c, "name", "") == "Audio"
+			),
+			None,
+		)
+		if button:
+			try:
+				button.doAction()
+			except Exception:
+				pass
 
 	# End a call, decline call, or leave a voice chat
 	@script(description=_("Press \"Decline call\" button  if there is an incoming call, \"End call\" button if a call is in progress or leave voice chat if it is active."), gesture="kb:ALT+N")
 	def script_callCancellation(self, gesture):
 		gesture.send()
-		desktop = api.getDesktopObject()
-		notification = next((item.firstChild.firstChild for item in desktop.children if item.firstChild and hasattr(item.firstChild, "UIAAutomationId") and item.firstChild.UIAAutomationId == "ToastCenterScrollViewer"), False)
+		toast = self._getIncomingCallNotification()
 		button = None
-		if notification:
-			button = next((item.next for item in notification.children if item.UIAAutomationId == "VerbButton"), None)
+		if toast:
+			button = next(
+				(
+					c for c in getattr(toast, "children", [])
+					if getattr(c, "UIAAutomationId", "") == "VerbButton" and getattr(c, "name", "") == "Decline"
+				),
+				None,
+			)
 		if button:
-			button.doAction()
+			try:
+				button.doAction()
+			except Exception:
+				pass
 			return
 		import appModuleHandler
 		appMod = appModuleHandler.getAppModuleFromProcessID(api.getFocusObject().processID)
