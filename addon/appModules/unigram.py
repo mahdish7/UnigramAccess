@@ -36,6 +36,7 @@ from .overlays import (
 	Media_download_button,
 	Message_list_item,
 	SettingsPanelListItem,
+	SettingsRadioListItem,
 )
 from .text_window import TextWindow
 from .unigram_calls import UnigramCalls
@@ -147,6 +148,13 @@ class AppModule(appModuleHandler.AppModule):
 					or getattr(obj, "UIAAutomationId", "") == "Message_item"
 				):
 					clsList.insert(0, Message_list_item)
+					return
+
+				# Check whether this list item wraps an inner RadioButton (e.g. Proxy, Language, and settings lists)
+				firstChild = getattr(obj, "firstChild", None)
+				if firstChild and getattr(firstChild, "role", None) == Role.RADIOBUTTON:
+					clsList.insert(0, SettingsRadioListItem)
+					return
 
 			elif (
 				conf.get("action_when_pressing_up_arrow_in_text_field") != "normal"
@@ -677,7 +685,12 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:space",
 	)
 	def script_actionMediaInMessage(self, gesture):
-		return self.media_helper.script_actionMediaInMessage(gesture)
+		obj = api.getFocusObject()
+		if self.ui_helper.is_message_object(obj):
+			return self.media_helper.script_actionMediaInMessage(gesture)
+		if hasattr(obj, "script_activate_radio"):
+			return obj.script_activate_radio(gesture)
+		gesture.send()
 
 	@script(
 		# Translators: Description for the script that starts or stops voice message recording.
