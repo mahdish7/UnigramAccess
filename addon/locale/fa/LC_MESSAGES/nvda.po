@@ -944,6 +944,9 @@ msgstr "زمان ارسال یا دریافت پیام و فهرست واکنش�
 msgid "This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"
 msgstr "این افزونه کلیدهای میانبر متعددی را جهت پیمایش سریع در بخشهای مختلف برنامه یونیگرام، تعامل و مدیریت آسان پیامها و گفتگوها، و بهبودهای کاربردی فراوان برای کاربران صفحهخوان فراهم میکند."
 
+msgid "Initial release of UnigramAccess."
+msgstr "انتشار اولیه UnigramAccess."
+
 msgid "Conversion started"
 msgstr "تبدیل آغاز شد"
 
