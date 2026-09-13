@@ -304,7 +304,7 @@ class UnigramMedia:
 			button.doAction()
 			obj.setFocus()
 			try: playWaveFile(os.path.join(baseDir, "RecognitionStart.wav"))
-			except Exception: message("Conversion started")
+			except Exception: message(_("Conversion started"))
 			self.waiting_for_recognition(button)
 		else: message(_("Button not found"))
 

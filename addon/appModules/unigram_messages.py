@@ -659,8 +659,9 @@ class UnigramMessages:
 
 		last_focus = api.getFocusObject()
 		btn_name = (getattr(btn, "name", None) or "").strip().lower()
-		reply_kws = [kw for kws in composer_header_cancel_types.get("reply", {}).values() for kw in kws]
-		edit_kws = [kw for kws in composer_header_cancel_types.get("edit", {}).values() for kw in kws]
+		lang = conf.get("lang")
+		reply_kws = composer_header_cancel_types.get("reply", {}).get(lang, ())
+		edit_kws = composer_header_cancel_types.get("edit", {}).get(lang, ())
 		is_reply = any(kw in btn_name for kw in reply_kws)
 		is_edit = any(kw in btn_name for kw in edit_kws)
 

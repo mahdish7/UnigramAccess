@@ -62,7 +62,8 @@ def isActivelyDownloading(name):
 		return False
 	base_name = name.split(": ")[0] if ": " in name else name
 	base_name_lower = base_name.lower()
-	return any(kw in base_name_lower for kw_list in active_download_keywords.values() for kw in kw_list)
+	kws = active_download_keywords.get(conf.get("lang"), ())
+	return any(kw in base_name_lower for kw in kws)
 
 
 def get_context_menu_targets(action):
