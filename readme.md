@@ -49,7 +49,8 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **control+shift+A**: Press "Attach file" button.
 * **control+N**: Press "New chat" button.
 * **ALT+shift+L**: Copy live stream RTMP URL and stream key to clipboard (in broadcast window).
-* **Unassigned**: Pin or unpin a message or chat.
+* **control+P**: Pin or unpin a message or chat.
+* **ALT+shift+O**: Press "More Options" button in an open chat.
 * **Unassigned**: Save file attachment as...
 
 ### Media & Voice Messages

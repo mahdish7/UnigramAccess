@@ -83,13 +83,25 @@ class UnigramChats:
 	def __init__(self, appModule):
 		self.appModule = appModule
 
-	def select_chat(self):
-		"""Switch focused chat to selection mode via context menu."""
+	def activate_option_for_menu(self, option):
+		"""Open context menu on chat item and automatically select a specific option."""
 		if self.appModule.executeContextMenuOption:
 			return False
-		self.appModule.executeContextMenuOption = "select"
+		self.appModule.executeContextMenuOption = option
 		CACHED_KEYS["Applications"].send()
 		return True
+
+	def select_chat(self):
+		"""Switch focused chat to selection mode via context menu."""
+		return self.activate_option_for_menu("select")
+
+	def pin_chat(self):
+		"""Pin or unpin focused chat via context menu."""
+		return self.activate_option_for_menu("pin")
+
+	def read_chat(self):
+		"""Mark focused chat as read/unread via context menu."""
+		return self.activate_option_for_menu("read")
 
 	def to_contacts_list(self):
 		"""Focus the contacts list if the Contacts dialog is currently open.
@@ -511,4 +523,22 @@ class UnigramChats:
 			message(_("Failed to read chat title"))
 		if title:
 			self.appModule.saved_items.save("profile name", title)
+
+	def script_showMoreOptions(self, gesture):
+		"""Open the More Options menu in an open chat via the SearchOption sibling."""
+		search_btn = next(
+			(
+				item
+				for item in self.appModule.ui_helper.getElements()
+				if getattr(item, "role", None) == Role.BUTTON
+				and getattr(item, "UIAAutomationId", "") == "SearchOption"
+			),
+			None,
+		)
+
+		targetButton = search_btn.next if (search_btn and getattr(search_btn, "next", None) and getattr(search_btn.next, "role", None) == Role.BUTTON) else None
+		if targetButton:
+			targetButton.doAction()
+		else:
+			message(_("Button not found"))
 

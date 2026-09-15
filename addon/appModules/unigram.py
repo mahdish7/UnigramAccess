@@ -531,6 +531,14 @@ class AppModule(appModuleHandler.AppModule):
 	def script_read_profile_name(self, gesture):
 		return self.chats_helper.script_read_profile_name(gesture)
 
+	@script(
+		# Translators: Description for the script that opens the More Options menu in an open chat.
+		description=_("Press \"More Options\" button in an open chat"),
+		gesture="kb:ALT+shift+O",
+	)
+	def script_showMoreOptions(self, gesture):
+		return self.chats_helper.script_showMoreOptions(gesture)
+
 	# ── Message Scripts ─────────────────────────────────────────────────
 
 	@script(
@@ -602,7 +610,7 @@ class AppModule(appModuleHandler.AppModule):
 			if not self.chats_helper.select_chat():
 				gesture.send()
 		elif self.ui_helper.is_message_object(obj):
-			if not self.msg_helper.script_selectMessage(gesture, obj=obj):
+			if not self.msg_helper.script_selectMessage(gesture):
 				gesture.send()
 		else:
 			gesture.send()
@@ -613,7 +621,12 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:ALT+F",
 	)
 	def script_forwardMessage(self, gesture):
-		return self.msg_helper.script_forwardMessage(gesture)
+		obj = api.getFocusObject()
+		if self.ui_helper.is_message_object(obj):
+			if not self.msg_helper.script_forwardMessage(gesture):
+				gesture.send()
+		else:
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that marks a chat as read or unread.
@@ -621,21 +634,40 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:ALT+shift+R",
 	)
 	def script_readMessage(self, gesture):
-		return self.msg_helper.script_readMessage(gesture)
+		obj = api.getFocusObject()
+		if self.chats_helper.is_chat_item(obj):
+			if not self.chats_helper.read_chat():
+				gesture.send()
+		else:
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that saves a file attachment.
 		description=_("Save file as..."),
 	)
 	def script_save_file(self, gesture):
-		return self.msg_helper.script_save_file(gesture)
+		obj = api.getFocusObject()
+		if self.ui_helper.is_message_object(obj):
+			if not self.msg_helper.script_save_file(gesture):
+				gesture.send()
+		else:
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that pins or unpins a message/chat.
 		description=_("Pin a message or chat"),
+		gesture="kb:control+P",
 	)
 	def script_attach(self, gesture):
-		return self.msg_helper.script_attach(gesture)
+		obj = api.getFocusObject()
+		if self.chats_helper.is_chat_item(obj):
+			if not self.chats_helper.pin_chat():
+				gesture.send()
+		elif self.ui_helper.is_message_object(obj):
+			if not self.msg_helper.pin_message():
+				gesture.send()
+		else:
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that copies broadcast RTMP data.
