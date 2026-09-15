@@ -240,28 +240,6 @@ class UnigramMessages:
 		else:
 			message(_("Button not found"))
 
-	# TODO: Unimplemented / Inactive feature.
-	# Not currently mapped to any gesture or called from AppModule.
-	# Requires 'labels_for_button_more_options' to be defined in data.py to function.
-	def script_showMoreOptions(self, gesture):
-		"""Open the More Options menu in an open chat."""
-		from .data import labels_for_button_more_options
-
-		labelsForButton = labels_for_button_more_options.get(conf.get("lang"), labels_for_button_more_options["en"])
-		targetButton = next(
-			(
-				item
-				for item in self.appModule.ui_helper.getElements()
-				if item.role == Role.BUTTON
-				and (item.UIAAutomationId in ("Options", "Menu", "Settings") or item.name in labelsForButton)
-			),
-			False,
-		)
-		if targetButton:
-			targetButton.doAction()
-		else:
-			message(_("Button not found"))
-
 	def script_copy_data_for_broadcast(self, gesture):
 		"""Extract and copy streaming RTMP URL and stream key to clipboard."""
 		dialog = next(
@@ -310,49 +288,29 @@ class UnigramMessages:
 			return
 		self.appModule.isSetReaction = index
 
-	def script_selectMessage(self, gesture, obj=None):
-		"""Switch message to selection mode via context menu."""
-		return self.activate_option_for_menu("select", "Messages", obj=obj)
-
-	def script_forwardMessage(self, gesture):
-		"""Forward message via context menu."""
-		self.activate_option_for_menu("forward", "Messages")
-
-	def script_readMessage(self, gesture):
-		"""Mark chat as read/unread via context menu."""
-		self.activate_option_for_menu("read", "ChatsList")
-
-	def script_save_file(self, gesture):
-		"""Save attached file via context menu."""
-		self.activate_option_for_menu("save_as", "Messages")
-
-	def script_attach(self, gesture):
-		"""Pin/unpin message or chat via context menu."""
-		self.activate_option_for_menu("pin")
-
-	def activate_option_for_menu(self, option, listName=False, obj=None):
-		"""Open context menu and automatically select a specific option.
-
-		Sets the execute_context_menu_option flag which event_gainFocus
-		picks up when the context menu appears.
-		"""
+	def activate_option_for_menu(self, option):
+		"""Open context menu on focused message and automatically select a specific option."""
 		if self.appModule.executeContextMenuOption:
-			return False
-		if obj is None:
-			obj = api.getFocusObject()
-		if listName == "Messages" and not self.appModule.ui_helper.is_message_object(obj):
-			return False
-		elif listName == "ChatsList" and obj.parent.UIAAutomationId and obj.parent.UIAAutomationId != listName:
-			return False
-		elif not listName and (
-			not self.appModule.ui_helper.is_message_object(obj)
-			and obj.parent.UIAAutomationId
-			and obj.parent.UIAAutomationId != "ChatsList"
-		):
 			return False
 		self.appModule.executeContextMenuOption = option
 		CACHED_KEYS["Applications"].send()
 		return True
+
+	def script_selectMessage(self, gesture=None):
+		"""Switch message to selection mode via context menu."""
+		return self.activate_option_for_menu("select")
+
+	def pin_message(self):
+		"""Pin or unpin focused message via context menu."""
+		return self.activate_option_for_menu("pin")
+
+	def script_forwardMessage(self, gesture=None):
+		"""Forward message via context menu."""
+		return self.activate_option_for_menu("forward")
+
+	def script_save_file(self, gesture=None):
+		"""Save attached file via context menu."""
+		return self.activate_option_for_menu("save_as")
 
 	def _is_message_item(self, item):
 		"""Determine if item is an actual message (and not a date header, separator, or container)."""

@@ -139,7 +139,7 @@ context_menu_items = {
 		"en": ("save as",),
 	},
 	"pin": {
-		"en": ("pin", "unpin"),
+		"en": ("pin", "unpin", "pin to top", "unpin from top"),
 	},
 	"read": {
 		"en": ("mark as read", "mark as unread"),

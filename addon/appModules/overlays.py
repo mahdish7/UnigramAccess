@@ -151,7 +151,8 @@ class Message_list_item(ListItem):
 		gesture="kb:backspace",
 	)
 	def script_edit_message(self, gesture):
-		self.appModule.msg_helper.activate_option_for_menu("edit", "Messages")
+		if not self.appModule.msg_helper.activate_option_for_menu("edit"):
+			gesture.send()
 
 	@script(
 		# Translators: Description for the script that replies to the focused message.
@@ -159,7 +160,8 @@ class Message_list_item(ListItem):
 		gesture="kb:enter",
 	)
 	def script_reply_to_message(self, gesture):
-		self.appModule.msg_helper.activate_option_for_menu("reply", "Messages")
+		if not self.appModule.msg_helper.activate_option_for_menu("reply"):
+			gesture.send()
 
 	def script_next_media(self, gesture, revers=False):
 		self.list_media = self.list_media or [item for item in self.children if item.role == Role.LISTITEM]
