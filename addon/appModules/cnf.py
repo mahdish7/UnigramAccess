@@ -6,31 +6,54 @@ import languageHandler
 import addonHandler
 addonHandler.initTranslation()
 
-lang = languageHandler.getLanguage().split("_")[0]
+_user_lang = languageHandler.getLanguage().replace("_", "-").lower()
+if _user_lang in ("pt-br", "pt"):
+	lang = "pt-br"
+elif _user_lang.startswith("zh-cn") or _user_lang.startswith("zh-sg"):
+	lang = "zh-hans"
+elif _user_lang.startswith("zh"):
+	lang = "zh-hant"
+elif _user_lang in ("sk", "sl"):
+	lang = "sk"
+else:
+	lang = _user_lang.split("-")[0]
 
 listLanguages = {
 	"ar": _("Arabic"),
-	"be": _("Belarus"),
+	"be": _("Belarusian"),
+	"ca": _("Catalan"),
 	"cs": _("Czech"),
-	"en": _("English"),
-	"fr": _("French"),
-	"fi": _("Finnish"),
-	"sl": _("Slovak"),
-	"nb": _("Norwegian"),
 	"de": _("German"),
-	"it": _("Italian"),
-	"fa": _("Persian"),
-	"pl": _("Polish"),
-	"pt": _("Portuguese"),
-	"ru": _("Russian"),
+	"en": _("English"),
 	"es": _("Spanish"),
+	"fa": _("Persian"),
+	"fi": _("Finnish"),
+	"fr": _("French"),
+	"he": _("Hebrew"),
+	"hr": _("Croatian"),
+	"hu": _("Hungarian"),
+	"id": _("Indonesian"),
+	"it": _("Italian"),
+	"kk": _("Kazakh"),
+	"ko": _("Korean"),
+	"ms": _("Malay"),
+	"nb": _("Norwegian"),
+	"nl": _("Dutch"),
+	"pl": _("Polish"),
+	"pt-br": _("Portuguese (Brazil)"),
+	"ro": _("Romanian"),
+	"ru": _("Russian"),
+	"sk": _("Slovak"),
+	"sr": _("Serbian"),
+	"sv": _("Swedish"),
 	"tr": _("Turkish"),
 	"uk": _("Ukrainian"),
-	"hr": _("Croatian"),
-	"sr": _("Serbian"),
-	"zh": _("Chinese (Traditional)"),
-	"ro": _("Romanian"),
+	"uz": _("Uzbek"),
+	"zh-hans": _("Chinese (Simplified)"),
+	"zh-hant": _("Chinese (Traditional)"),
 }
+
+
 
 spec = (
 	f"lang = string(default={lang if lang in listLanguages else 'en'})",

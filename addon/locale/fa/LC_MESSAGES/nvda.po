@@ -93,6 +93,58 @@ msgstr "صربستانی"
 msgid "Chinese (Traditional)"
 msgstr "چینی سنتی"
 
+#: addon\appModules\cnf.py:23
+msgid "Belarusian"
+msgstr "بلاروسی"
+
+#: addon\appModules\cnf.py:24
+msgid "Catalan"
+msgstr "کاتالان"
+
+#: addon\appModules\cnf.py:32
+msgid "Hebrew"
+msgstr "عبری"
+
+#: addon\appModules\cnf.py:34
+msgid "Hungarian"
+msgstr "مجاری"
+
+#: addon\appModules\cnf.py:35
+msgid "Indonesian"
+msgstr "اندونزیایی"
+
+#: addon\appModules\cnf.py:37
+msgid "Kazakh"
+msgstr "قزاقی"
+
+#: addon\appModules\cnf.py:38
+msgid "Korean"
+msgstr "کره‌ای"
+
+#: addon\appModules\cnf.py:39
+msgid "Malay"
+msgstr "مالایی"
+
+#: addon\appModules\cnf.py:41
+msgid "Dutch"
+msgstr "هلندی"
+
+#: addon\appModules\cnf.py:43
+msgid "Portuguese (Brazil)"
+msgstr "پرتغالی (برزیل)"
+
+#: addon\appModules\cnf.py:48
+msgid "Swedish"
+msgstr "سوئدی"
+
+#: addon\appModules\cnf.py:51
+msgid "Uzbek"
+msgstr "ازبکی"
+
+#: addon\appModules\cnf.py:52
+msgid "Chinese (Simplified)"
+msgstr "چینی ساده‌شده"
+
 #: addon\appModules\data.py:44
 msgid "Back"
 msgstr "برگشت"
@@ -1132,6 +1184,14 @@ msgstr "زمان ارسال یا دریافت پیام و فهرست واکنش�
 
 msgid "This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"
 msgstr "این افزونه کلیدهای میانبر متعددی را جهت پیمایش سریع در بخشهای مختلف برنامه یونیگرام، تعامل و مدیریت آسان پیامها و گفتگوها، و بهبودهای کاربردی فراوان برای کاربران صفحهخوان فراهم میکند."
+
+#: addon\appModules\unigram_calls.py:80
+msgid "Leave"
+msgstr "ترک کردن"
+
+#: addon\appModules\unigram.py:536
+msgid "Press \"More Options\" button in an open chat"
+msgstr "فشردن دکمه «گزینه‌های بیشتر» در چت بازشده"
 
 #~ msgid "Announce some progress bars"
 #~ msgstr "گفته شدن بعضی از نوارهای پیشرفت."
