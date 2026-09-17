@@ -215,11 +215,21 @@ class Message_list_item(ListItem):
 		self.states.discard(State.SELECTABLE)
 		keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
 		self.keywords = keywords
-		index = self.name.find(keywords[2])
+		index = -1
+		if len(keywords) > 4 and keywords[4]:
+			index = self.name.find(keywords[4])
+			if index == -1 and "\u2068" in keywords[4]:
+				index = self.name.find(keywords[4].replace("\u2068", ""))
+		if index == -1 and len(keywords) > 5 and keywords[5]:
+			index = self.name.find(keywords[5])
+			if index == -1 and "\u2068" in keywords[5]:
+				index = self.name.find(keywords[5].replace("\u2068", ""))
+		if index == -1:
+			index = self.name.find(keywords[2])
 		if index == -1:
 			index = self.name.find(keywords[3])
 		self.index_last_part_in_message = index
-		self.last_part_in_message = self.name[index:]
+		self.last_part_in_message = self.name[index:] if index != -1 else ""
 
 	__gestures = {
 		"kb:ALT+C": "show_text_message",

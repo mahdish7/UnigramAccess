@@ -25,7 +25,7 @@ keywordsInMessages = {
 	"de": (". Gesehen", ". Noch nicht gesehen", ", Gesendet um ", ", Empfangen um ", ", Gesendet um ", ", Empfangen um "),
 	"en": (". Seen", ". Not seen", ", Sent at ", ", Received at ", ", Sent at ", ", Received at "),
 	"es": (". Visto", ". No visto", ", Enviado a las ", ", Recibido el a las ", ", Enviado a las ", ", Recibido el a las "),
-	"fa": (". دیده شده", ". دیده نشده", ", ⁨در ⁨", ", ⁨در ⁨", ", ⁨در ⁨", ", ⁨در ⁨"),
+	"fa": (". دیده شده", ". دیده نشده", "ارسال شد", "دریافت شد", ", ⁨در ⁨", ", ⁨در ⁨"),
 	"fi": (". Nähty", ". Ei nähty", ", Lähetetty klo ", ", Vastaanotettu klo ", ", Lähetetty klo ", ", Vastaanotettu klo "),
 	"fr": (". Vu", ". Non vu", ", Envoyé à ", ", Reçu à ", ", Envoyé à ", ", Reçu à "),
 	"hr": (". Viđeno", ". Nije viđeno", ", Poslano u ", ", Primljeno u ", ", Poslano u ", ", Primljeno u "),
@@ -49,6 +49,7 @@ phrase_administrator_in_message = {
 	"cs": ("Správce", "Vlastník"),
 	"en": ("Admin", "Owner"),
 	"es": ("Administrador", "Propietario"),
+	"fa": ("مدیر", "مالک"),
 	"fr": ("Administrateur", "Propriétaire"),
 	"hr": ("Administrator", "Vlasnik"),
 	"it": ("Proprietario", "Amministratore"),
@@ -63,6 +64,7 @@ phrase_administrator_in_message = {
 # Format: "lang_code": ("keyword", ...)
 unread_messages_keywords = {
 	"en": ("unread messages",),
+	"fa": ("پیام‌های خوانده نشده", "پیام‌های خوانده‌نشده", "پیام های خوانده نشده"),
 }
 
 
@@ -75,9 +77,11 @@ unread_messages_keywords = {
 composer_header_cancel_types = {
 	"reply": {
 		"en": ("reply",),
+		"fa": ("پاسخ", "لغو پاسخ"),
 	},
 	"edit": {
 		"en": ("editing", "edit"),
+		"fa": ("ویرایش", "لغو ویرایش"),
 	},
 }
 
@@ -85,6 +89,7 @@ composer_header_cancel_types = {
 # Format: "original_title": _("replacement_title")
 composer_header_title_replacements = {
 	"Edit": _("Editing"),
+	"ویرایش": _("Editing"),
 }
 
 
@@ -97,12 +102,15 @@ composer_header_title_replacements = {
 chat_deletion_keywords = {
 	"channel": {
 		"en": ("channel",),
+		"fa": ("کانال",),
 	},
 	"group": {
 		"en": ("group",),
+		"fa": ("گروه",),
 	},
 	"bot": {
 		"en": ("bot",),
+		"fa": ("ربات",),
 	},
 }
 
@@ -110,6 +118,7 @@ chat_deletion_keywords = {
 # Format: "lang_code": "title"
 contacts_dialog_titles = {
 	"en": "Contacts",
+	"fa": "مخاطبین",
 }
 
 
@@ -122,27 +131,40 @@ contacts_dialog_titles = {
 context_menu_items = {
 	"select": {
 		"en": ("select",),
+		"fa": ("انتخاب",),
 	},
 	"delete": {
 		"en": ("delete",),
+		"fa": ("حذف", "ترک کانال", "ترک گروه", "حذف و ترک گروه", "لغو ارسال"),
 	},
 	"forward": {
 		"en": ("forward",),
+		"fa": ("فوروارد", "بازفرستادن", "هدایت"),
 	},
 	"reply": {
 		"en": ("reply",),
+		"fa": ("پاسخ", "پاسخ در گفتگویی دیگر"),
 	},
 	"edit": {
 		"en": ("edit",),
+		"fa": ("ویرایش",),
 	},
 	"save_as": {
 		"en": ("save as",),
+		"fa": ("ذخیره به عنوان...", "ذخیره به عنوان"),
 	},
 	"pin": {
 		"en": ("pin", "unpin", "pin to top", "unpin from top"),
+		"fa": ("سنجاق کردن", "برداشتن سنجاق", "سنجاق کردن به بالا", "برداشتن سنجاق از بالا", "سنجاق"),
 	},
 	"read": {
 		"en": ("mark as read", "mark as unread"),
+		"fa": (
+			"علامت زدن به عنوان خوانده شده",
+			"علامت زدن به عنوان خوانده نشده",
+			"علامت‌گذاری به عنوان خوانده شده",
+			"علامت‌گذاری به عنوان خوانده نشده",
+		),
 	},
 }
 
@@ -198,4 +220,5 @@ labels_in_buttons = {
 # Format: "lang_code": ("keyword", ...)
 active_download_keywords = {
 	"en": ("cancel",),
+	"fa": ("لغو",),
 }
