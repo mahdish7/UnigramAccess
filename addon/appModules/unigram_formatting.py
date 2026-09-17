@@ -52,8 +52,15 @@ def formatMessageOnFocus(obj, savedItems):
 				description = "\n".join(description[:2])
 			# Escape all backslash symbols
 			description = description.replace("\\", "").replace("http:\\", "\\\\")
+			leading_prefix = keywords[4] if len(keywords) > 4 and keywords[4] else None
+			if leading_prefix and leading_prefix in obj.name:
+				target_pat = re.escape(leading_prefix)
+			elif leading_prefix and "\u2068" in leading_prefix and leading_prefix.replace("\u2068", "") in obj.name:
+				target_pat = re.escape(leading_prefix.replace("\u2068", ""))
+			else:
+				target_pat = r"[.,]?{}|{}".format(re.escape(keywords[3]), re.escape(keywords[2]))
 			obj.name = re.sub(
-				r"[.,]?{}|{}".format(keywords[3], keywords[2]),
+				target_pat,
 				r". \n{}\g<0>".format(description),
 				obj.name,
 			)
