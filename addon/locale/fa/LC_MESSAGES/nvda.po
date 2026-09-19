@@ -1262,3 +1262,88 @@ msgstr "فشردن دکمه «گزینه‌های بیشتر» در چت باز�
 
 #~ msgid "Rewind voice message forward"
 #~ msgstr "پیام صوتی را جلو میبرد."
+
+
+msgid "Announce message timestamp and reactions. Press twice to toggle automatic announcement."
+msgstr "اعلام زمان ارسال یا دریافت پیام و واکنش‌ها؛ با دو بار فشردن، اعلام خودکار این اطلاعات فعال یا غیرفعال می‌شود."
+
+msgid "The display of message sending or receiving time and reactions is enabled."
+msgstr "اعلام زمان ارسال یا دریافت پیام و واکنش‌ها فعال شد."
+
+msgid "The display of message sending or receiving time and reactions is disabled."
+msgstr "اعلام زمان ارسال یا دریافت پیام و واکنش‌ها غیرفعال شد."
+
+msgid "Move focus to chats, contacts, or settings list"
+msgstr "انتقال فوکوس به لیست گفتگوها، مخاطبین یا تنظیمات"
+
+msgid "Move focus to the last message, topics, profile, or settings"
+msgstr "انتقال فوکوس به آخرین پیام، موضوعات، اطلاعات پروفایل یا تنظیمات"
+
+msgid "Move focus to group topics list"
+msgstr "انتقال فوکوس به لیست موضوعات گروه"
+
+msgid "Scroll to the bottom of the chat"
+msgstr "رفتن به انتهای گفتگو"
+
+msgid "Open more options menu in the active chat"
+msgstr "باز کردن منوی گزینه‌های بیشتر در گفتگوی فعال"
+
+msgid "Copy message text, or copy focused link URL"
+msgstr "کپی متن پیام، یا کپی آدرس پیوند فوکوس‌شده"
+
+msgid "Open Instant View for the focused message"
+msgstr "باز کردن نمای فوری (Instant View) برای پیام فوکوس‌شده"
+
+msgid "Toggle focus between message edit field and previous position"
+msgstr "جابه‌جایی فوکوس بین کادر ویرایش پیام و موقعیت قبلی"
+
+msgid "Attach file or media to message"
+msgstr "پیوست کردن فایل یا رسانه به پیام"
+
+msgid "Start a new chat"
+msgstr "ایجاد گفتگوی جدید"
+
+msgid "Mark focused chat as read"
+msgstr "علامت‌گذاری گفتگوی فوکوس‌شده به عنوان خوانده‌شده"
+
+msgid "Pin or unpin focused message or chat"
+msgstr "سنجاق کردن یا برداشتن سنجاق پیام یا گفتگوی فوکوس‌شده"
+
+msgid "Change media playback speed"
+msgstr "تغییر سرعت پخش رسانه"
+
+msgid "Toggle focus between audio playback slider and previous position"
+msgstr "جابه‌جایی فوکوس بین اسلایدر پخش صوت و موقعیت قبلی"
+
+msgid "Play or pause currently playing audio or voice message"
+msgstr "پخش یا توقف صوت یا پیام صوتی در حال پخش"
+
+msgid "Cancel voice recording, message reply, or edit. Press twice to cycle recording notification mode."
+msgstr "لغو ضبط صدا، پاسخ یا ویرایش پیام؛ با دو بار فشردن، حالت اعلان ضبط تغییر می‌کند."
+
+msgid "Start voice call with contact, or join group voice chat"
+msgstr "برقراری تماس صوتی با مخاطب یا ورود به گفتگوی صوتی گروه"
+
+msgid "Start video call"
+msgstr "برقراری تماس تصویری"
+
+msgid "Mute or unmute microphone in active call or voice chat"
+msgstr "قطع یا وصل میکروفون در تماس یا گفتگوی صوتی فعال"
+
+msgid "Turn camera on or off in active video call"
+msgstr "روشن یا خاموش کردن دوربین در تماس تصویری فعال"
+
+msgid "Toggle automatic live reading of incoming messages in the active chat"
+msgstr "فعال یا غیرفعال کردن خواندن زنده پیام‌های دریافتی در گفتگوی جاری"
+
+msgid "List not found"
+msgstr "لیست پیدا نشد"
+
+msgid "Open UnigramAccess settings panel"
+msgstr "باز کردن پنل تنظیمات UnigramAccess"
+
+msgid "Decline incoming call, end active call, or leave voice chat"
+msgstr "رد تماس ورودی، پایان تماس در حال انجام، یا خروج از گفتگوی صوتی"
+
+msgid "Help document not found"
+msgstr "فایل راهنما پیدا نشد"
