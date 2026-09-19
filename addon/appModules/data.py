@@ -4,6 +4,10 @@
 # Note: When adding new language entries to any dictionary, please keep the
 # language codes sorted alphabetically (e.g., 'ar', 'de', 'en', 'fa', 'ru', ...).
 
+import addonHandler
+
+addonHandler.initTranslation()
+
 # ============================================================================
 # 1. MESSAGE HISTORY & FORMATTING
 # ============================================================================

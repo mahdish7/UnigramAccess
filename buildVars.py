@@ -68,6 +68,8 @@ i18nSources: list[str] = pythonSources + ["buildVars.py"]
 excludedFiles: list[str] = [
 	"unigram_access.log",
 	"*.log",
+	"*.pyc",
+	"__pycache__/*",
 ]
 
 # Base language for the NVDA add-on

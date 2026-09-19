@@ -24,9 +24,10 @@ class UnigramMedia:
 		self._is_monitoring_download = False
 
 	def script_voiceMessageAcceleration(self, gesture):
-		targetButton = next((item for item in self.appModule.ui_helper.getElements() if item.role == Role.BUTTON and item.UIAAutomationId == "SpeedButton"), False)
-		if not targetButton and self.appModule.ui_helper.getElements()[0].role == Role.WINDOW:
-			targetButton = next((item for item in self.appModule.ui_helper.getElements()[0].children if item.role == Role.BUTTON and item.UIAAutomationId == "SpeedButton"), False)
+		elements = self.appModule.ui_helper.getElements()
+		targetButton = next((item for item in elements if getattr(item, "role", None) == Role.BUTTON and getattr(item, "UIAAutomationId", "") == "SpeedButton"), False)
+		if not targetButton and elements and getattr(elements[0], "role", None) == Role.WINDOW:
+			targetButton = next((item for item in getattr(elements[0], "children", []) if getattr(item, "role", None) == Role.BUTTON and getattr(item, "UIAAutomationId", "") == "SpeedButton"), False)
 		if targetButton: targetButton.doAction()
 		else: message(_("Nothing is playing right now"))
 
@@ -100,7 +101,11 @@ class UnigramMedia:
 		if targetButton:
 			lastFocus = api.getFocusObject()
 			targetButton.doAction()
-			lastFocus.setFocus()
+			if lastFocus:
+				try:
+					lastFocus.setFocus()
+				except Exception:
+					pass
 		else: message(_("Nothing is playing right now"))
 
 	def script_actionMediaInMessage(self, gesture):
