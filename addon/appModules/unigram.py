@@ -10,6 +10,7 @@ voice message controls, call management, and live chat monitoring.
 """
 
 # Standard library imports
+import os
 import re
 
 # NVDA core imports
@@ -428,7 +429,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that moves focus to the chat list.
-		description=_("Move focus to chat list"),
+		description=_("Move focus to chats, contacts, or settings list"),
 		gesture="kb:ALT+1",
 	)
 	def script_toChatList(self, gesture, arg=False):
@@ -436,7 +437,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that moves focus to the last message.
-		description=_("Move focus to the last message in an open chat"),
+		description=_("Move focus to the last message, topics, profile, or settings"),
 		gesture="kb:ALT+2",
 	)
 	def script_toLastMessage(self, gesture):
@@ -468,7 +469,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that moves focus to the group topics list.
-		description=_("Move focus to the list of group threads"),
+		description=_("Move focus to group topics list"),
 		gesture="kb:ALT+6",
 	)
 	def script_move_focus_to_list_threads(self, gesture):
@@ -492,7 +493,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that scrolls to the bottom of the chat.
-		description=_("Go to the end"),
+		description=_("Scroll to the bottom of the chat"),
 		gesture="kb:ALT+end",
 	)
 	def script_to_down(self, gesture):
@@ -534,7 +535,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that opens the More Options menu in an open chat.
-		description=_("Press \"More Options\" button in an open chat"),
+		description=_("Open more options menu in the active chat"),
 		gesture="kb:ALT+shift+O",
 	)
 	def script_showMoreOptions(self, gesture):
@@ -544,7 +545,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that copies the focused message or link.
-		description=_("Copy the message if it contains text. If the focus is on a link, the link will be copied"),
+		description=_("Copy message text, or copy focused link URL"),
 		gesture="kb:control+C",
 	)
 	def script_copyMessage(self, gesture):
@@ -552,7 +553,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that opens the Instant View page.
-		description=_("Press \"Instant view\" button, if it is included in the current message"),
+		description=_("Open Instant View for the focused message"),
 		gesture="kb:ALT+Q",
 	)
 	def script_instantView(self, gesture):
@@ -560,7 +561,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that toggles focus between the edit field and messages.
-		description=_("Move the focus to the edit field. If the focus is already in the edit field, then after pressing the hotkey, it will move to where it was before"),
+		description=_("Toggle focus between message edit field and previous position"),
 		gesture="kb:ALT+D",
 	)
 	def script_moveFocusToTextMessage(self, gesture):
@@ -568,7 +569,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that clicks the Attach File button.
-		description=_("Press \"Attach file\" button"),
+		description=_("Attach file or media to message"),
 		gesture="kb:control+shift+A",
 	)
 	def script_add_files(self, gesture):
@@ -576,7 +577,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that clicks the New Conversation button.
-		description=_("Press \"New conversation\" button"),
+		description=_("Start a new chat"),
 		gesture="kb:control+N",
 	)
 	def script_new_conversation(self, gesture):
@@ -631,7 +632,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that marks a chat as read or unread.
-		description=_("Mark a chat as read"),
+		description=_("Mark focused chat as read"),
 		gesture="kb:ALT+shift+R",
 	)
 	def script_readMessage(self, gesture):
@@ -656,7 +657,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that pins or unpins a message/chat.
-		description=_("Pin a message or chat"),
+		description=_("Pin or unpin focused message or chat"),
 		gesture="kb:control+P",
 	)
 	def script_attach(self, gesture):
@@ -682,7 +683,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that cycles voice message playback speed.
-		description=_("Increase/decrease the playback speed of voice messages"),
+		description=_("Change media playback speed"),
 		gesture="kb:ALT+X",
 	)
 	def script_voiceMessageAcceleration(self, gesture):
@@ -690,7 +691,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that toggles focus to the voice slider.
-		description=_("Toggle focus to voice slider"),
+		description=_("Toggle focus between audio playback slider and previous position"),
 		gesture="kb:ALT+S",
 	)
 	def script_toggleVoiceSlider(self, gesture):
@@ -706,7 +707,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that plays/pauses the current voice message.
-		description=_("Play/pause the voice message currently playing"),
+		description=_("Play or pause currently playing audio or voice message"),
 		gesture="kb:ALT+P",
 	)
 	def script_pauseVoiceMessage(self, gesture):
@@ -735,7 +736,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that cancels voice recording or cycles notification mode.
-		description=_("Cancel voice message recording or cycle notification mode"),
+		description=_("Cancel voice recording, message reply, or edit. Press twice to cycle recording notification mode."),
 		gesture="kb:control+D",
 	)
 	def script_cancelVoiceMessageRecording(self, gesture):
@@ -770,7 +771,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that initiates a voice call or joins voice chat.
-		description=_("Call if it's a contact, or enter a voice chat if it's a group"),
+		description=_("Start voice call with contact, or join group voice chat"),
 		gesture="kb:shift+alt+C",
 	)
 	def script_call(self, gesture):
@@ -778,7 +779,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that initiates a video call.
-		description=_("Press the video call button"),
+		description=_("Start video call"),
 		gesture="kb:shift+alt+V",
 	)
 	def script_videoCall(self, gesture):
@@ -786,7 +787,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that mutes/unmutes the microphone.
-		description=_("Press \"Mute/unmute microphone\" button"),
+		description=_("Mute or unmute microphone in active call or voice chat"),
 		gesture="kb:ALT+A",
 	)
 	def script_microphone(self, gesture):
@@ -794,7 +795,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that toggles the camera.
-		description=_("Press \"Enable/disable camera\" button"),
+		description=_("Turn camera on or off in active video call"),
 		gesture="kb:ALT+V",
 	)
 	def script_video(self, gesture):
@@ -809,7 +810,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that toggles live chat automatic message reading.
-		description=_("Enable automatic reading of new messages in the current chat"),
+		description=_("Toggle automatic live reading of incoming messages in the active chat"),
 		gesture="kb:ALT+L",
 	)
 	def script_toggle_live_chat(self, gesture):
@@ -823,25 +824,45 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_help(self, gesture):
 		"""Parse readme.md and display all keyboard shortcuts in a popup window."""
-		a = addonHandler.getCodeAddon() or next(
+		addon = addonHandler.getCodeAddon() or next(
 			(item for item in list(addonHandler.getAvailableAddons()) if item.name in ("UnigramAccess", "unigramAccess")),
 			None,
 		)
-		a = a.getDocFilePath()
-		# Replace the file extension because we need an md file
-		a = a[:-4] + "md"
-		with open(a, "r", encoding="utf-8") as file:
+		if not addon:
+			message(_("Help document not found"))
+			return
+
+		readme_path = addon.getDocFilePath("readme.md")
+		if not readme_path or not os.path.isfile(readme_path):
+			message(_("Help document not found"))
+			return
+
+		with open(readme_path, "r", encoding="utf-8") as file:
 			lines = file.readlines()
+
 		parsedLines = []
+		in_shortcuts = False
 		for line in lines:
-			line = line.strip()
-			if line.startswith("### "):
-				if parsedLines:
-					parsedLines.append("")
-				parsedLines.append(line.replace("### ", "") + ":")
-			elif line.startswith("* **"):
-				parsedLines.append(line.replace("* **", "").replace("**", ""))
+			stripped = line.strip()
+			if stripped.startswith("## "):
+				header = stripped[3:].strip().lower()
+				if "shortcut" in header or "میانبر" in header:
+					in_shortcuts = True
+				else:
+					in_shortcuts = False
+			elif in_shortcuts:
+				if stripped.startswith("### "):
+					if parsedLines:
+						parsedLines.append("")
+					parsedLines.append(stripped.replace("### ", "") + ":")
+				elif stripped.startswith("* **"):
+					parsedLines.append(stripped.replace("* **", "").replace("**", ""))
+
 		text = "\n".join(parsedLines).strip()
+		if not text:
+			message(_("Help document not found"))
+			return
+
 		TextWindow(text, _("List of shortcuts"), readOnly=True)
 
 	@script(gesture="kb:escape")
@@ -852,7 +873,10 @@ class AppModule(appModuleHandler.AppModule):
 			log.debug("Delete dialog: confirmed dismissal via Escape")
 		gesture.send()
 		if self.isExitFromMedia:
-			lastFocusObject = self.saved_items.get("last focus object")
-			if lastFocusObject and lastFocusObject.location:
-				lastFocusObject.setFocus()
+			try:
+				lastFocusObject = self.saved_items.get("last focus object")
+				if lastFocusObject and getattr(lastFocusObject, "location", None):
+					lastFocusObject.setFocus()
+			except Exception:
+				pass
 			self.isExitFromMedia = False

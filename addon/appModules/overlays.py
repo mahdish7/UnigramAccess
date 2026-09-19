@@ -194,10 +194,7 @@ class Message_list_item(ListItem):
 
 	@script(
 		# Translators: Description for the script that announces message time and reactions.
-		description=_(
-			"Announces the time a message was sent or received, as well as a list of reactions. "
-			"Double-clicking toggles the announcement mode for this information."
-		),
+		description=_("Announce message timestamp and reactions. Press twice to toggle automatic announcement."),
 		gesture="kb:ALT+W",
 	)
 	def script_toggle_sounding_message_information(self, gesture):
@@ -206,9 +203,9 @@ class Message_list_item(ListItem):
 		elif scriptHandler.getLastScriptRepeatCount() == 1:
 			conf.set("announce_end_of_message", not conf.get("announce_end_of_message"))
 			if conf.get("announce_end_of_message"):
-				message(_("The display of message sending or receiving time and the list of installed emojis is enabled."))
+				message(_("The display of message sending or receiving time and reactions is enabled."))
 			else:
-				message(_("The display of message sending or receiving time and the list of installed emojis is  disabled."))
+				message(_("The display of message sending or receiving time and reactions is disabled."))
 
 	def initOverlayClass(self):
 		self.positionInfo = self.parent.positionInfo

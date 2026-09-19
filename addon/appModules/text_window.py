@@ -7,7 +7,9 @@ class TextWindow(wx.Frame):
 	def __init__(self, text, title, readOnly=True, insertionPoint=0):
 		super().__init__(gui.mainFrame, title=title)
 		sizer = wx.BoxSizer(wx.VERTICAL)
-		style = wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH
+		style = wx.TE_MULTILINE | wx.TE_RICH
+		if readOnly:
+			style |= wx.TE_READONLY
 		self.outputCtrl = wx.TextCtrl(self, style=style)
 		self.outputCtrl.Bind(wx.EVT_KEY_DOWN, self.onOutputKeyDown)
 		sizer.Add(self.outputCtrl, proportion=1, flag=wx.EXPAND)

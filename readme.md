@@ -18,18 +18,18 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 ## Keyboard Shortcuts
 
 ### Navigation & Layout
-* **ALT+1**: Move focus to chat list (or contacts list if open, or settings categories).
-* **ALT+2**: Move focus to the last message in the active chat (or forum topics, profile panel, or settings detail panel).
+* **ALT+1**: Move focus to chats, contacts, or settings list.
+* **ALT+2**: Move focus to the last message, topics, profile, or settings.
 * **ALT+3**: Move focus to "unread messages" separator in the active chat.
 * **ALT+4**: Move focus to chat folders list.
 * **ALT+5**: Move focus to open profile panel.
-* **ALT+6**: Move focus to group topics / threads list.
+* **ALT+6**: Move focus to group topics list.
 * **ALT+shift+P**: Open current chat profile.
 * **ALT+M**: Open main navigation menu.
 * **ALT+end**: Scroll to the bottom of the chat.
 
 ### Messages & Interaction
-* **ALT+D**: Move focus to the message edit field (pressing again returns focus to previous position).
+* **ALT+D**: Toggle focus between message edit field and previous position.
 * **ALT+T**: Announce chat name and status (member count, online status, typing). Double-press toggles real-time tracking of chat activity.
 * **ALT+W**: Announce focused message timestamp and reactions. Double-press toggles automatic announcement of this information.
 * **Left arrow**: Announce the original replied-to message. Double-press moves focus to it. In media albums, moves to previous media.
@@ -46,21 +46,21 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+L**: Toggle automatic live announcement of incoming messages in the active chat.
 * **control+ALT+C**: Open comments thread for the focused message.
 * **ALT+Q**: Open Telegram Instant View for the current message.
-* **control+shift+A**: Press "Attach file" button.
-* **control+N**: Press "New chat" button.
+* **control+shift+A**: Attach file or media to message.
+* **control+N**: Start a new chat.
 * **ALT+shift+L**: Copy live stream RTMP URL and stream key to clipboard (in broadcast window).
-* **control+P**: Pin or unpin a message or chat.
-* **ALT+shift+O**: Press "More Options" button in an open chat.
+* **control+P**: Pin or unpin focused message or chat.
+* **ALT+shift+O**: Open more options menu in the active chat.
 * **Unassigned**: Save file attachment as...
 
 ### Media & Voice Messages
 * **space**: Play or pause focused voice/video message, or open attached media in full-screen viewer.
-* **ALT+P**: Play or pause currently active voice message or audio playback.
-* **ALT+X**: Cycle playback speed of voice messages.
-* **ALT+S**: Toggle focus between voice message slider and previous position.
+* **ALT+P**: Play or pause currently active audio or voice message.
+* **ALT+X**: Change media playback speed.
+* **ALT+S**: Toggle focus between audio playback slider and previous position.
 * **ALT+E**: Close active audio player bar.
 * **control+R**: Start or stop recording a voice message.
-* **control+D**: Press once to cancel voice recording or cancel active reply/edit; press twice to cycle recording notification mode.
+* **control+D**: Cancel voice recording, message reply, or edit. Press twice to cycle recording notification mode.
 * **NVDA+ALT+R**: Convert voice message to text (transcribe speech-to-text).
 
 ### Calls

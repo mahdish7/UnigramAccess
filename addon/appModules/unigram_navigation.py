@@ -28,7 +28,7 @@ class UnigramNavigation:
 			return True
 
 		if not arg:
-			message(_("Chat list not found"))
+			message(_("List not found"))
 
 	def script_toLastMessage(self, gesture):
 		# Priority 1: Focus or move caret to last message in active chat

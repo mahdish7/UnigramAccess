@@ -22,7 +22,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		super().terminate()
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(UnigramAccessSettings)
 
-	@script(description=_("Open UnigramAccess settings window"), gesture="kb:NVDA+ALT+U")
+	@script(description=_("Open UnigramAccess settings panel"), gesture="kb:NVDA+ALT+U")
 	def script_open_settings_dialog(self, gesture, arg = False):
 		wx.CallAfter(gui.mainFrame.popupSettingsDialog, gui.settingsDialogs.NVDASettingsDialog, UnigramAccessSettings)
 
@@ -88,7 +88,7 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 				pass
 
 	# End a call, decline call, or leave a voice chat
-	@script(description=_("Press \"Decline call\" button  if there is an incoming call, \"End call\" button if a call is in progress or leave voice chat if it is active."), gesture="kb:ALT+N")
+	@script(description=_("Decline incoming call, end active call, or leave voice chat"), gesture="kb:ALT+N")
 	def script_callCancellation(self, gesture):
 		gesture.send()
 		toast = self._getIncomingCallNotification()
