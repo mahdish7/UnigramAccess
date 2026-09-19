@@ -58,11 +58,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 			if caller:
 				ui.message(caller)
 				return
-		import appModuleHandler
-		appMod = appModuleHandler.getAppModuleFromProcessID(api.getFocusObject().processID)
-		if appMod and hasattr(appMod, "script_read_profile_name"):
-			appMod.script_read_profile_name(gesture)
-			return
+		focus = api.getFocusObject()
+		if focus:
+			import appModuleHandler
+			appMod = appModuleHandler.getAppModuleFromProcessID(focus.processID)
+			if appMod and hasattr(appMod, "script_read_profile_name"):
+				appMod.script_read_profile_name(gesture)
+				return
 		gesture.send()
 
 	# Call answer
@@ -72,13 +74,13 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		toast = self._getIncomingCallNotification()
 		if not toast:
 			return
-		button = next(
-			(
-				c for c in getattr(toast, "children", [])
-				if getattr(c, "UIAAutomationId", "") == "VerbButton" and getattr(c, "name", "") == "Audio"
-			),
-			None,
-		)
+		verb_buttons = [
+			c for c in getattr(toast, "children", [])
+			if getattr(c, "UIAAutomationId", "") == "VerbButton"
+		]
+		button = next((c for c in verb_buttons if getattr(c, "name", "") == "Audio"), None)
+		if not button and verb_buttons:
+			button = verb_buttons[0]
 		if button:
 			try:
 				button.doAction()
@@ -92,23 +94,25 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		toast = self._getIncomingCallNotification()
 		button = None
 		if toast:
-			button = next(
-				(
-					c for c in getattr(toast, "children", [])
-					if getattr(c, "UIAAutomationId", "") == "VerbButton" and getattr(c, "name", "") == "Decline"
-				),
-				None,
-			)
+			verb_buttons = [
+				c for c in getattr(toast, "children", [])
+				if getattr(c, "UIAAutomationId", "") == "VerbButton"
+			]
+			button = next((c for c in verb_buttons if getattr(c, "name", "") == "Decline"), None)
+			if not button and verb_buttons:
+				button = verb_buttons[1] if len(verb_buttons) > 1 else verb_buttons[0]
 		if button:
 			try:
 				button.doAction()
 			except Exception:
 				pass
 			return
-		import appModuleHandler
-		appMod = appModuleHandler.getAppModuleFromProcessID(api.getFocusObject().processID)
-		if appMod and hasattr(appMod, 'script_callCancellation'):
-			appMod.script_callCancellation(gesture)
+		focus = api.getFocusObject()
+		if focus:
+			import appModuleHandler
+			appMod = appModuleHandler.getAppModuleFromProcessID(focus.processID)
+			if appMod and hasattr(appMod, 'script_callCancellation'):
+				appMod.script_callCancellation(gesture)
 
 
 class UnigramAccessSettings(SettingsPanel):
