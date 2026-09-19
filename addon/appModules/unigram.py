@@ -74,6 +74,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	# State tracking flags
 	profilePanelElement = False
+	tabsFolderElement = None
 	isDelete = False
 	isOpenProfile = False
 	isSkipName = 0

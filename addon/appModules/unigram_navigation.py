@@ -51,19 +51,22 @@ class UnigramNavigation:
 
 	def script_to_tabs_folder(self, gesture):
 		obj = self.appModule.saved_items.get("tabs folder")
-		if obj and obj.location and obj.location.width:
-			el = next((item for item in self.appModule.tabsFolderElement.children if State.SELECTED in item.states), None)
-			if el: el.setFocus()
-			else: message(_("Chat folder list not found"))
+		if obj and getattr(obj, "location", None) and obj.location.width:
+			el = next((item for item in getattr(obj, "children", []) if State.SELECTED in getattr(item, "states", set())), None)
+			if el:
+				el.setFocus()
+			else:
+				message(_("Chat folder list not found"))
 		else:
-			list = self.appModule.ui_helper.getChatsListElement()
-			if list:
-				obj = list.previous
+			list_elem = self.appModule.ui_helper.getChatsListElement()
+			if list_elem and getattr(list_elem, "previous", None):
+				obj = list_elem.previous
 				self.appModule.saved_items.save("tabs folder", obj)
-				el = next((item for item in obj.children if State.SELECTED in item.states), None)
-				if el: el.setFocus()
-				else: message(_("Chat folder list not found"))
-			else: message(_("Chat folder list not found"))
+				el = next((item for item in getattr(obj, "children", []) if State.SELECTED in getattr(item, "states", set())), None)
+				if el:
+					el.setFocus()
+					return
+			message(_("Chat folder list not found"))
 
 	def script_move_focus_to_list_threads(self, gesture):
 		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_threads_list():
