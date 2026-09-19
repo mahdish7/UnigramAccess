@@ -17,20 +17,33 @@ class Saved_items:
 
 	def get(self, key):
 		import comtypes
-		windowId = api.getFocusObject().windowHandle
+		focus = api.getFocusObject()
+		if not focus:
+			return False
+		windowId = getattr(focus, "windowHandle", 0)
+		if not windowId:
+			return False
 		try:
-			obj = self._items[windowId][key]
+			obj = self._items.get(windowId, {}).get(key)
+			if not obj:
+				return False
 			if hasattr(obj, "name"):
 				_ = obj.name
 			return obj
 		except comtypes.COMError:
-			del self._items[windowId][key]
+			if windowId in self._items and key in self._items[windowId]:
+				del self._items[windowId][key]
 			return False
 		except Exception:
 			return False
 
 	def save(self, key, obj):
-		windowId = api.getFocusObject().windowHandle
+		focus = api.getFocusObject()
+		if not focus:
+			return
+		windowId = getattr(focus, "windowHandle", 0)
+		if not windowId:
+			return
 		if windowId not in self._items:
 			self._items[windowId] = {}
 		self._items[windowId][key] = obj
