@@ -8,11 +8,8 @@ import ui
 import gui
 from gui.settingsDialogs import SettingsPanel
 import wx
-import os
 addonHandler.initTranslation()
-import threading
 from appModules.cnf import conf, listLanguages
-from .updater import onCheckForUpdates
 
 
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
@@ -20,12 +17,6 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(UnigramAccessSettings)
-		# Check if the user folder contains a temporary add-on file, if so, then delete it
-		fp = os.path.join(globalVars.appArgs.configPath, "unigramaccess.nvda-addon")
-		if os.path.exists(fp): os.remove(fp)
-		# Checking for updates
-		if conf.get("is_automatically_check_for_updates") and not globalVars.appArgs.secure:
-			threading.Thread(target=onCheckForUpdates, args=(False, True,), daemon=True).start()
 
 	def terminate(self):
 		super().terminate()
@@ -209,12 +200,6 @@ class UnigramAccessSettings(SettingsPanel):
 		# Fix toggle buttons for some users
 		self.isFixedToggleButton = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Check this box if the voice message recording function or the voice message playback speed change function does not work properly")))
 		self.isFixedToggleButton.SetValue(conf.get("isFixedToggleButton"))
-		# Checking for Updates on NVDA Startup
-		self.is_automatically_check_for_updates = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Check for UnigramAccess updates on NVDA startup")))
-		self.is_automatically_check_for_updates.SetValue(conf.get("is_automatically_check_for_updates"))
-		# Button to check for updates
-		self.checkForUpdates = settingsSizerHelper.addItem(wx.Button(self, label=_("Check for &updates")))
-		self.checkForUpdates.Bind(wx.EVT_BUTTON, onCheckForUpdates)
 
 		# Custom Log settings
 		self.custom_log_level = settingsSizerHelper.addLabeledControl(_("Add-on log level:"), wx.Choice, choices=[self.listCustomLogLevels[item] for item in self.listCustomLogLevels])
@@ -262,7 +247,6 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("voiceMediaButtonDetails", self.voiceMediaButtonDetails.IsChecked())
 		conf.set("voice_the_presence_of_a_reaction", self.voice_the_presence_of_a_reaction.IsChecked())
 		conf.set("isFixedToggleButton", self.isFixedToggleButton.IsChecked())
-		conf.set("is_automatically_check_for_updates", self.is_automatically_check_for_updates.IsChecked())
 		
 		level = self.get_key(self.listCustomLogLevels, self.custom_log_level.GetStringSelection())
 		conf.set("custom_log_level", level)
