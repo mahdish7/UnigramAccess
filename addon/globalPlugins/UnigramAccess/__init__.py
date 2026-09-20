@@ -169,6 +169,21 @@ class UnigramAccessSettings(SettingsPanel):
 		# Report not seen before message content
 		self.unreadBeforeMessageContent = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Speak \"Not Seen\" before reading contents of a message")))
 		self.unreadBeforeMessageContent.SetValue(conf.get("unreadBeforeMessageContent"))
+		# Announce timestamp and reactions at the end of messages
+		self.announce_end_of_message = settingsSizerHelper.addItem(
+			wx.CheckBox(self, label=_("Announce timestamp and reactions at the end of messages"))
+		)
+		self.announce_end_of_message.SetValue(conf.get("announce_end_of_message"))
+		# Automatically announce incoming messages in active chat
+		self.automatically_announce_new_messages = settingsSizerHelper.addItem(
+			wx.CheckBox(self, label=_("Automatically announce incoming messages in active chat"))
+		)
+		self.automatically_announce_new_messages.SetValue(conf.get("automatically announce new messages"))
+		# Automatically announce activity in chats
+		self.automatically_announce_activity_in_chats = settingsSizerHelper.addItem(
+			wx.CheckBox(self, label=_("Automatically announce activity in chats (typing, online status)"))
+		)
+		self.automatically_announce_activity_in_chats.SetValue(conf.get("automatically announce activity in chats"))
 		# Announce the phrases "Administrator" and "Owner" on messages in communities
 		self.notify_administrators_in_messages = settingsSizerHelper.addItem(wx.CheckBox(
 			self, label=_('Announce the phrases "Administrator" and "Owner" on messages in communities')))
@@ -198,12 +213,6 @@ class UnigramAccessSettings(SettingsPanel):
 		# Announce file details on media buttons
 		self.voiceMediaButtonDetails = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Announce file details (name, size, duration) on media buttons")))
 		self.voiceMediaButtonDetails.SetValue(conf.get("voiceMediaButtonDetails"))
-		# Report if the message contains a reaction
-		self.voice_the_presence_of_a_reaction = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Announce if the message contains a reaction")))
-		self.voice_the_presence_of_a_reaction.SetValue(conf.get("voice_the_presence_of_a_reaction"))
-		# Fix toggle buttons for some users
-		self.isFixedToggleButton = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Check this box if the voice message recording function or the voice message playback speed change function does not work properly")))
-		self.isFixedToggleButton.SetValue(conf.get("isFixedToggleButton"))
 
 		# Custom Log settings
 		self.custom_log_level = settingsSizerHelper.addLabeledControl(_("Add-on log level:"), wx.Choice, choices=[self.listCustomLogLevels[item] for item in self.listCustomLogLevels])
@@ -237,6 +246,9 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("voiceTypeAfterChatName", self.get_key(self.listVoiceTypeAfterChatName, self.voiceTypeAfterChatName.GetStringSelection()))
 		conf.set("saySenderName", self.get_key(self.listSaySenderName, self.saySenderName.GetStringSelection()))
 		conf.set("unreadBeforeMessageContent", self.unreadBeforeMessageContent.IsChecked())
+		conf.set("announce_end_of_message", self.announce_end_of_message.IsChecked())
+		conf.set("automatically announce new messages", self.automatically_announce_new_messages.IsChecked())
+		conf.set("automatically announce activity in chats", self.automatically_announce_activity_in_chats.IsChecked())
 		conf.set("notify administrators in messages",
 		         self.notify_administrators_in_messages.IsChecked())
 		conf.set("voiceFolderNames", self.voiceFolderNames.IsChecked())
@@ -249,8 +261,6 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("actionDescriptionForLinks", self.actionDescriptionForLinks.IsChecked())
 		conf.set("voiceFullDescriptionOfLinkToYoutube", self.voiceFullDescriptionOfLinkToYoutube.IsChecked())
 		conf.set("voiceMediaButtonDetails", self.voiceMediaButtonDetails.IsChecked())
-		conf.set("voice_the_presence_of_a_reaction", self.voice_the_presence_of_a_reaction.IsChecked())
-		conf.set("isFixedToggleButton", self.isFixedToggleButton.IsChecked())
 		
 		level = self.get_key(self.listCustomLogLevels, self.custom_log_level.GetStringSelection())
 		conf.set("custom_log_level", level)

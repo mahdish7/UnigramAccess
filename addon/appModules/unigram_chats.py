@@ -38,7 +38,9 @@ class Title_change_tracking:
 
 	@classmethod
 	def tick(cls):
-		if not cls.active or cls.pause:
+		if not cls.active or cls.pause or not conf.get("automatically announce activity in chats"):
+			if not conf.get("automatically announce activity in chats"):
+				cls.active = False
 			return
 		title = cls.savedItems.get("profile name")
 		if not title or not title.isInForeground:

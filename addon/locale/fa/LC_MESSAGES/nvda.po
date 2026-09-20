@@ -1318,8 +1318,8 @@ msgstr "جابه‌جایی فوکوس بین اسلایدر پخش صوت و م
 msgid "Play or pause currently playing audio or voice message"
 msgstr "پخش یا توقف صوت یا پیام صوتی در حال پخش"
 
-msgid "Cancel voice recording, message reply, or edit. Press twice to cycle recording notification mode."
-msgstr "لغو ضبط صدا، پاسخ یا ویرایش پیام؛ با دو بار فشردن، حالت اعلان ضبط تغییر می‌کند."
+msgid "Cancel voice recording, message reply, or edit"
+msgstr "لغو ضبط پیام صوتی، پاسخ یا ویرایش پیام"
 
 msgid "Start voice call with contact, or join group voice chat"
 msgstr "برقراری تماس صوتی با مخاطب یا ورود به گفتگوی صوتی گروه"
@@ -1347,3 +1347,12 @@ msgstr "رد تماس ورودی، پایان تماس در حال انجام، 
 
 msgid "Help document not found"
 msgstr "فایل راهنما پیدا نشد"
+
+msgid "Announce timestamp and reactions at the end of messages"
+msgstr "اعلام زمان ارسال و واکنش‌ها در انتهای پیام‌ها"
+
+msgid "Automatically announce incoming messages in active chat"
+msgstr "اعلام خودکار پیام‌های جدید در چت فعال"
+
+msgid "Automatically announce activity in chats (typing, online status)"
+msgstr "اعلام خودکار فعالیت‌ها در چت (در حال نوشتن، آنلاین بودن)"
