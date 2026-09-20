@@ -313,9 +313,11 @@ class EditableText(editableText.EditableText):
 		except Exception:
 			pass
 		if info and info.text == "":
-			if conf.get("action_when_pressing_up_arrow_in_text_field") == "to_messages":
+			action = conf.get("action_when_pressing_up_arrow_in_text_field")
+			if action == "to_messages":
 				self.appModule.nav_helper.script_toLastMessage(None)
-			else:
-				message("")
-			return
+				return
+			elif action == "do_nothing":
+				return
+			return super().script_caret_moveByLine(gesture)
 		return super().script_caret_moveByLine(gesture)

@@ -297,7 +297,7 @@ class UnigramMedia:
 
 	def start_download_monitoring(self, obj):
 		"""Poll download progress in real time (500ms) while focus remains on the actively downloading media button."""
-		if conf.get("voicingPerformanceIndicators") == "none":
+		if not conf.get("voiceDownloadProgress"):
 			return
 		if not obj or getattr(obj, "UIAAutomationId", "") not in ("Button", "Download"):
 			return
@@ -312,7 +312,7 @@ class UnigramMedia:
 		self.last_progress_percentage = None
 
 		def monitor():
-			if conf.get("voicingPerformanceIndicators") == "none":
+			if not conf.get("voiceDownloadProgress"):
 				self._is_monitoring_download = False
 				return
 
