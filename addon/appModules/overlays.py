@@ -295,30 +295,6 @@ class SettingsRadioListItem:
 
 
 
-# TODO: Inactive overlay class.
-# Currently not added to clsList in chooseNVDAObjectOverlayClasses.
-# Needs matching conditions in AppModule to inject on quiz explanation controls.
-class ExplanationCorrectAnswerInQuiz:
-	"""Overlay for quiz answer explanation buttons.
-
-	Opens the explanation text in a TextWindow popup.
-	"""
-
-	def script_activate_element(self, gesture):
-		gesture.send()
-		elements = self.appModule.ui_helper.getElements()
-		try:
-			obj = elements[1].firstChild.firstChild.firstChild
-		except Exception:
-			obj = None
-		if not obj:
-			return False
-		TextWindow(obj.name, _("Explanation"), readOnly=False)
-
-	__gestures = {
-		"kb:enter": "activate_element",
-		"kb:space": "activate_element",
-	}
 
 
 class EditableText(editableText.EditableText):

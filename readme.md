@@ -60,7 +60,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+S**: Toggle focus between audio playback slider and previous position.
 * **ALT+E**: Close active audio player bar.
 * **control+R**: Start or stop recording a voice message.
-* **control+D**: Cancel voice recording, message reply, or edit. Press twice to cycle recording notification mode.
+* **control+D**: Cancel voice recording, message reply, or edit.
 * **NVDA+ALT+R**: Convert voice message to text (transcribe speech-to-text).
 
 ### Calls
@@ -89,6 +89,9 @@ The UnigramAccess settings panel (accessible via **NVDA+ALT+U** or NVDA Settings
 * **Say the sender's name**: Control whether the sender's name is announced (never, sent messages only, received messages only, or all messages).
 * **Action when pressing Up Arrow in message edit field**: Configure whether pressing Up Arrow in an empty edit field does nothing, edits the last sent message, or moves focus to the last message in the chat.
 * **Speak "Not Seen" before reading contents**: Announces unread status before the message text and suppresses "Seen".
+* **Announce timestamp and reactions at the end of messages**: Announce message sending or receiving time and reactions when moving through messages.
+* **Automatically announce incoming messages in active chat**: Automatically read incoming messages in the open chat in real time.
+* **Automatically announce chat activity**: Track and announce typing status, online status, and member count changes in real time.
 * **Announce "Administrator" and "Owner" badges**: Speak admin badges on messages in communities.
 * **Speak folder names when switching**: Read folder tabs when switching between them.
 * **Audio notifications for deletion**: Play a sound confirmation when deleting messages or chats.
@@ -97,7 +100,6 @@ The UnigramAccess settings panel (accessible via **NVDA+ALT+U** or NVDA Settings
 * **Progress bar notification level**: Choose whether to announce all progress bars or suppress them.
 * **URL descriptions**: Read descriptions of links attached to messages, and full descriptions of YouTube videos.
 * **Announce file details on media buttons**: Speak name, size, and duration on media action buttons.
-* **Announce message reactions**: Speak whether a message has reactions.
 * **Logging & Diagnostics**: Adjust add-on log level (Disabled, Error, Warning, Info, Debug) with buttons to open and clear the log file.
 
 ## Changes in version 1.0.0

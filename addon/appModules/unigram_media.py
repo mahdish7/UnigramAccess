@@ -169,13 +169,8 @@ class UnigramMedia:
 				message(_("Video"))
 			else:
 				message(_("Audio"))
-		if conf.get("isFixedToggleButton"):
-			log.debug("Standard button press")
-			self.appModule.isSkipName = 1
-			gesture.send()
-		else:
-			obj.doAction()
-			lastFocus.setFocus()
+		obj.doAction()
+		lastFocus.setFocus()
 
 	def get_elapsed_label(self):
 		"""Find ElapsedLabel indicating active voice recording."""
@@ -203,19 +198,6 @@ class UnigramMedia:
 			except Exception:
 				pass
 		return True
-
-	def cycle_voice_recording_indicator(self):
-		"""Cycle notification mode between none, text, and audio."""
-		current = conf.get("voiceMessageRecordingIndicator")
-		if current == "none":
-			conf.set("voiceMessageRecordingIndicator", "text")
-			message(_("Voice recording notifications set to text"))
-		elif current == "text":
-			conf.set("voiceMessageRecordingIndicator", "audio")
-			message(_("Voice recording notifications set to sounds"))
-		elif current == "audio":
-			conf.set("voiceMessageRecordingIndicator", "none")
-			message(_("Recording voice messages has standard behavior"))
 
 	def script_cancelVoiceMessageRecording(self, gesture):
 		"""Delegate to AppModule dispatcher for backward compatibility."""

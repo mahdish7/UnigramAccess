@@ -37,7 +37,9 @@ class Chat_update:
 
 	@classmethod
 	def tick(cls):
-		if not cls.active or cls.pause:
+		if not cls.active or cls.pause or not conf.get("automatically announce new messages"):
+			if not conf.get("automatically announce new messages"):
+				cls.active = False
 			return
 		try:
 			lastMessage = cls.app.ui_helper.getMessagesElement().lastChild
@@ -273,20 +275,6 @@ class UnigramMessages:
 		textMessage = textMessage.replace("%key", keyName)
 		message(textMessage)
 
-	# TODO: Incomplete / Reserved feature.
-	# Sets 'isSetReaction' on appModule, but the focus handler in AppModule
-	# does not currently consume or navigate reaction buttons. Not bound to any gesture.
-	def script_set_reaction(self, gesture):
-		"""Trigger a context menu reaction selection."""
-		obj = api.getFocusObject()
-		if not self.appModule.ui_helper.is_message_object(obj):
-			return
-		CACHED_KEYS["Applications"].send()
-		try:
-			index = int(gesture.mainKeyName[-1])
-		except (AttributeError, ValueError):
-			return
-		self.appModule.isSetReaction = index
 
 	def activate_option_for_menu(self, option):
 		"""Open context menu on focused message and automatically select a specific option."""

@@ -78,7 +78,6 @@ class AppModule(appModuleHandler.AppModule):
 	tabsFolderElement = None
 	isDelete = False
 	isOpenProfile = False
-	isSkipName = 0
 	executeContextMenuOption = False
 	isExitFromMedia = False
 
@@ -267,12 +266,14 @@ class AppModule(appModuleHandler.AppModule):
 	def _restoreBackgroundTimers(self):
 		"""Restore suspended background polling timers after window reactivation."""
 		restored = False
-		if conf.get("automatically announce new messages") and Chat_update.pause:
-			Chat_update.restore(self)
-			restored = True
-		if conf.get("automatically announce activity in chats") and Title_change_tracking.pause:
-			Title_change_tracking.restore(self.saved_items)
-			restored = True
+		if conf.get("automatically announce new messages"):
+			if Chat_update.pause or not Chat_update.active:
+				Chat_update.restore(self)
+				restored = True
+		if conf.get("automatically announce activity in chats"):
+			if Title_change_tracking.pause or not Title_change_tracking.active:
+				Title_change_tracking.restore(self.saved_items)
+				restored = True
 		return restored
 
 	def _handleSliderFocusRestoration(self, obj):
@@ -299,12 +300,7 @@ class AppModule(appModuleHandler.AppModule):
 
 		Returns True if the focus event was consumed (should not call nextHandler).
 		"""
-		if self.isSkipName:
-			speech.cancelSpeech()
-			self.isSkipName -= 1
-			return True
-
-		elif self.isOpenProfile:
+		if self.isOpenProfile:
 			self.isOpenProfile = False
 			panel = next(
 				(item for item in self.ui_helper.getElements() if item.UIAAutomationId == "ScrollingHost"),
@@ -735,18 +731,11 @@ class AppModule(appModuleHandler.AppModule):
 		return self.media_helper.script_recordingVoiceMessage(gesture)
 
 	@script(
-		# Translators: Description for the script that cancels voice recording or cycles notification mode.
-		description=_("Cancel voice recording, message reply, or edit. Press twice to cycle recording notification mode."),
+		# Translators: Description for the script that cancels voice recording, message reply, or edit.
+		description=_("Cancel voice recording, message reply, or edit"),
 		gesture="kb:control+D",
 	)
 	def script_cancelVoiceMessageRecording(self, gesture):
-		import scriptHandler
-
-		# Double press: Cycle voice recording indicator setting
-		if scriptHandler.getLastScriptRepeatCount() == 1:
-			self.media_helper.cycle_voice_recording_indicator()
-			return
-
 		# Single press priority 1: Active voice message recording takes precedence
 		if self.media_helper.is_voice_recording():
 			self.media_helper.cancel_voice_recording(gesture)
