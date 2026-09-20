@@ -82,23 +82,36 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 
 ## Configuration Options
 
-The UnigramAccess settings panel (accessible via **NVDA+ALT+U** or NVDA Settings -> UnigramAccess) provides the following options:
+The UnigramAccess settings panel (accessible via **NVDA+ALT+U** or NVDA Settings -> UnigramAccess) is organized into 6 accessible categories:
 
+### 1. General & Navigation
 * **Interface language in Unigram**: Select the language used by Unigram to ensure accurate recognition of UI elements.
-* **Speak the type of chat in the chat list**: Announce chat type before name, after name, or do not speak chat type.
-* **Say the sender's name**: Control whether the sender's name is announced (never, sent messages only, received messages only, or all messages).
-* **Action when pressing Up Arrow in message edit field**: Configure whether pressing Up Arrow in an empty edit field does nothing, edits the last sent message, or moves focus to the last message in the chat.
-* **Speak "Not Seen" before reading contents**: Announces unread status before the message text and suppresses "Seen".
-* **Announce "Administrator" and "Owner" badges**: Speak admin badges on messages in communities.
-* **Speak folder names when switching**: Read folder tabs when switching between them.
-* **Audio notifications for deletion**: Play a sound confirmation when deleting messages or chats.
-* **Display confirmation dialog when deleting**: Show a confirmation prompt before deleting.
-* **Voice message recording notification method**: Choose between Audio notification, Text notification, or standard Telegram behavior.
-* **Progress bar notification level**: Choose whether to announce all progress bars or suppress them.
-* **URL descriptions**: Read descriptions of links attached to messages, and full descriptions of YouTube videos.
+* **Chat type announcement in chats list**: Announce chat type before name, after name, or do not announce.
+
+### 2. Messages & Reading
+* **Announce sender name**: Control whether the sender's name is announced (disabled, sent messages only, received messages only, or all messages).
+* **Up arrow action in empty message edit field**: Configure whether pressing Up Arrow in an empty edit field edits the last sent message, moves focus to the last message in the chat, or does nothing.
+* **Speak "Not seen" before message text**: Announces unread status before the message text and suppresses "Seen".
+* **Announce timestamp and reactions at end of messages**: Announce message sending or receiving time and reactions when moving through messages.
+* **Announce "Administrator" and "Owner" badges in communities**: Speak admin badges on messages in communities.
+* **Read descriptions of message links**: Read descriptions and summaries of web links and video previews attached to messages.
+* **Clean up repetitive and boilerplate text in link previews**: Strip repetitive boilerplate text (such as generic YouTube platform descriptions) and tracking parameters from URLs.
+
+### 3. Live Monitoring & Activity
+* **Automatically read incoming messages in active chat**: Automatically announce incoming messages in the open chat in real time.
+* **Announce chat activity**: Track and announce typing status, online status, and member count changes in real time.
+
+### 4. Media & Voice Messages
+* **Voice recording notification mode**: Choose between Sound notification, Text notification, or standard Telegram behavior.
 * **Announce file details on media buttons**: Speak name, size, and duration on media action buttons.
-* **Announce message reactions**: Speak whether a message has reactions.
-* **Logging & Diagnostics**: Adjust add-on log level (Disabled, Error, Warning, Info, Debug) with buttons to open and clear the log file.
+* **Announce file download progress**: Announce download progress percentage when focused on active download buttons.
+
+### 5. Deletion & Confirmation
+* **Show confirmation dialog when deleting messages and chats**: Display a confirmation prompt before deleting.
+* **Play sound when deleting messages and chats**: Play a sound confirmation when deleting messages or chats.
+
+### 6. Logging & Diagnostics
+* **Add-on log level**: Adjust add-on log level (Disabled, Error, Warning, Info, Debug) with buttons to open and clear the log file.
 
 ## Changes in version 1.0.0
 

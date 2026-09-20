@@ -120,27 +120,23 @@ class UnigramAccessSettings(SettingsPanel):
 	listVoiceTypeAfterChatName = {
 		"beforeName": _("Before chat name"),
 		"afterName": _("After chat name"),
-		"don'tVoice": _("Do not speak chat type")
+		"don'tVoice": _("Do not announce")
 	}
 	listVoiceMessageRecordingIndicator = {
-		"none": _("Revert to standard voice message recording behavior"),
+		"none": _("Standard Telegram behavior"),
 		"text": _("Text notification"),
-		"audio": _("sound notification")
-	}
-	listVoicingPerformanceIndicators = {
-		"all": _("Announce all progress bars"),
-		"none": _("Do not announce any progress bars"),
+		"audio": _("Sound notification")
 	}
 	listSaySenderName = {
-		"none": _("Do not say at all"),
-		"sent": _("Only in sent messages"),
-		"received": _("Only in received messages"),
-		"all": _("In all messages")
+		"none": _("Do not announce"),
+		"send": _("Sent messages only"),
+		"received": _("Received messages only"),
+		"all": _("All messages")
 	}
 	list_actions_when_pressing_up_arrow_in_text_field = {
-		"block": _("Do nothing"),
-		"normal": _("Activate editing of last sent message"),
-		"to_messages": _("Move focus to the last message in a chat"),
+		"edit": _("Edit last sent message"),
+		"to_messages": _("Move focus to last message"),
+		"do_nothing": _("Do nothing"),
 	}
 	
 	listCustomLogLevels = {
@@ -153,81 +149,162 @@ class UnigramAccessSettings(SettingsPanel):
 	
 	def makeSettings(self, settingsSizer):
 		settingsSizerHelper = gui.guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
-		# Selecting an interface language
-		self.lang = settingsSizerHelper.addLabeledControl(_("Interface language in Unigram:"), wx.Choice, choices=list(listLanguages.values()))
+
+		# ── 1. General and Navigation ────────────────────────────────────
+		genBox = wx.StaticBox(self, label=_("General and Navigation"))
+		genSizer = wx.StaticBoxSizer(genBox, wx.VERTICAL)
+		genHelper = gui.guiHelper.BoxSizerHelper(genBox, sizer=genSizer)
+
+		self.lang = genHelper.addLabeledControl(
+			_("Interface language in Unigram:"),
+			wx.Choice,
+			choices=list(listLanguages.values())
+		)
 		self.lang.SetStringSelection(listLanguages[conf.get("lang")])
-		# Chat type announce mode
-		self.voiceTypeAfterChatName = settingsSizerHelper.addLabeledControl(_("Speak the type of chat in the chat list:"), wx.Choice, choices=[self.listVoiceTypeAfterChatName[item] for item in self.listVoiceTypeAfterChatName])
+
+		self.voiceTypeAfterChatName = genHelper.addLabeledControl(
+			_("Chat type announcement in chats list:"),
+			wx.Choice,
+			choices=[self.listVoiceTypeAfterChatName[item] for item in self.listVoiceTypeAfterChatName]
+		)
 		self.voiceTypeAfterChatName.SetStringSelection(self.listVoiceTypeAfterChatName[conf.get("voiceTypeAfterChatName")])
-		# Message sender announcement
-		self.saySenderName = settingsSizerHelper.addLabeledControl(_("Say the sender's name in:"), wx.Choice, choices=[self.listSaySenderName[item] for item in self.listSaySenderName])
+
+		settingsSizerHelper.addItem(genSizer)
+
+		# ── 2. Messages and Reading ──────────────────────────────────────
+		msgBox = wx.StaticBox(self, label=_("Messages and Reading"))
+		msgSizer = wx.StaticBoxSizer(msgBox, wx.VERTICAL)
+		msgHelper = gui.guiHelper.BoxSizerHelper(msgBox, sizer=msgSizer)
+
+		self.saySenderName = msgHelper.addLabeledControl(
+			_("Announce sender name:"),
+			wx.Choice,
+			choices=[self.listSaySenderName[item] for item in self.listSaySenderName]
+		)
 		self.saySenderName.SetStringSelection(self.listSaySenderName[conf.get("saySenderName")])
-		# Selecting the action when pressing the up arrow in the text editor
-		self.action_when_pressing_up_arrow_in_text_field = settingsSizerHelper.addLabeledControl(
-			_("Action when pressing the up arrow in the message edit field"), wx.Choice, choices=list(self.list_actions_when_pressing_up_arrow_in_text_field.values()))
-		self.action_when_pressing_up_arrow_in_text_field.SetStringSelection(self.list_actions_when_pressing_up_arrow_in_text_field[conf.get("action_when_pressing_up_arrow_in_text_field")])
-		# Report not seen before message content
-		self.unreadBeforeMessageContent = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Speak \"Not Seen\" before reading contents of a message")))
+
+		self.action_when_pressing_up_arrow_in_text_field = msgHelper.addLabeledControl(
+			_("Up arrow action in empty message edit field:"),
+			wx.Choice,
+			choices=list(self.list_actions_when_pressing_up_arrow_in_text_field.values())
+		)
+		self.action_when_pressing_up_arrow_in_text_field.SetStringSelection(
+			self.list_actions_when_pressing_up_arrow_in_text_field[conf.get("action_when_pressing_up_arrow_in_text_field")]
+		)
+
+		self.unreadBeforeMessageContent = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Speak \"Not seen\" before message text"))
+		)
 		self.unreadBeforeMessageContent.SetValue(conf.get("unreadBeforeMessageContent"))
-		# Announce timestamp and reactions at the end of messages
-		self.announce_end_of_message = settingsSizerHelper.addItem(
-			wx.CheckBox(self, label=_("Announce timestamp and reactions at the end of messages"))
+
+		self.announce_end_of_message = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Announce timestamp and reactions at end of messages"))
 		)
 		self.announce_end_of_message.SetValue(conf.get("announce_end_of_message"))
-		# Automatically announce incoming messages in active chat
-		self.automatically_announce_new_messages = settingsSizerHelper.addItem(
-			wx.CheckBox(self, label=_("Automatically announce incoming messages in active chat"))
+
+		self.notify_administrators_in_messages = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_('Announce "Administrator" and "Owner" badges in communities'))
+		)
+		self.notify_administrators_in_messages.SetValue(conf.get("notify administrators in messages"))
+
+		self.actionDescriptionForLinks = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Read descriptions of message links"))
+		)
+		self.actionDescriptionForLinks.SetValue(conf.get("actionDescriptionForLinks"))
+
+		self.cleanLinkDescriptions = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Clean up repetitive and boilerplate text in link previews"))
+		)
+		self.cleanLinkDescriptions.SetValue(conf.get("cleanLinkDescriptions"))
+
+		settingsSizerHelper.addItem(msgSizer)
+
+		# ── 3. Live Monitoring and Activity ──────────────────────────────
+		liveBox = wx.StaticBox(self, label=_("Live Monitoring and Activity"))
+		liveSizer = wx.StaticBoxSizer(liveBox, wx.VERTICAL)
+		liveHelper = gui.guiHelper.BoxSizerHelper(liveBox, sizer=liveSizer)
+
+		self.automatically_announce_new_messages = liveHelper.addItem(
+			wx.CheckBox(liveBox, label=_("Automatically read incoming messages in active chat"))
 		)
 		self.automatically_announce_new_messages.SetValue(conf.get("automatically announce new messages"))
-		# Automatically announce activity in chats
-		self.automatically_announce_activity_in_chats = settingsSizerHelper.addItem(
-			wx.CheckBox(self, label=_("Automatically announce activity in chats (typing, online status)"))
+
+		self.automatically_announce_activity_in_chats = liveHelper.addItem(
+			wx.CheckBox(liveBox, label=_("Announce chat activity (typing, online status)"))
 		)
 		self.automatically_announce_activity_in_chats.SetValue(conf.get("automatically announce activity in chats"))
-		# Announce the phrases "Administrator" and "Owner" on messages in communities
-		self.notify_administrators_in_messages = settingsSizerHelper.addItem(wx.CheckBox(
-			self, label=_('Announce the phrases "Administrator" and "Owner" on messages in communities')))
-		self.notify_administrators_in_messages.SetValue(
-			conf.get("notify administrators in messages"))
-		# Speak active folder name when switching between them
-		self.voiceFolderNames = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Speak folder names when switching between them")))
-		self.voiceFolderNames.SetValue(conf.get("voiceFolderNames"))
-		# Delete alert type
-		self.audioPlaybackWhenDeleted = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Notify about deleting a message and chat with a sound")))
-		self.audioPlaybackWhenDeleted.SetValue(conf.get("audioPlaybackWhenDeleted"))
-		# Show confirmation window when deleting
-		self.confirmation_at_deletion = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Display confirmation dialog when deleting messages and chats")))
-		self.confirmation_at_deletion.SetValue(conf.get("confirmation_at_deletion"))
-		# Type of notification when recording voice messages
-		self.voiceMessageRecordingIndicator = settingsSizerHelper.addLabeledControl(_("Set voice message recording notification method as:"), wx.Choice, choices=[self.listVoiceMessageRecordingIndicator[item] for item in self.listVoiceMessageRecordingIndicator])
-		self.voiceMessageRecordingIndicator.SetStringSelection(self.listVoiceMessageRecordingIndicator[conf.get("voiceMessageRecordingIndicator")])
-		# Progress bar announce
-		self.voicingPerformanceIndicators = settingsSizerHelper.addLabeledControl(_("Select the progress bar notification level:"), wx.Choice, choices=[self.listVoicingPerformanceIndicators[item] for item in self.listVoicingPerformanceIndicators])
-		self.voicingPerformanceIndicators.SetStringSelection(self.listVoicingPerformanceIndicators[conf.get("voicingPerformanceIndicators")])
-		# Processing messages containing links
-		self.actionDescriptionForLinks = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Read description of URLs attached to messages")))
-		self.actionDescriptionForLinks.SetValue(conf.get("actionDescriptionForLinks"))
-		# Announcement of the full description of YouTube links
-		self.voiceFullDescriptionOfLinkToYoutube = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Read full video description in YouTube URLs")))
-		self.voiceFullDescriptionOfLinkToYoutube.SetValue(conf.get("voiceFullDescriptionOfLinkToYoutube"))
-		# Announce file details on media buttons
-		self.voiceMediaButtonDetails = settingsSizerHelper.addItem(wx.CheckBox(self, label=_("Announce file details (name, size, duration) on media buttons")))
+
+		settingsSizerHelper.addItem(liveSizer)
+
+		# ── 4. Media and Voice Messages ──────────────────────────────────
+		mediaBox = wx.StaticBox(self, label=_("Media and Voice Messages"))
+		mediaSizer = wx.StaticBoxSizer(mediaBox, wx.VERTICAL)
+		mediaHelper = gui.guiHelper.BoxSizerHelper(mediaBox, sizer=mediaSizer)
+
+		self.voiceMessageRecordingIndicator = mediaHelper.addLabeledControl(
+			_("Voice recording notification mode:"),
+			wx.Choice,
+			choices=[self.listVoiceMessageRecordingIndicator[item] for item in self.listVoiceMessageRecordingIndicator]
+		)
+		self.voiceMessageRecordingIndicator.SetStringSelection(
+			self.listVoiceMessageRecordingIndicator[conf.get("voiceMessageRecordingIndicator")]
+		)
+
+		self.voiceMediaButtonDetails = mediaHelper.addItem(
+			wx.CheckBox(mediaBox, label=_("Announce file details (name, size, duration) on media buttons"))
+		)
 		self.voiceMediaButtonDetails.SetValue(conf.get("voiceMediaButtonDetails"))
 
-		# Custom Log settings
-		self.custom_log_level = settingsSizerHelper.addLabeledControl(_("Add-on log level:"), wx.Choice, choices=[self.listCustomLogLevels[item] for item in self.listCustomLogLevels])
-		self.custom_log_level.SetStringSelection(self.listCustomLogLevels.get(conf.get("custom_log_level"), self.listCustomLogLevels["disabled"]))
-		
+		self.voiceDownloadProgress = mediaHelper.addItem(
+			wx.CheckBox(mediaBox, label=_("Announce file download progress"))
+		)
+		self.voiceDownloadProgress.SetValue(conf.get("voiceDownloadProgress"))
+
+		settingsSizerHelper.addItem(mediaSizer)
+
+		# ── 5. Deletion and Confirmation ─────────────────────────────────
+		delBox = wx.StaticBox(self, label=_("Deletion and Confirmation"))
+		delSizer = wx.StaticBoxSizer(delBox, wx.VERTICAL)
+		delHelper = gui.guiHelper.BoxSizerHelper(delBox, sizer=delSizer)
+
+		self.confirmation_at_deletion = delHelper.addItem(
+			wx.CheckBox(delBox, label=_("Show confirmation dialog when deleting messages and chats"))
+		)
+		self.confirmation_at_deletion.SetValue(conf.get("confirmation_at_deletion"))
+
+		self.audioPlaybackWhenDeleted = delHelper.addItem(
+			wx.CheckBox(delBox, label=_("Play sound when deleting messages and chats"))
+		)
+		self.audioPlaybackWhenDeleted.SetValue(conf.get("audioPlaybackWhenDeleted"))
+
+		settingsSizerHelper.addItem(delSizer)
+
+		# ── 6. Logging and Diagnostics ───────────────────────────────────
+		logBox = wx.StaticBox(self, label=_("Logging and Diagnostics"))
+		logSizer = wx.StaticBoxSizer(logBox, wx.VERTICAL)
+		logHelper = gui.guiHelper.BoxSizerHelper(logBox, sizer=logSizer)
+
+		self.custom_log_level = logHelper.addLabeledControl(
+			_("Add-on log level:"),
+			wx.Choice,
+			choices=[self.listCustomLogLevels[item] for item in self.listCustomLogLevels]
+		)
+		self.custom_log_level.SetStringSelection(
+			self.listCustomLogLevels.get(conf.get("custom_log_level"), self.listCustomLogLevels["disabled"])
+		)
+
 		btnSizer = wx.BoxSizer(wx.HORIZONTAL)
-		self.btnOpenLog = wx.Button(self, label=_("Open Log File"))
+		self.btnOpenLog = wx.Button(logBox, label=_("Open Log File"))
 		self.btnOpenLog.Bind(wx.EVT_BUTTON, self.onOpenLog)
 		btnSizer.Add(self.btnOpenLog, 0, wx.ALL, 5)
-		
-		self.btnClearLog = wx.Button(self, label=_("Clear Log File"))
+
+		self.btnClearLog = wx.Button(logBox, label=_("Clear Log File"))
 		self.btnClearLog.Bind(wx.EVT_BUTTON, self.onClearLog)
 		btnSizer.Add(self.btnClearLog, 0, wx.ALL, 5)
-		
-		settingsSizerHelper.addItem(btnSizer)
+
+		logHelper.addItem(btnSizer)
+
+		settingsSizerHelper.addItem(logSizer)
 
 	def onOpenLog(self, evt):
 		from appModules.unigram_logger import ulog
@@ -251,15 +328,14 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("automatically announce activity in chats", self.automatically_announce_activity_in_chats.IsChecked())
 		conf.set("notify administrators in messages",
 		         self.notify_administrators_in_messages.IsChecked())
-		conf.set("voiceFolderNames", self.voiceFolderNames.IsChecked())
 		conf.set("confirmation_at_deletion", self.confirmation_at_deletion.IsChecked())
 		conf.set("audioPlaybackWhenDeleted", self.audioPlaybackWhenDeleted.IsChecked())
 		conf.set("voiceMessageRecordingIndicator", self.get_key(self.listVoiceMessageRecordingIndicator, self.voiceMessageRecordingIndicator.GetStringSelection()))
-		conf.set("voicingPerformanceIndicators", self.get_key(self.listVoicingPerformanceIndicators, self.voicingPerformanceIndicators.GetStringSelection()))
+		conf.set("voiceDownloadProgress", self.voiceDownloadProgress.IsChecked())
 		conf.set("lang", self.get_key(listLanguages, self.lang.GetStringSelection()))
 		conf.set("action_when_pressing_up_arrow_in_text_field", self.get_key(self.list_actions_when_pressing_up_arrow_in_text_field, self.action_when_pressing_up_arrow_in_text_field.GetStringSelection()))
 		conf.set("actionDescriptionForLinks", self.actionDescriptionForLinks.IsChecked())
-		conf.set("voiceFullDescriptionOfLinkToYoutube", self.voiceFullDescriptionOfLinkToYoutube.IsChecked())
+		conf.set("cleanLinkDescriptions", self.cleanLinkDescriptions.IsChecked())
 		conf.set("voiceMediaButtonDetails", self.voiceMediaButtonDetails.IsChecked())
 		
 		level = self.get_key(self.listCustomLogLevels, self.custom_log_level.GetStringSelection())

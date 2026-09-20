@@ -42,7 +42,6 @@ from .overlays import (
 from .text_window import TextWindow
 from .unigram_calls import UnigramCalls
 from .unigram_formatting import (
-	announceFolderChange,
 	formatChatElementOnFocus,
 	formatMediaButtonName,
 	formatMediaButtonOnFocus,
@@ -75,7 +74,6 @@ class AppModule(appModuleHandler.AppModule):
 
 	# State tracking flags
 	profilePanelElement = False
-	tabsFolderElement = None
 	isDelete = False
 	isOpenProfile = False
 	executeContextMenuOption = False
@@ -118,18 +116,12 @@ class AppModule(appModuleHandler.AppModule):
 				parent = getattr(obj, "parent", None)
 				parentId = getattr(parent, "UIAAutomationId", "") if parent else ""
 
-				if parentId == "ChatFolders":
-					self.tabsFolderElement = parent
-					if conf.get("voiceFolderNames") and State.SELECTED in obj.states:
-						announceFolderChange(obj, self.saved_items)
-					return True
+				if parentId in ("ChatFolders", "ChatsList", "TopicList"):
+					return
 
 				elif parentId == "Navigation":
 					clsList.insert(0, SettingsPanelListItem)
 					return True
-
-				elif parentId in ("ChatsList", "TopicList"):
-					return
 
 				# Check whether the element is a message
 				name = (getattr(obj, "name", "") or "")[-200:]
@@ -158,7 +150,7 @@ class AppModule(appModuleHandler.AppModule):
 					return
 
 			elif (
-				conf.get("action_when_pressing_up_arrow_in_text_field") != "normal"
+				conf.get("action_when_pressing_up_arrow_in_text_field") != "edit"
 				and obj.role == Role.EDITABLETEXT
 				and obj.UIAAutomationId == "TextField"
 			):
@@ -175,9 +167,6 @@ class AppModule(appModuleHandler.AppModule):
 
 			elif getattr(obj, "UIAAutomationId", "") in ("Button", "Download") and getattr(obj, "role", None) in (Role.BUTTON, Role.LINK):
 				clsList.insert(0, Media_download_button)
-
-			elif conf.get("voicingPerformanceIndicators") == "none" and obj.role == Role.PROGRESSBAR:
-				clsList.pop(0)
 
 		except (comtypes.COMError, AttributeError) as e:
 			log.debugException(f"Handled expected exception during chooseNVDAObjectOverlayClasses: {e}")

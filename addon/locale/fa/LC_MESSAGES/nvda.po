@@ -1356,3 +1356,90 @@ msgstr "اعلام خودکار پیام‌های جدید در چت فعال"
 
 msgid "Automatically announce activity in chats (typing, online status)"
 msgstr "اعلام خودکار فعالیت‌ها در چت (در حال نوشتن، آنلاین بودن)"
+
+msgid "General and Navigation"
+msgstr "عمومی و ناوبری"
+
+msgid "Messages and Reading"
+msgstr "پیام‌ها و خواندن"
+
+msgid "Live Monitoring and Activity"
+msgstr "اعلان‌های زنده و فعالیت چت"
+
+msgid "Media and Voice Messages"
+msgstr "رسانه و پیام‌های صوتی"
+
+msgid "Deletion and Confirmation"
+msgstr "حذف و تاییدها"
+
+msgid "Logging and Diagnostics"
+msgstr "لاگ و عیب‌یابی"
+
+msgid "Do not announce"
+msgstr "اعلام نشود"
+
+msgid "Standard Telegram behavior"
+msgstr "رفتار پیش‌فرض تلگرام"
+
+msgid "Sound notification"
+msgstr "اعلان صوتی"
+
+msgid "Sent messages only"
+msgstr "فقط پیام‌های ارسالی"
+
+msgid "Received messages only"
+msgstr "فقط پیام‌های دریافتی"
+
+msgid "All messages"
+msgstr "همه پیام‌ها"
+
+msgid "Edit last sent message"
+msgstr "ویرایش آخرین پیام ارسالی"
+
+msgid "Move focus to last message"
+msgstr "انتقال فوکوس به آخرین پیام"
+
+msgid "Do nothing"
+msgstr "هیچ کاری انجام نشود"
+
+msgid "Chat type announcement in chats list:"
+msgstr "نحوه اعلام نوع گفتگو در لیست گفتگوها:"
+
+msgid "Announce sender name:"
+msgstr "اعلام نام فرستنده پیام:"
+
+msgid "Up arrow action in empty message edit field:"
+msgstr "عملکرد کلید جهت‌نمای بالا در کادر خالی پیام:"
+
+msgid "Speak \"Not seen\" before message text"
+msgstr "اعلام «دیده نشده» قبل از متن پیام"
+
+msgid "Announce timestamp and reactions at end of messages"
+msgstr "اعلام زمان و واکنش‌ها در انتهای پیام"
+
+msgid "Announce \"Administrator\" and \"Owner\" badges in communities"
+msgstr "اعلام نشان‌های مدیر و مالک در گروه‌ها"
+
+msgid "Read descriptions of message links"
+msgstr "خواندن توضیحات لینک‌های ضمیمه"
+
+msgid "Clean up repetitive and boilerplate text in link previews"
+msgstr "تمیزسازی متن‌های تکراری و زائد در پیش‌نمایش لینک‌ها"
+
+msgid "Automatically read incoming messages in active chat"
+msgstr "خواندن خودکار پیام‌های جدید در چت فعال"
+
+msgid "Announce chat activity (typing, online status)"
+msgstr "اعلام وضعیت فعالیت چت (در حال نوشتن، آنلاین بودن)"
+
+msgid "Voice recording notification mode:"
+msgstr "حالت اعلان ضبط پیام صوتی:"
+
+msgid "Announce file download progress"
+msgstr "اعلام درصد پیشرفت دانلود فایل‌ها"
+
+msgid "Show confirmation dialog when deleting messages and chats"
+msgstr "نمایش پیام تایید هنگام حذف پیام‌ها و چت‌ها"
+
+msgid "Play sound when deleting messages and chats"
+msgstr "پخش صدا هنگام حذف پیام‌ها و چت‌ها"

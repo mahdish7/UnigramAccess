@@ -5,8 +5,6 @@ import re
 
 import addonHandler
 from controlTypes import Role, State
-import queueHandler
-from ui import message
 
 addonHandler.initTranslation()
 
@@ -19,6 +17,25 @@ from .data import (
 )
 from .unigram_logger import ulog as log
 from .unigram_utils import isActivelyDownloading
+
+# Precompiled dictionary and regex pattern for admin / owner badges across all supported languages
+_ALL_ADMIN_BADGES = set()
+for _pairs in phrase_administrator_in_message.values():
+	for _p in _pairs:
+		_clean = _p.strip().rstrip(".")
+		if _clean:
+			_ALL_ADMIN_BADGES.add(_clean)
+_ALL_ADMIN_BADGES.update({
+	"Admin", "Administrator", "Administrateur", "Administrador", "Amministratore",
+	"Owner", "Creator", "Co-owner", "Moderator",
+	"مدیر", "مالک", "سازنده", "ادمین", "مدیر کل", "هم‌بنیان‌گذار",
+	"Владелец", "Администратор", "Адمین", "Создатель",
+})
+_ADMIN_BADGES_LOWER = {b.lower() for b in _ALL_ADMIN_BADGES}
+_ADMIN_BADGES_PATTERN = re.compile(
+	rf",\s*(?:{'|'.join(re.escape(b) for b in sorted(_ALL_ADMIN_BADGES, key=len, reverse=True))})\.?\s*\r?\n?",
+	flags=re.IGNORECASE,
+)
 
 
 def formatMessageOnFocus(obj, savedItems):
@@ -41,15 +58,30 @@ def formatMessageOnFocus(obj, savedItems):
 		if (
 			conf.get("actionDescriptionForLinks")
 			and item.role == Role.LINK
-			and len(item.name) > 30
-			and not item.UIAAutomationId
-			and item.firstChild.UIAAutomationId == "Label"
+			and not getattr(item, "UIAAutomationId", "")
+			and (
+				len(getattr(item, "name", "") or "") > 30
+				or (getattr(item, "name", "") or "").startswith("Link Preview:")
+				or getattr(getattr(item, "firstChild", None), "UIAAutomationId", "") == "TitleLabel"
+			)
 		):
-			# Processing the description of the link contained in the message
-			description = item.name.strip()
-			if not conf.get("voiceFullDescriptionOfLinkToYoutube") and description.startswith("YouTube "):
-				description = description.split("\n")
-				description = "\n".join(description[:2])
+			raw_desc = (getattr(item, "name", "") or "").strip()
+			# Language-independent stripping of link preview prefixes
+			raw_desc = re.sub(
+				r"^(?:Link Preview|پیش‌نمایش پیوند|پیش‌نمایش لینک|Предварительный просмотр):\s*",
+				"",
+				raw_desc,
+				flags=re.IGNORECASE,
+			)
+			description = raw_desc
+
+			if conf.get("cleanLinkDescriptions"):
+				# Clean up standard YouTube boilerplate text if present
+				if "Enjoy the videos and music you love" in description:
+					description = description.replace("Enjoy the videos and music you love, upload original content, and share it all with friends, family, and the world on YouTube.", "").strip()
+					if description.endswith(","):
+						description = description[:-1].strip()
+
 			# Escape all backslash symbols
 			description = description.replace("\\", "").replace("http:\\", "\\\\")
 			leading_prefix = keywords[4] if len(keywords) > 4 and keywords[4] else None
@@ -64,7 +96,8 @@ def formatMessageOnFocus(obj, savedItems):
 				r". \n{}\g<0>".format(description),
 				obj.name,
 			)
-			obj.name = re.sub(r"(https?://\S+)\?[^\s,]+", r"\g<1>", obj.name)
+			if conf.get("cleanLinkDescriptions"):
+				obj.name = re.sub(r"(https?://\S+)\?[^\s,]+", r"\g<1>", obj.name)
 
 		elif item.UIAAutomationId == "Subtitle" and len(item.name) < 15 and " / " in item.name:
 			# Checking if a message is a voice message
@@ -75,19 +108,72 @@ def formatMessageOnFocus(obj, savedItems):
 
 		item = item.next
 
-
 	# Checking whether to add a message sender name
 	profileName = savedItems.get("profile name")
-	if conf.get("saySenderName") in ("sent", "all") and senderMessage == "send" and not header:
+	say_sender_mode = conf.get("saySenderName")
+
+	if say_sender_mode in ("send", "all") and senderMessage == "send" and not header:
 		sender = _("You") + ".\n"
-	elif (
-		conf.get("saySenderName") in ("received", "all")
-		and profileName
-		and obj.simpleFirstChild.UIAAutomationId not in ("Photo", "1HeaderLabel", "PhotoRoot")
-		and obj.simpleFirstChild.location.left - obj.location.left < 35
-		and not header
-	):
-		sender = profileName.firstChild.name + ".\n"
+	elif say_sender_mode in ("received", "all") and senderMessage == "received":
+		# In group and channel chats, Unigram natively includes the author name
+		# at the beginning of obj.name (e.g. "Author\r\n. Message text").
+		# We must never prepend a sender name if obj.name already has one, nor
+		# prepend the group title as a sender name.
+		lines = obj.name.split("\n")
+		has_sender_prefix = bool(
+			header
+			or (
+				len(lines) > 1
+				and (
+					lines[1].startswith((", ", ". "))
+					or lines[1].lstrip().startswith(".")
+					or lines[1].strip().lower().lstrip(",").rstrip(".").strip() in _ADMIN_BADGES_LOWER
+				)
+			)
+		)
+
+		if not has_sender_prefix:
+			# Check if message contains group visual markers (avatars / header labels)
+			is_group_msg = any(
+				getattr(c, "UIAAutomationId", "") in ("Photo", "PhotoRoot", "HeaderLabel")
+				for c in getattr(obj, "children", [])
+			)
+
+			if not is_group_msg:
+				# If profile button is not in cache, resolve it from the UI container
+				if not profileName or not getattr(profileName, "location", None) or profileName.location.width == 0:
+					appMod = getattr(obj, "appModule", None)
+					if appMod and hasattr(appMod, "ui_helper"):
+						profileName = next(
+							(
+								item
+								for item in appMod.ui_helper.getElements()
+								if getattr(item, "role", None) == Role.BUTTON and getattr(item, "UIAAutomationId", "") == "Profile"
+							),
+							None,
+						)
+						if profileName:
+							savedItems.save("profile name", profileName)
+
+				if profileName:
+					is_group_profile = False
+					try:
+						if profileName.childCount > 1:
+							sub = (getattr(profileName.lastChild, "name", "") or "").lower()
+							if re.search(r"\d+\s*(?:member|subscriber|عضو|مشترک)", sub):
+								is_group_profile = True
+					except Exception:
+						pass
+
+					if not is_group_profile:
+						partner_name = (
+							getattr(getattr(profileName, "firstChild", None), "name", "")
+							or getattr(profileName, "name", "")
+						)
+						if partner_name:
+							clean_partner = partner_name.strip().rstrip(".")
+							if not obj.name.strip().startswith(clean_partner):
+								sender = clean_partner + ".\n"
 
 	# Check the status of the message — read or not read (only for sent messages)
 	if keywords[0] in getattr(obj, "end_text", ""):
@@ -104,23 +190,16 @@ def formatMessageOnFocus(obj, savedItems):
 	if not conf.get("announce_end_of_message") and obj.index_last_part_in_message:
 		obj.name = obj.name[:obj.index_last_part_in_message]
 
-	if keywords[3] in getattr(obj, "end_text", ""):
-		# Removal of the phrase "administrator" and the phrase "owner" in messages
-		listText = obj.name.split("\n")
-		keyPhrases = phrase_administrator_in_message.get(conf.get("lang"), phrase_administrator_in_message["en"])
-		enKeyPhrases = phrase_administrator_in_message["en"]
-		if (
-			not conf.get("notify administrators in messages")
-			and len(listText) > 1
-			and listText[1] in (
-				", " + keyPhrases[0] + ". \r",
-				", " + keyPhrases[1] + ". \r",
-				", " + enKeyPhrases[0] + ". \r",
-				", " + enKeyPhrases[1] + ". \r",
-			)
-		):
-			del listText[1]
-			obj.name = "\n".join(listText)
+	if not conf.get("notify administrators in messages"):
+		lines = obj.name.split("\n")
+		if len(lines) > 1:
+			clean_line1 = lines[1].strip().lstrip(",").rstrip(".").strip().lower()
+			if clean_line1 in _ADMIN_BADGES_LOWER:
+				del lines[1]
+				if len(lines) > 1 and not lines[1].lstrip().startswith("."):
+					lines[1] = ". " + lines[1].lstrip()
+				obj.name = "\n".join(lines)
+		obj.name = _ADMIN_BADGES_PATTERN.sub("", obj.name)
 
 	obj.name = sender + obj.name
 
@@ -230,25 +309,6 @@ def formatPollOption(obj) -> str:
 	except Exception as e:
 		log.error(f"Error formatting poll option: {e}")
 	return obj.name
-
-
-def announceFolderChange(obj, savedItems):
-	"""Announce folder name and unread chat counts when switching chat folders."""
-	tabItems = obj.name.split(", ")
-	countChats = None
-	lastSelectedFolder = savedItems.get("last selected folder")
-
-	if lastSelectedFolder != tabItems[0]:
-		savedItems.save("last selected folder", tabItems[0])
-		if len(tabItems) > 1 and tabItems[1] != "0":
-			countChats = tabItems[1]
-	else:
-		return False
-
-	text = savedItems.get("last selected folder")
-	if countChats:
-		text += ", " + countChats
-	queueHandler.queueFunction(queueHandler.eventQueue, message, text)
 
 
 def resolveUnlabeledElement(obj):
