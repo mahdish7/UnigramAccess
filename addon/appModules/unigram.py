@@ -125,16 +125,13 @@ class AppModule(appModuleHandler.AppModule):
 					clsList.insert(0, SettingsPanelListItem)
 					return True
 
-				# Check whether the element is a message
-				name = (getattr(obj, "name", "") or "")[-200:]
+				name = getattr(obj, "name", "") or ""
 				sender = ""
-				for k, v in keywordsInMessages.items():
-					if v[3] in name:
-						sender = "received"
-						break
-					elif v[2] in name:
-						sender = "send"
-						break
+				keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
+				if keywords[3] in name:
+					sender = "received"
+				elif keywords[2] in name:
+					sender = "send"
 				obj.sender_message = sender
 				obj.end_text = name
 				if (
