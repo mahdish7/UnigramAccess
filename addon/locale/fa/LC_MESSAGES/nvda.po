@@ -1273,14 +1273,11 @@ msgstr "اعلام زمان ارسال یا دریافت پیام و واکنش�
 msgid "The display of message sending or receiving time and reactions is disabled."
 msgstr "اعلام زمان ارسال یا دریافت پیام و واکنش‌ها غیرفعال شد."
 
-msgid "Move focus to chats, contacts, or settings list"
-msgstr "انتقال فوکوس به لیست گفتگوها، مخاطبین یا تنظیمات"
+msgid "Move focus to topics, chats, contacts, or settings list"
+msgstr "انتقال فوکوس به لیست موضوعات گروه، گفتگوها، مخاطبین یا تنظیمات"
 
-msgid "Move focus to the last message, topics, profile, or settings"
-msgstr "انتقال فوکوس به آخرین پیام، موضوعات، اطلاعات پروفایل یا تنظیمات"
-
-msgid "Move focus to group topics list"
-msgstr "انتقال فوکوس به لیست موضوعات گروه"
+msgid "Move focus to the last message, profile, or settings"
+msgstr "انتقال فوکوس به آخرین پیام، اطلاعات پروفایل یا تنظیمات"
 
 msgid "Scroll to the bottom of the chat"
 msgstr "رفتن به انتهای گفتگو"
@@ -1443,3 +1440,6 @@ msgstr "نمایش پیام تایید هنگام حذف پیام‌ها و چت
 
 msgid "Play sound when deleting messages and chats"
 msgstr "پخش صدا هنگام حذف پیام‌ها و چت‌ها"
+
+msgid "Toggle focus between message edit field and previous position"
+msgstr "جابجایی فوکوس بین کادر ویرایش پیام و موقعیت قبلی"

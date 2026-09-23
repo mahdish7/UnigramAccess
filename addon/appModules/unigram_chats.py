@@ -169,6 +169,22 @@ class UnigramChats:
 		message(_("Chat list is empty"))
 		return True
 
+	def is_topic_item(self, obj):
+		"""Check whether an NVDAObject is an item in the forum topics list."""
+		try:
+			if not obj:
+				return False
+			curr = obj if getattr(obj, "role", None) == Role.LISTITEM else getattr(obj, "parent", None)
+			if curr and getattr(curr, "role", None) == Role.LISTITEM:
+				parent = getattr(curr, "parent", None)
+				return (
+					getattr(parent, "role", None) == Role.LIST
+					and getattr(parent, "UIAAutomationId", "") in ("TopicList", "ScrollingHost")
+				)
+			return False
+		except Exception:
+			return False
+
 	def to_threads_list(self):
 		"""Focus the forum topics/threads list in a supergroup.
 
@@ -176,9 +192,36 @@ class UnigramChats:
 			bool: True if threads list was found and focused, False otherwise.
 		"""
 		branch_list = self.appModule.ui_helper.get_branch_list()
-		if branch_list and getattr(branch_list, "firstChild", None):
-			branch_list.firstChild.setFocus()
+		if not branch_list:
+			return False
+		loc = getattr(branch_list, "location", None)
+		if loc and loc.width == 0:
+			return False
+
+		curr = api.getFocusObject()
+		if self.is_topic_item(curr):
+			message(getattr(curr, "name", ""))
 			return True
+
+		last_topic = self.appModule.saved_items.get("last focused topic")
+		if last_topic and getattr(last_topic, "location", None) and last_topic.location.width:
+			try:
+				last_topic.setFocus()
+				return True
+			except Exception:
+				pass
+
+		first = getattr(branch_list, "firstChild", None)
+		if first:
+			target = first
+			if getattr(target, "role", None) != Role.LISTITEM and getattr(target, "next", None):
+				target = target.next
+			if getattr(target, "role", None) == Role.LISTITEM:
+				try:
+					target.setFocus()
+					return True
+				except Exception:
+					pass
 		return False
 
 	def to_profile_panel(self):

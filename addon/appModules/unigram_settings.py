@@ -35,6 +35,8 @@ class UnigramSettings:
 	def get_detail_panel(self):
 		"""Locate and return the settings right-side detail panel or its first focusable control."""
 		try:
+			if not self.is_in_settings():
+				return None
 			elements = self.appModule.ui_helper.getElements()
 			settings_panel = next(
 				(

@@ -88,21 +88,15 @@ class UnigramUIHelper:
 		return targetList
 
 	def getMainContainer(self):
-		container = self.appModule.saved_items.get("main_container")
-		if container and getattr(container, "location", None) and container.location.width:
-			return container
-
 		fg = api.getForegroundObject()
 		if not fg:
 			return None
 		if getattr(fg, "windowClassName", "") == "Windows.UI.Core.CoreWindow":
-			self.appModule.saved_items.save("main_container", fg)
 			return fg
 		queue = list(getattr(fg, "children", []))
 		while queue:
 			item = queue.pop(0)
 			if getattr(item, "windowClassName", "") == "Windows.UI.Core.CoreWindow":
-				self.appModule.saved_items.save("main_container", item)
 				return item
 			if getattr(item, "role", None) == Role.PANE:
 				queue.extend(getattr(item, "children", []))
@@ -182,9 +176,15 @@ class UnigramUIHelper:
 		except Exception: return False
 
 	def get_branch_list(self):
-		branch_list = next((item for item in self.getElements() if item.role == Role.LIST and item.UIAAutomationId == "TopicList"), False)
-		if branch_list: return branch_list
-		else: return False
+		for item in self.getElements():
+			if getattr(item, "role", None) == Role.LIST and getattr(item, "UIAAutomationId", "") in ("TopicList", "ScrollingHost"):
+				# Exclude profile panel and settings detail panel
+				if getattr(item, "firstChild", None) and getattr(item.firstChild, "UIAAutomationId", "") in ("Photo", "Segments"):
+					continue
+				if getattr(item, "previous", None) and getattr(item.previous, "UIAAutomationId", "") == "DetailHeaderPresenter":
+					continue
+				return item
+		return False
 
 	def get_profile_panel(self):
 		list = self.appModule.profilePanelElement

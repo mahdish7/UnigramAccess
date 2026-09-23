@@ -18,18 +18,17 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 ## Keyboard Shortcuts
 
 ### Navigation & Layout
-* **ALT+1**: Move focus to chats, contacts, or settings list.
-* **ALT+2**: Move focus to the last message, topics, profile, or settings.
-* **ALT+3**: Move focus to "unread messages" separator in the active chat.
+* **ALT+1**: Move focus to group topics list if open (or chats list, contacts list, or settings categories).
+* **ALT+2**: Move focus to the last message, open profile, or settings details.
+* **ALT+3**: Toggle focus between message edit field and previous position.
 * **ALT+4**: Move focus to chat folders list.
 * **ALT+5**: Move focus to open profile panel.
-* **ALT+6**: Move focus to group topics list.
+* **ALT+U**: Move focus to "unread messages" separator in the active chat.
 * **ALT+shift+P**: Open current chat profile.
 * **ALT+M**: Open main navigation menu.
 * **ALT+end**: Scroll to the bottom of the chat.
 
 ### Messages & Interaction
-* **ALT+D**: Toggle focus between message edit field and previous position.
 * **ALT+T**: Announce chat name and status (member count, online status, typing). Double-press toggles real-time tracking of chat activity.
 * **ALT+W**: Announce focused message timestamp and reactions. Double-press toggles automatic announcement of this information.
 * **Left arrow**: Announce the original replied-to message. Double-press moves focus to it. In media albums, moves to previous media.
