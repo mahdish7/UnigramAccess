@@ -15,6 +15,7 @@ from .unigram_utils import isActivelyDownloading
 
 baseDir = os.path.join(os.path.dirname(__file__), "media")
 
+
 class UnigramMedia:
 	def __init__(self, appModule):
 		self.appModule = appModule
@@ -108,33 +109,127 @@ class UnigramMedia:
 					pass
 		else: message(_("Nothing is playing right now"))
 
+	def _safe_set_focus(self, candidate):
+		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
+		if not candidate:
+			return False
+		try:
+			if not getattr(candidate, "parent", None):
+				return False
+			if getattr(candidate, "isFocusable", True):
+				try:
+					candidate.setFocus()
+					return True
+				except Exception:
+					pass
+			first = getattr(candidate, "firstChild", None)
+			if first and getattr(first, "isFocusable", True):
+				try:
+					first.setFocus()
+					return True
+				except Exception:
+					pass
+		except Exception:
+			pass
+		return False
+
+	def is_media_popup_element(self, obj):
+		"""Check if an NVDA object is the Popup window or inside it.
+
+		Identifies the container window named 'Popup' by walking up the ancestor hierarchy.
+		Does not rely on control labels or button automation IDs.
+		"""
+		if not obj:
+			return False
+		curr = obj
+		depth = 0
+		while curr and depth < 20:
+			try:
+				if getattr(curr, "role", None) == Role.DESKTOP:
+					break
+				raw_name = getattr(curr, "name", None) or getattr(curr, "windowText", None)
+				if raw_name:
+					clean_name = str(raw_name).strip().strip("\u200e\u200f\u202a\u202b\u202c").lower()
+					if clean_name == "popup":
+						return True
+				curr_id = getattr(curr, "UIAAutomationId", "") or ""
+				if curr_id == "Popup":
+					return True
+			except Exception:
+				pass
+			try:
+				curr = getattr(curr, "parent", None)
+			except Exception:
+				break
+			depth += 1
+		return False
+
+	def handle_media_step(self, obj):
+		"""Advance the media focus state machine from real UI focus events."""
+		if not (self.appModule.isMedia and isinstance(self.appModule.isMedia, dict)):
+			return False
+
+		dismiss_source = self.appModule.isMedia.get("confirmed_dismissal")
+		if dismiss_source:
+			# If focus is still inside the popup, dialog has not closed yet
+			if self.is_media_popup_element(obj):
+				return False
+
+			log.debug(f"Media viewer: closed via {dismiss_source}, restoring focus")
+			target = self.appModule.isMedia.get("initial_obj")
+			if not target or not getattr(target, "parent", None):
+				target = self.appModule.saved_items.get("last focus object")
+			self.appModule.isMedia = False
+
+			if target:
+				log.debug(f"Media viewer: restoring focus to target role={getattr(target, 'role', None)}")
+				return self._safe_set_focus(target)
+
+			return False
+
+		# Dismissal not confirmed yet: media opened or playing
+		if obj == self.appModule.isMedia.get("initial_obj"):
+			return False
+
+		# Only clear media state if user clearly navigated to text input or chat list
+		if getattr(obj, "UIAAutomationId", "") in ("TextField", "ChatsList"):
+			self.appModule.isMedia = False
+			return False
+
+		return False
+
 	def script_actionMediaInMessage(self, gesture):
 		obj = api.getFocusObject()
-		message_states = obj.states
-		gesture.send()
-		if not self.appModule.ui_helper.is_message_object(obj): return
-		def spechState():
-			is_save_focus = True
-			targetButton = None
-			if obj.states != message_states: return
-			if obj.media:
-				targetButton = next((item for item in obj.media.children if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button"), None)
-				if targetButton and targetButton.previous and targetButton.previous.UIAAutomationId != "Button": is_save_focus = False
-			else:
-				item = obj.firstChild
-				while item:
-					if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button":
-						targetButton = item
-						if item.location.width > 150: is_save_focus = False
-						break
-					item = item.next
-			if not targetButton: return
-			targetButton.doAction()
-			if is_save_focus:
-				obj.setFocus()
-			else:
-				self.appModule.isExitFromMedia = True
-		core.callLater(100, spechState)
+		if not self.appModule.ui_helper.is_message_object(obj):
+			gesture.send()
+			return
+
+		if self.appModule.isMessageSelectionMode:
+			gesture.send()
+			return
+
+		targetButton = None
+		if getattr(obj, "media", None):
+			targetButton = next((item for item in obj.media.children if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button"), None)
+		else:
+			item = obj.firstChild
+			while item:
+				if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button":
+					targetButton = item
+					break
+				item = item.next
+
+		if not targetButton:
+			gesture.send()
+			return
+
+		self.appModule.saved_items.save("last focus object", obj)
+		self.appModule.isMedia = {
+			"initial_obj": obj,
+			"confirmed_dismissal": None,
+		}
+		log.debug("Media: action triggered")
+		targetButton.doAction()
 
 	def script_recordingVoiceMessage(self, gesture):
 		lastFocus = api.getFocusObject()

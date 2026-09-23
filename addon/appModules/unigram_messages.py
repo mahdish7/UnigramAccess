@@ -333,26 +333,25 @@ class UnigramMessages:
 		return None
 
 	def _safe_set_focus(self, candidate):
-		"""Safely set focus to candidate or its focusable child."""
+		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
 		if not candidate:
 			return False
 		try:
 			if not getattr(candidate, "parent", None):
 				return False
-			loc = getattr(candidate, "location", None)
-			if not loc or not loc.width or not loc.height:
-				return False
-			# First attempt: direct setFocus
-			try:
-				candidate.setFocus()
-				return True
-			except Exception:
-				pass
-			# Second attempt: firstChild if available
+			if getattr(candidate, "isFocusable", True):
+				try:
+					candidate.setFocus()
+					return True
+				except Exception:
+					pass
 			first = getattr(candidate, "firstChild", None)
-			if first and getattr(first, "location", None) and first.location.width:
-				first.setFocus()
-				return True
+			if first and getattr(first, "isFocusable", True):
+				try:
+					first.setFocus()
+					return True
+				except Exception:
+					pass
 		except Exception:
 			pass
 		return False
@@ -398,17 +397,20 @@ class UnigramMessages:
 		if not self.appModule.ui_helper.is_message_object(obj):
 			return False
 
-		curr_item = obj
-		if getattr(curr_item, "parent", None) and curr_item.parent.role == Role.LISTITEM:
-			curr_item = curr_item.parent
+		if getattr(obj, "parent", None) and obj.parent.role == Role.LISTITEM:
+			obj = obj.parent
+		try:
+			obj.setFocus()
+		except Exception:
+			pass
 
-		next_obj = self._get_adjacent_item(curr_item, forward=True)
-		prev_obj = self._get_adjacent_item(curr_item, forward=False)
+		next_obj = self._get_adjacent_item(obj, forward=True)
+		prev_obj = self._get_adjacent_item(obj, forward=False)
 
 		self.appModule.isDelete = {
 			"target": "messages",
 			"isCompleteDeletion": isCompleteDeletion,
-			"initial_obj": curr_item,
+			"initial_obj": obj,
 			"next_obj": next_obj,
 			"prev_obj": prev_obj,
 			"message": _("Message deleted on both sides") if isCompleteDeletion else _("Message deleted"),

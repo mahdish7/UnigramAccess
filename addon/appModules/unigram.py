@@ -77,7 +77,9 @@ class AppModule(appModuleHandler.AppModule):
 	isDelete = False
 	isOpenProfile = False
 	executeContextMenuOption = False
-	isExitFromMedia = False
+	isMedia = False
+	isMessageSelectionMode = False
+	_selection_restore_target = None
 
 	# ── Initialization & Teardown ───────────────────────────────────────
 
@@ -211,6 +213,10 @@ class AppModule(appModuleHandler.AppModule):
 			roleName = getattr(role, "name", str(role)) if role else "Unknown"
 			log.debug(f"Focus changed: Role: {roleName} ({role}) - ID: '{objId}'")
 
+		if self.ui_helper.is_message_object(obj) and State.SELECTED in getattr(obj, "states", set()):
+			self.isMessageSelectionMode = True
+			log.debug("Message selection mode activated")
+
 		# Restore background timers if window was minimized
 		if self._restoreBackgroundTimers():
 			pass  # Timers restored, continue processing
@@ -289,6 +295,14 @@ class AppModule(appModuleHandler.AppModule):
 
 		Returns True if the focus event was consumed (should not call nextHandler).
 		"""
+		if self._selection_restore_target:
+			target = self._selection_restore_target
+			self._selection_restore_target = None
+			if obj != target and target and getattr(target, "parent", None):
+				log.debug("Selection exit: restoring focus to previous message")
+				self.msg_helper._safe_set_focus(target)
+				return True
+
 		if self.isOpenProfile:
 			self.isOpenProfile = False
 			panel = next(
@@ -314,7 +328,19 @@ class AppModule(appModuleHandler.AppModule):
 				consumed = self.msg_helper.handle_deletion_step(obj)
 			return bool(consumed)
 
+		elif self.isMedia:
+			consumed = self.media_helper.handle_media_step(obj)
+			return bool(consumed)
+
 		return False
+ 
+	def _restore_selection_focus(self, target):
+		"""Fallback timer to restore focus to target message upon selection exit."""
+		if self._selection_restore_target == target:
+			self._selection_restore_target = None
+			if target and getattr(target, "parent", None):
+				log.debug("Selection exit: fallback restoring focus to message")
+				self.msg_helper._safe_set_focus(target)
 
 	def _formatFocusedObject(self, obj):
 		"""Apply formatting and label enrichment to the focused object."""
@@ -575,6 +601,7 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_deletion(self, gesture):
 		"""Unified deletion handler for both single-side (Delete) and two-sided (Shift+Delete) deletion."""
+		self.isMessageSelectionMode = False
 		is_shift = any("shift" in i.lower() for i in getattr(gesture, "identifiers", []))
 		obj = api.getFocusObject()
 		if self.ui_helper.is_message_object(obj):
@@ -608,6 +635,7 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:ALT+F",
 	)
 	def script_forwardMessage(self, gesture):
+		self.isMessageSelectionMode = False
 		obj = api.getFocusObject()
 		if self.ui_helper.is_message_object(obj):
 			if not self.msg_helper.script_forwardMessage(gesture):
@@ -845,16 +873,31 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(gesture="kb:escape")
 	def script_action_escape_key(self, gesture):
-		"""Handle Escape key: restore focus when exiting full-screen media viewer or delete dialog."""
+		"""Handle Escape key: restore focus when exiting full-screen media viewer, delete dialog, or selection mode."""
+		if self.isMessageSelectionMode:
+			self.isMessageSelectionMode = False
+			focus_obj = api.getFocusObject()
+			target_msg = focus_obj if self.ui_helper.is_message_object(focus_obj) else self.saved_items.get("last focus object")
+			self._selection_restore_target = target_msg
+			gesture.send()
+			core.callLater(150, self._restore_selection_focus, target_msg)
+			return
+
 		if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":
 			self.isDelete["confirmed_dismissal"] = "escape"
 			log.debug("Delete dialog: confirmed dismissal via Escape")
+
+		focus_obj = api.getFocusObject()
+		is_in_viewer = self.media_helper.is_media_popup_element(focus_obj)
+		if is_in_viewer or (self.isMedia and isinstance(self.isMedia, dict) and not self.ui_helper.is_message_object(focus_obj)):
+			target = (self.isMedia.get("initial_obj") if isinstance(self.isMedia, dict) else None) or self.saved_items.get("last focus object")
+			if target:
+				self.isMedia = {
+					"initial_obj": target,
+					"confirmed_dismissal": "escape",
+				}
+				log.debug("Media viewer: confirmed dismissal via Escape")
+		else:
+			self.isMedia = False
+
 		gesture.send()
-		if self.isExitFromMedia:
-			try:
-				lastFocusObject = self.saved_items.get("last focus object")
-				if lastFocusObject and getattr(lastFocusObject, "location", None):
-					lastFocusObject.setFocus()
-			except Exception:
-				pass
-			self.isExitFromMedia = False
