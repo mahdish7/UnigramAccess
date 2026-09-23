@@ -15,15 +15,19 @@ class UnigramNavigation:
 
 	def script_toChatList(self, gesture, arg = False):
 		log.info("Executing toChatList shortcut.")
-		# Priority 1: Focus the main chats list
+		# Priority 1: If a forum group's topics list is open, focus topics list
+		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_threads_list():
+			return True
+
+		# Priority 2: Focus the main chats list
 		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_chats_list():
 			return True
 
-		# Priority 2: If Contacts dialog is active, focus the contacts list
+		# Priority 3: If Contacts dialog is active, focus the contacts list
 		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_contacts_list():
 			return True
 
-		# Priority 3: If in Settings, focus settings categories list
+		# Priority 4: If in Settings, focus settings categories list
 		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_categories_list():
 			return True
 
@@ -35,15 +39,11 @@ class UnigramNavigation:
 		if getattr(self.appModule, "msg_helper", None) and self.appModule.msg_helper.to_last_message():
 			return True
 
-		# Priority 2: Focus forum topics / threads list if present
-		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_threads_list():
-			return True
-
-		# Priority 3: Focus profile information panel if open
+		# Priority 2: Focus profile information panel if open
 		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_profile_panel():
 			return True
 
-		# Priority 4: Focus settings detail panel if in settings
+		# Priority 3: Focus settings detail panel if in settings
 		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_detail_panel():
 			return True
 
@@ -67,11 +67,6 @@ class UnigramNavigation:
 					el.setFocus()
 					return
 			message(_("Chat folder list not found"))
-
-	def script_move_focus_to_list_threads(self, gesture):
-		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_threads_list():
-			return True
-		message(_("No list with threads was found"))
 
 	def script_to_open_profile(self, gesture):
 		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_profile_panel():

@@ -34,6 +34,7 @@ class UnigramLogger:
 
 	def enable_file_logging(self):
 		if not self.file_handler:
+			self.file_logger.handlers.clear()
 			self.file_handler = logging.FileHandler(log_file_path, encoding="utf-8")
 			formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 			self.file_handler.setFormatter(formatter)

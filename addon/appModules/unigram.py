@@ -118,7 +118,7 @@ class AppModule(appModuleHandler.AppModule):
 				parent = getattr(obj, "parent", None)
 				parentId = getattr(parent, "UIAAutomationId", "") if parent else ""
 
-				if parentId in ("ChatFolders", "ChatsList", "TopicList"):
+				if parentId in ("ChatFolders", "ChatsList", "TopicList") or (getattr(self, "chats_helper", None) and self.chats_helper.is_topic_item(obj)):
 					return
 
 				elif parentId == "Navigation":
@@ -352,6 +352,8 @@ class AppModule(appModuleHandler.AppModule):
 			elif obj.parent.UIAAutomationId == "ChatsList":
 				self.saved_items.save("last focused chat", obj)
 				obj.name = formatChatElementOnFocus(obj)
+			elif getattr(self, "chats_helper", None) and self.chats_helper.is_topic_item(obj):
+				self.saved_items.save("last focused topic", obj)
 			elif obj.parent.UIAAutomationId == "ScrollingHost":
 				if obj.name == "" and obj.childCount != 0:
 					for item in obj.children:
@@ -440,7 +442,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that moves focus to the chat list.
-		description=_("Move focus to chats, contacts, or settings list"),
+		description=_("Move focus to topics, chats, contacts, or settings list"),
 		gesture="kb:ALT+1",
 	)
 	def script_toChatList(self, gesture, arg=False):
@@ -448,7 +450,7 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(
 		# Translators: Description for the script that moves focus to the last message.
-		description=_("Move focus to the last message, topics, profile, or settings"),
+		description=_("Move focus to the last message, profile, or settings"),
 		gesture="kb:ALT+2",
 	)
 	def script_toLastMessage(self, gesture):
@@ -457,7 +459,7 @@ class AppModule(appModuleHandler.AppModule):
 	@script(
 		# Translators: Description for the script that moves focus to the unread messages label.
 		description=_("Move focus to 'unread messages' label"),
-		gesture="kb:ALT+3",
+		gesture="kb:ALT+U",
 	)
 	def script_goToTheLastUnreadMessage(self, gesture):
 		return self.nav_helper.script_goToTheLastUnreadMessage(gesture)
@@ -477,14 +479,6 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_to_open_profile(self, gesture):
 		return self.nav_helper.script_to_open_profile(gesture)
-
-	@script(
-		# Translators: Description for the script that moves focus to the group topics list.
-		description=_("Move focus to group topics list"),
-		gesture="kb:ALT+6",
-	)
-	def script_move_focus_to_list_threads(self, gesture):
-		return self.nav_helper.script_move_focus_to_list_threads(gesture)
 
 	@script(
 		# Translators: Description for the script that opens the navigation menu.
@@ -573,7 +567,7 @@ class AppModule(appModuleHandler.AppModule):
 	@script(
 		# Translators: Description for the script that toggles focus between the edit field and messages.
 		description=_("Toggle focus between message edit field and previous position"),
-		gesture="kb:ALT+D",
+		gesture="kb:ALT+3",
 	)
 	def script_moveFocusToTextMessage(self, gesture):
 		return self.msg_helper.script_moveFocusToTextMessage(gesture)
