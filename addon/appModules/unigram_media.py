@@ -294,10 +294,6 @@ class UnigramMedia:
 				pass
 		return True
 
-	def script_cancelVoiceMessageRecording(self, gesture):
-		"""Delegate to AppModule dispatcher for backward compatibility."""
-		return self.appModule.script_cancelVoiceMessageRecording(gesture)
-
 	def script_toggleVoiceSlider(self, gesture):
 		current_focus = api.getFocusObject()
 
