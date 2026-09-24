@@ -302,13 +302,17 @@ class AppModule(appModuleHandler.AppModule):
 
 		if self.isOpenProfile:
 			self.isOpenProfile = False
-			panel = next(
-				(item for item in self.ui_helper.getElements() if item.UIAAutomationId == "ScrollingHost"),
-				None,
-			)
+			if self.ui_helper._is_profile_host(self.profilePanelElement):
+				panel = self.profilePanelElement
+			else:
+				panel = next((item for item in self.ui_helper.getElements() if self.ui_helper._is_profile_host(item)), None)
 			if panel:
 				self.profilePanelElement = panel
-				panel.firstChild.setFocus()
+				if panel.firstChild:
+					try:
+						panel.firstChild.setFocus()
+					except Exception:
+						pass
 			return True
 
 		elif self.executeContextMenuOption:
@@ -468,14 +472,6 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_to_tabs_folder(self, gesture):
 		return self.nav_helper.script_to_tabs_folder(gesture)
-
-	@script(
-		# Translators: Description for the script that moves focus to the open profile pane.
-		description=_("Move focus to open profile"),
-		gesture="kb:ALT+5",
-	)
-	def script_to_open_profile(self, gesture):
-		return self.nav_helper.script_to_open_profile(gesture)
 
 	@script(
 		# Translators: Description for the script that opens the navigation menu.

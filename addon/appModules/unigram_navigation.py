@@ -68,11 +68,6 @@ class UnigramNavigation:
 					return
 			message(_("Chat folder list not found"))
 
-	def script_to_open_profile(self, gesture):
-		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_profile_panel():
-			return True
-		message(_("There is no open profile"))
-
 	def _is_unread_messages_separator(self, obj):
 		"""Check if a message list item represents the unread messages separator."""
 		if not obj:
@@ -153,13 +148,21 @@ class UnigramNavigation:
 
 	def script_openProfile(self, gesture):
 		profile = self.appModule.saved_items.get("profile name")
-		if not profile or profile.location.width == 0:
-			profile = next((item for item in self.appModule.ui_helper.getElements() if item.role ==Role.BUTTON and item.UIAAutomationId == "Profile"), None)
-			if profile:
+		if not profile or not getattr(profile, "isFocusable", False):
+			profile = next((item for item in self.appModule.ui_helper.getElements() if item.role in (Role.BUTTON, Role.LINK) and item.UIAAutomationId == "Profile"), None)
+			if profile and getattr(profile, "isFocusable", False):
 				self.appModule.saved_items.save("profile name", profile)
-		if profile and profile.location.width != 0:
+
+		if profile and getattr(profile, "isFocusable", False):
 			self.appModule.isOpenProfile = api.getFocusObject()
 			profile.doAction()
+			panel = next((item for item in self.appModule.ui_helper.getElements() if self.appModule.ui_helper._is_profile_host(item)), None)
+			if panel and getattr(panel, "firstChild", None):
+				try:
+					panel.firstChild.setFocus()
+					self.appModule.isOpenProfile = False
+				except Exception:
+					pass
 		else:
 			message(_("No open chat"))
 

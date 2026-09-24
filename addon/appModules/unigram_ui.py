@@ -179,27 +179,75 @@ class UnigramUIHelper:
 		for item in self.getElements():
 			if getattr(item, "role", None) == Role.LIST and getattr(item, "UIAAutomationId", "") in ("TopicList", "ScrollingHost"):
 				# Exclude profile panel and settings detail panel
-				if getattr(item, "firstChild", None) and getattr(item.firstChild, "UIAAutomationId", "") in ("Photo", "Segments"):
+				if getattr(item, "firstChild", None) and getattr(item.firstChild, "UIAAutomationId", "") == "Segments":
 					continue
 				if getattr(item, "previous", None) and getattr(item.previous, "UIAAutomationId", "") == "DetailHeaderPresenter":
 					continue
 				return item
 		return False
 
-	def get_profile_panel(self):
-		list = self.appModule.profilePanelElement
-		if not list or not list.location.width:
-			list = next((item for item in self.getElements() if (item.role == Role.LIST and item.UIAAutomationId == "ScrollingHost" and item.firstChild and item.firstChild.UIAAutomationId in ("Photo", "Segments")) or (item.role == Role.LINK and item.UIAAutomationId == "Photo" and item.next.UIAAutomationId == "Title")), None)
-		if not list:
+	def _is_profile_host(self, item):
+		"""Determine if a ScrollingHost container belongs to the active profile panel."""
+		if not item or getattr(item, "UIAAutomationId", "") != "ScrollingHost":
 			return False
-		if list.UIAAutomationId == "Photo":
-			# If the profile does not contain any tabs, then the focus is set to the profile photo
-			return list
-		self.appModule.profilePanelElement = list
-		list2 = list.firstChild
-		for i in range(15):
-			if list2.role == Role.LIST:
-				# Now we find the selected element to set focus on it
-				return next((item for item in list2.children if State.SELECTED in item.states), list2.firstChild)
-			else: list2 = list2.next
-		return list.firstChild
+		try:
+			if not getattr(item, "parent", None):
+				return False
+			states = getattr(item, "states", set())
+			if State.INVISIBLE in states or State.OFFSCREEN in states:
+				return False
+		except Exception:
+			return False
+
+		for child in getattr(item, "children", []):
+			if getattr(child, "UIAAutomationId", "") in ("Segments", "IdentityRoot", "Navigation"):
+				return True
+		curr = getattr(item, "firstChild", None)
+		while curr:
+			if getattr(curr, "UIAAutomationId", "") in ("Segments", "IdentityRoot", "Navigation"):
+				return True
+			curr = getattr(curr, "next", None)
+		return False
+
+	def get_profile_panel(self):
+		panel = self.appModule.profilePanelElement
+		if not self._is_profile_host(panel):
+			panel = next((item for item in self.getElements() if self._is_profile_host(item)), None)
+		if not panel:
+			self.appModule.profilePanelElement = False
+			return False
+
+		self.appModule.profilePanelElement = panel
+
+		# Look for Navigation tabs list within the profile panel
+		nav = None
+		for child in getattr(panel, "children", []):
+			if getattr(child, "UIAAutomationId", "") == "Navigation" or getattr(child, "role", None) in (Role.LIST, Role.TABCONTROL):
+				nav = child
+				break
+
+		if not nav:
+			curr = getattr(panel, "firstChild", None)
+			while curr:
+				if getattr(curr, "UIAAutomationId", "") == "Navigation" or getattr(curr, "role", None) in (Role.LIST, Role.TABCONTROL):
+					nav = curr
+					break
+				curr = getattr(curr, "next", None)
+
+		if nav:
+			tabs = getattr(nav, "children", [])
+			if tabs:
+				selected = next((item for item in tabs if State.SELECTED in getattr(item, "states", set())), tabs[0])
+				if selected:
+					return selected
+			curr = getattr(nav, "firstChild", None)
+			first_tab = curr
+			while curr:
+				if State.SELECTED in getattr(curr, "states", set()):
+					return curr
+				curr = getattr(curr, "next", None)
+			if first_tab:
+				return first_tab
+
+		# Fallback to the first item in the profile panel
+		return getattr(panel, "firstChild", None)
