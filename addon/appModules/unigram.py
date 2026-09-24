@@ -128,10 +128,10 @@ class AppModule(appModuleHandler.AppModule):
 				name = getattr(obj, "name", "") or ""
 				sender = ""
 				keywords = keywordsInMessages.get(conf.get("lang"), keywordsInMessages["en"])
-				if keywords[3] in name:
-					sender = "received"
-				elif keywords[2] in name:
-					sender = "send"
+				idx_recv = name.rfind(keywords[3])
+				idx_sent = name.rfind(keywords[2])
+				if idx_recv != -1 or idx_sent != -1:
+					sender = "received" if idx_recv > idx_sent else "send"
 				obj.sender_message = sender
 				obj.end_text = name
 				if (
