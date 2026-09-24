@@ -2,6 +2,7 @@
 # UnigramAccess: Custom NVDAObject overlay classes for Unigram UI elements.
 
 import api
+from .unigram_logger import ulog as log
 from controlTypes import Role, State
 import editableText
 from NVDAObjects.UIA import ListItem
@@ -310,8 +311,8 @@ class EditableText(editableText.EditableText):
 		info = None
 		try:
 			info = self.makeTextInfo(textInfos.POSITION_ALL)
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 		if info and info.text == "":
 			action = conf.get("action_when_pressing_up_arrow_in_text_field")
 			if action == "to_messages":

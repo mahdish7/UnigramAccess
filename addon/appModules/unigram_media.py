@@ -42,7 +42,8 @@ class UnigramMedia:
 			if parent and getattr(parent, 'role', None) in (Role.UNKNOWN, Role.SLIDER) and getattr(parent, 'UIAAutomationId', None) == "Slider":
 				return True
 			return False
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 
@@ -58,7 +59,8 @@ class UnigramMedia:
 				return False
 			_ = slider.name
 			return True
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 	def _find_voice_slider(self):
@@ -78,8 +80,8 @@ class UnigramMedia:
 					if self._is_slider_element(item) and self._is_slider_alive(item):
 						self.appModule.saved_items.save("slider", item)
 						return item
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 		return None
 
 	def script_closingVoiceMessage(self, gesture):
@@ -91,8 +93,8 @@ class UnigramMedia:
 			if lastFocus:
 				try:
 					lastFocus.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			message(_("The audio player has been closed"))
 		else:
 			message(_("Nothing is playing right now"))
@@ -105,8 +107,8 @@ class UnigramMedia:
 			if lastFocus:
 				try:
 					lastFocus.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 		else: message(_("Nothing is playing right now"))
 
 	def _safe_set_focus(self, candidate):
@@ -120,17 +122,17 @@ class UnigramMedia:
 				try:
 					candidate.setFocus()
 					return True
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			first = getattr(candidate, "firstChild", None)
 			if first and getattr(first, "isFocusable", True):
 				try:
 					first.setFocus()
 					return True
-				except Exception:
-					pass
-		except Exception:
-			pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def is_media_popup_element(self, obj):
@@ -155,8 +157,8 @@ class UnigramMedia:
 				curr_id = getattr(curr, "UIAAutomationId", "") or ""
 				if curr_id == "Popup":
 					return True
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 			try:
 				curr = getattr(curr, "parent", None)
 			except Exception:
@@ -209,15 +211,12 @@ class UnigramMedia:
 			return
 
 		targetButton = None
-		if getattr(obj, "media", None):
-			targetButton = next((item for item in obj.media.children if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button"), None)
-		else:
-			item = obj.firstChild
-			while item:
-				if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button":
-					targetButton = item
-					break
-				item = item.next
+		item = obj.firstChild
+		while item:
+			if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button":
+				targetButton = item
+				break
+			item = item.next
 
 		if not targetButton:
 			gesture.send()
@@ -290,8 +289,8 @@ class UnigramMedia:
 		if last_focus:
 			try:
 				last_focus.setFocus()
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 		return True
 
 	def script_toggleVoiceSlider(self, gesture):
@@ -305,8 +304,8 @@ class UnigramMedia:
 			if saved_focus:
 				try:
 					saved_focus.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			return
 
 		# Find the slider
@@ -317,8 +316,8 @@ class UnigramMedia:
 			self.active_slider = slider
 			try:
 				slider.setFocus()
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 			def monitor_slider():
 				# Stop if saved focus is cleared (e.g. user toggled back manually via Alt+S)
@@ -345,8 +344,8 @@ class UnigramMedia:
 					if saved_focus:
 						try:
 							saved_focus.setFocus()
-						except Exception:
-							pass
+						except Exception as e:
+							log.debugException(f"Swallowed exception: {e}")
 					return
 
 			core.callLater(300, monitor_slider)

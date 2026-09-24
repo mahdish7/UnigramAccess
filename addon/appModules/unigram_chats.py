@@ -182,7 +182,8 @@ class UnigramChats:
 					and getattr(parent, "UIAAutomationId", "") in ("TopicList", "ScrollingHost")
 				)
 			return False
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 	def to_threads_list(self):
@@ -208,8 +209,8 @@ class UnigramChats:
 			try:
 				last_topic.setFocus()
 				return True
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		first = getattr(branch_list, "firstChild", None)
 		if first:
@@ -220,8 +221,8 @@ class UnigramChats:
 				try:
 					target.setFocus()
 					return True
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def to_profile_panel(self):
@@ -235,8 +236,8 @@ class UnigramChats:
 			try:
 				profile_panel.setFocus()
 				return True
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def is_chat_item(self, obj):
@@ -251,7 +252,8 @@ class UnigramChats:
 				parent = getattr(curr, "parent", None)
 				return getattr(parent, "UIAAutomationId", "") == "ChatsList"
 			return False
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 	def _get_adjacent_item(self, item, forward=True):
@@ -278,17 +280,17 @@ class UnigramChats:
 				try:
 					candidate.setFocus()
 					return True
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			first = getattr(candidate, "firstChild", None)
 			if first and getattr(first, "isFocusable", True):
 				try:
 					first.setFocus()
 					return True
-				except Exception:
-					pass
-		except Exception:
-			pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def restore_deletion_focus(self):
@@ -336,8 +338,8 @@ class UnigramChats:
 			obj = obj.parent
 		try:
 			obj.setFocus()
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 
 		next_obj = self._get_adjacent_item(obj, forward=True)
 		prev_obj = self._get_adjacent_item(obj, forward=False)
@@ -377,8 +379,8 @@ class UnigramChats:
 					primary_btn = item
 				elif not secondary_btn and auto_id == "SecondaryButton":
 					secondary_btn = item
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		# 1. Check focused object itself first
 		check_candidate(obj)
@@ -387,8 +389,8 @@ class UnigramChats:
 		try:
 			check_candidate(getattr(obj, "next", None))
 			check_candidate(getattr(obj, "previous", None))
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 
 		# 3. Find the dialog container (walk up to Role.DIALOG or at most 4 levels)
 		dialog = None
@@ -413,8 +415,8 @@ class UnigramChats:
 							check_candidate(subchild)
 					if checkbox and primary_btn and secondary_btn:
 						break
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		return checkbox, primary_btn, secondary_btn
 

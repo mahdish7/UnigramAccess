@@ -241,13 +241,13 @@ class AppModule(appModuleHandler.AppModule):
 			if uia_elem:
 				try:
 					raw_name = getattr(uia_elem, "CurrentName", "") or getattr(uia_elem, "currentName", "") or ""
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			if not raw_name:
 				try:
 					raw_name = obj._get_name()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			if raw_name:
 				obj.name = formatMediaButtonName(obj, raw_name)
 			if obj == api.getFocusObject():
@@ -279,8 +279,8 @@ class AppModule(appModuleHandler.AppModule):
 				self.media_helper.active_slider = None
 				try:
 					savedSliderFocus.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 				return True
 			else:
 				self.media_helper.saved_slider_focus = None
@@ -311,8 +311,8 @@ class AppModule(appModuleHandler.AppModule):
 				if panel.firstChild:
 					try:
 						panel.firstChild.setFocus()
-					except Exception:
-						pass
+					except Exception as e:
+						log.debugException(f"Swallowed exception: {e}")
 			return True
 
 		elif self.executeContextMenuOption:
@@ -399,8 +399,8 @@ class AppModule(appModuleHandler.AppModule):
 						raw_name = getattr(title, "name", "") if (title and getattr(title, "UIAAutomationId", "") == "TitleLabel") else (getattr(ref, "name", "") or "")
 						if raw_name:
 							obj.name = composer_header_title_replacements.get(raw_name, raw_name)
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		elif obj.role in (Role.BUTTON, Role.LINK):
 			try:
@@ -418,8 +418,8 @@ class AppModule(appModuleHandler.AppModule):
 							obj.name = _("Enable video")
 						elif first_child_name == "\ue964" or obj.name == "Disable video":
 							obj.name = _("Disable video")
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		elif obj.role == Role.TOGGLEBUTTON:
 			try:
@@ -432,8 +432,8 @@ class AppModule(appModuleHandler.AppModule):
 						flags=re.S,
 					)
 				formatPollOption(obj)
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		# Resolve unlabeled elements
 		if obj.name == "":

@@ -34,7 +34,8 @@ class Saved_items:
 			if windowId in self._items and key in self._items[windowId]:
 				del self._items[windowId][key]
 			return False
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 	def save(self, key, obj):
@@ -104,7 +105,8 @@ class UnigramUIHelper:
 		try:
 			container = self.getMainContainer()
 			return getattr(container, "firstChild", None)
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return None
 
 
@@ -185,7 +187,8 @@ class UnigramUIHelper:
 			states = getattr(item, "states", set())
 			if State.INVISIBLE in states or State.OFFSCREEN in states:
 				return False
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 		for child in getattr(item, "children", []):
