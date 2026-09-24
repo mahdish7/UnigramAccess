@@ -22,7 +22,6 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+2**: Move focus to the last message, open profile, or settings details.
 * **ALT+3**: Toggle focus between message edit field and previous position.
 * **ALT+4**: Move focus to chat folders list.
-* **ALT+5**: Move focus to open profile panel.
 * **ALT+U**: Move focus to "unread messages" separator in the active chat.
 * **ALT+shift+P**: Open current chat profile.
 * **ALT+M**: Open main navigation menu.

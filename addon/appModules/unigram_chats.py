@@ -232,8 +232,11 @@ class UnigramChats:
 		"""
 		profile_panel = self.appModule.ui_helper.get_profile_panel()
 		if profile_panel:
-			profile_panel.setFocus()
-			return True
+			try:
+				profile_panel.setFocus()
+				return True
+			except Exception:
+				pass
 		return False
 
 	def is_chat_item(self, obj):
@@ -552,7 +555,7 @@ class UnigramChats:
 		isGroupCall = False
 		title = False
 		obj = self.appModule.saved_items.get("profile name")
-		if obj and obj.location.width != 0:
+		if obj and getattr(obj, "isFocusable", False):
 			title = obj
 			message(obj.name)
 		for item in self.appModule.ui_helper.getElements():
