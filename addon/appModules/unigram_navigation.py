@@ -35,17 +35,19 @@ class UnigramNavigation:
 			message(_("List not found"))
 
 	def script_toLastMessage(self, gesture):
+		log.info("Executing toLastMessage shortcut.")
 		# Priority 1: Focus or move caret to last message in active chat
 		if getattr(self.appModule, "msg_helper", None) and self.appModule.msg_helper.to_last_message():
 			return True
 
-		# Priority 2: Focus profile information panel if open
+		# Priority 2: Focus profile panel if open
 		if getattr(self.appModule, "chats_helper", None) and self.appModule.chats_helper.to_profile_panel():
 			return True
 
 		# Priority 3: Focus settings detail panel if in settings
-		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_detail_panel():
-			return True
+		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.is_in_settings():
+			if self.appModule.settings_helper.to_detail_panel():
+				return True
 
 		message(_("No open chat"))
 
@@ -156,15 +158,14 @@ class UnigramNavigation:
 		if profile and getattr(profile, "isFocusable", False):
 			self.appModule.isOpenProfile = api.getFocusObject()
 			profile.doAction()
-			panel = next((item for item in self.appModule.ui_helper.getElements() if self.appModule.ui_helper._is_profile_host(item)), None)
-			if panel and getattr(panel, "firstChild", None):
-				try:
-					panel.firstChild.setFocus()
-					self.appModule.isOpenProfile = False
-				except Exception:
-					pass
+			import core
+			core.callLater(200, self._focus_profile_on_open)
 		else:
 			message(_("No open chat"))
+
+	def _focus_profile_on_open(self):
+		if getattr(self.appModule, "chats_helper", None):
+			self.appModule.chats_helper.to_profile_panel()
 
 	def script_to_down(self, gesture):
 		button = next((button for button in self.appModule.ui_helper.getElements() if button.role == Role.BUTTON and button.UIAAutomationId == "MessagesButton"), None)
