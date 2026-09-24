@@ -495,22 +495,6 @@ class UnigramMessages:
 			except Exception:
 				pass
 
-		# 4. Fallback: if primary_btn or secondary_btn is still not found, search upward ancestors
-		if not primary_btn or not secondary_btn:
-			curr = getattr(obj, "parent", None)
-			depth = 0
-			while curr and depth < 3:
-				try:
-					for child in getattr(curr, "children", []):
-						check_candidate(child)
-						if primary_btn and secondary_btn:
-							break
-				except Exception:
-					pass
-				if primary_btn and secondary_btn:
-					break
-				curr = getattr(curr, "parent", None)
-				depth += 1
 
 		return checkbox, primary_btn, secondary_btn
 
