@@ -4,6 +4,7 @@ addonHandler.initTranslation()
 from controlTypes import Role, State
 from keyboardHandler import KeyboardInputGesture
 import api
+import core
 from ui import message
 from .cnf import conf
 from .data import unread_messages_keywords
@@ -95,8 +96,8 @@ class UnigramNavigation:
 				for item in getattr(first_child, "children", []):
 					if getattr(item, "name", None) == "\ue0e5":
 						return True
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 
 		return False
 
@@ -136,8 +137,8 @@ class UnigramNavigation:
 			except Exception:
 				try:
 					target_item.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 		else:
 			message(_("There are no unread messages in this chat"))
 
@@ -158,7 +159,6 @@ class UnigramNavigation:
 		if profile and getattr(profile, "isFocusable", False):
 			self.appModule.isOpenProfile = api.getFocusObject()
 			profile.doAction()
-			import core
 			core.callLater(200, self._focus_profile_on_open)
 		else:
 			message(_("No open chat"))
@@ -173,7 +173,6 @@ class UnigramNavigation:
 		else: message(_("Button not found"))
 
 	def script_go_to_list_search_results(self, gesture):
-		obj = api.getFocusObject()
 		btn = next((element.next for element in self.appModule.ui_helper.getElements()
 			if element.role == Role.EDITABLETEXT and element.UIAAutomationId == "Field" and "/" in element.next.name and element.next.role == Role.BUTTON), None)
 		if btn:
@@ -182,7 +181,6 @@ class UnigramNavigation:
 	
 	def script_go_to_next_search_result(self, gesture):
 		"""Navigate to the next search result (upwards in chat history, clicking SearchPrevious)."""
-		obj = api.getFocusObject()
 		btn = next((element for element in self.appModule.ui_helper.getElements()
 			if element.UIAAutomationId == "SearchPrevious" and element.role == Role.BUTTON), None)
 		if btn and State.FOCUSABLE in btn.states:
@@ -194,7 +192,6 @@ class UnigramNavigation:
 
 	def script_go_to_previous_search_result(self, gesture):
 		"""Navigate to the previous search result (downwards towards newer messages, clicking SearchNext)."""
-		obj = api.getFocusObject()
 		btn = next((element for element in self.appModule.ui_helper.getElements()
 			if element.UIAAutomationId == "SearchNext" and element.role == Role.BUTTON), None)
 		if btn and State.FOCUSABLE in btn.states:

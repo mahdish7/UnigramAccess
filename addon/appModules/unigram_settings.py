@@ -73,7 +73,8 @@ class UnigramSettings:
 				return True
 
 			return False
-		except Exception:
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 			return False
 
 	def to_categories_list(self):

@@ -162,8 +162,8 @@ def formatMessageOnFocus(obj, savedItems):
 							sub = (getattr(profileName.lastChild, "name", "") or "").lower()
 							if re.search(r"\d+\s*(?:member|subscriber|عضو|مشترک)", sub):
 								is_group_profile = True
-					except Exception:
-						pass
+					except Exception as e:
+						log.debugException(f"Swallowed exception: {e}")
 
 					if not is_group_profile:
 						partner_name = (

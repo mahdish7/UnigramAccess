@@ -75,8 +75,8 @@ class Chat_update:
 			try:
 				newMessage = (title, lastMessage.positionInfo["indexInGroup"])
 				cls.app.saved_items.save("last message", newMessage)
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 		core.callLater(int(cls.interval * 1000), cls.tick)
 
 	@classmethod
@@ -135,8 +135,8 @@ class UnigramMessages:
 					last_child.setFocus()
 					KeyboardInputGesture.fromName("end").send()
 					return True
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			else:
 				message(_("This chat is empty"))
 				return True
@@ -329,8 +329,8 @@ class UnigramMessages:
 				return True
 			if getattr(item, "sender_message", None):
 				return True
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def _get_adjacent_item(self, item, forward=True):
@@ -357,17 +357,17 @@ class UnigramMessages:
 				try:
 					candidate.setFocus()
 					return True
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			first = getattr(candidate, "firstChild", None)
 			if first and getattr(first, "isFocusable", True):
 				try:
 					first.setFocus()
 					return True
-				except Exception:
-					pass
-		except Exception:
-			pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def restore_deletion_focus(self):
@@ -415,8 +415,8 @@ class UnigramMessages:
 			obj = obj.parent
 		try:
 			obj.setFocus()
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 
 		next_obj = self._get_adjacent_item(obj, forward=True)
 		prev_obj = self._get_adjacent_item(obj, forward=False)
@@ -456,8 +456,8 @@ class UnigramMessages:
 					primary_btn = item
 				elif not secondary_btn and auto_id == "SecondaryButton":
 					secondary_btn = item
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		# 1. Check focused object itself first
 		check_candidate(obj)
@@ -466,8 +466,8 @@ class UnigramMessages:
 		try:
 			check_candidate(getattr(obj, "next", None))
 			check_candidate(getattr(obj, "previous", None))
-		except Exception:
-			pass
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 
 		# 3. Find the dialog container (walk up to Role.DIALOG or at most 4 levels)
 		dialog = None
@@ -492,8 +492,8 @@ class UnigramMessages:
 							check_candidate(subchild)
 					if checkbox and primary_btn and secondary_btn:
 						break
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 
 		return checkbox, primary_btn, secondary_btn
@@ -620,8 +620,8 @@ class UnigramMessages:
 		if last_focus:
 			try:
 				last_focus.setFocus()
-			except Exception:
-				pass
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 
 		if is_reply:
 			message(_("Reply canceled"))

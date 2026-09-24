@@ -2,6 +2,7 @@
 # UnigramAccess: Voice and video call controls.
 
 import api
+from .unigram_logger import ulog as log
 from controlTypes import Role
 import queueHandler
 from threading import Timer
@@ -83,8 +84,8 @@ class UnigramCalls:
 			if lastFocus:
 				try:
 					lastFocus.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 			return True
 		return False
 
@@ -129,14 +130,14 @@ class UnigramCalls:
 			except Exception:
 				try:
 					targetButton.doAction()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 
 			if obj:
 				try:
 					obj.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 
 			def speakAudioState():
 				btn = next(
@@ -175,14 +176,14 @@ class UnigramCalls:
 			except Exception:
 				try:
 					targetButton.doAction()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 
 			if obj:
 				try:
 					obj.setFocus()
-				except Exception:
-					pass
+				except Exception as e:
+					log.debugException(f"Swallowed exception: {e}")
 
 			def speakVideoState():
 				btn = next(
