@@ -206,7 +206,7 @@ class UnigramMessages:
 				lastFocusObject.setFocus()
 			return
 		targetButton = self.appModule.saved_items.get("message box")
-		if not targetButton or not targetButton.location or not targetButton.location.width:
+		if not targetButton or not getattr(targetButton, "isFocusable", False):
 			targetButton = False
 			for item in reversed(self.appModule.ui_helper.getElements()):
 				if item.role == Role.EDITABLETEXT and item.UIAAutomationId == "TextField":
@@ -214,9 +214,23 @@ class UnigramMessages:
 					self.appModule.saved_items.save("message box", item)
 					break
 		if targetButton:
-			targetButton.setFocus()
-		elif lastFocusObject and lastFocusObject.location:
-			lastFocusObject.setFocus()
+			if not getattr(targetButton, "isFocusable", False):
+				self.appModule.saved_items.save("message box", None)
+				message(_("Message input field not found"))
+			else:
+				try:
+					targetButton.setFocus()
+				except Exception:
+					self.appModule.saved_items.save("message box", None)
+					message(_("Message input field not found"))
+		elif lastFocusObject:
+			if not getattr(lastFocusObject, "isFocusable", False):
+				message(_("Message input field not found"))
+			else:
+				try:
+					lastFocusObject.setFocus()
+				except Exception:
+					message(_("Message input field not found"))
 		else:
 			message(_("Message input field not found"))
 

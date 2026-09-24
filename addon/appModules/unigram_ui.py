@@ -200,13 +200,8 @@ class UnigramUIHelper:
 			return False
 
 		for child in getattr(item, "children", []):
-			if getattr(child, "UIAAutomationId", "") in ("Segments", "IdentityRoot", "Navigation"):
+			if getattr(child, "UIAAutomationId", "") in ("Segments", "IdentityRoot"):
 				return True
-		curr = getattr(item, "firstChild", None)
-		while curr:
-			if getattr(curr, "UIAAutomationId", "") in ("Segments", "IdentityRoot", "Navigation"):
-				return True
-			curr = getattr(curr, "next", None)
 		return False
 
 	def get_profile_panel(self):
@@ -226,28 +221,12 @@ class UnigramUIHelper:
 				nav = child
 				break
 
-		if not nav:
-			curr = getattr(panel, "firstChild", None)
-			while curr:
-				if getattr(curr, "UIAAutomationId", "") == "Navigation" or getattr(curr, "role", None) in (Role.LIST, Role.TABCONTROL):
-					nav = curr
-					break
-				curr = getattr(curr, "next", None)
-
 		if nav:
 			tabs = getattr(nav, "children", [])
 			if tabs:
 				selected = next((item for item in tabs if State.SELECTED in getattr(item, "states", set())), tabs[0])
 				if selected:
 					return selected
-			curr = getattr(nav, "firstChild", None)
-			first_tab = curr
-			while curr:
-				if State.SELECTED in getattr(curr, "states", set()):
-					return curr
-				curr = getattr(curr, "next", None)
-			if first_tab:
-				return first_tab
 
 		# Fallback to the first item in the profile panel
 		return getattr(panel, "firstChild", None)
