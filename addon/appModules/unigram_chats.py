@@ -575,5 +575,5 @@ class UnigramChats:
 		if targetButton:
 			targetButton.doAction()
 		else:
-			message(_("Button not found"))
+			message(_("More options button not found"))
 

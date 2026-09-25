@@ -50,7 +50,7 @@ class UnigramNavigation:
 			if self.appModule.settings_helper.to_detail_panel():
 				return True
 
-		message(_("No open chat"))
+		message(_("Section not found"))
 
 	def script_to_tabs_folder(self, gesture):
 		obj = self.appModule.saved_items.get("tabs folder")
@@ -169,15 +169,18 @@ class UnigramNavigation:
 
 	def script_to_down(self, gesture):
 		button = next((button for button in self.appModule.ui_helper.getElements() if button.role == Role.BUTTON and button.UIAAutomationId == "MessagesButton"), None)
-		if button: button.doAction()
-		else: message(_("Button not found"))
+		if button:
+			button.doAction()
+		else:
+			message(_("Scroll down button not found"))
 
 	def script_go_to_list_search_results(self, gesture):
 		btn = next((element.next for element in self.appModule.ui_helper.getElements()
 			if element.role == Role.EDITABLETEXT and element.UIAAutomationId == "Field" and "/" in element.next.name and element.next.role == Role.BUTTON), None)
 		if btn:
 			btn.doAction()
-		else: message(_("Button not found"))
+		else:
+			message(_("Search is not active"))
 	
 	def script_go_to_next_search_result(self, gesture):
 		"""Navigate to the next search result (upwards in chat history, clicking SearchPrevious)."""
@@ -188,7 +191,7 @@ class UnigramNavigation:
 		elif btn:
 			message(_("No next search result"))
 		else:
-			message(_("Button not found"))
+			message(_("Search is not active"))
 
 	def script_go_to_previous_search_result(self, gesture):
 		"""Navigate to the previous search result (downwards towards newer messages, clicking SearchNext)."""
@@ -199,4 +202,4 @@ class UnigramNavigation:
 		elif btn:
 			message(_("No previous search result"))
 		else:
-			message(_("Button not found"))
+			message(_("Search is not active"))

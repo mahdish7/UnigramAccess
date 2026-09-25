@@ -13,14 +13,14 @@ from site_scons.site_tools.NVDATool.utils import _
 # Add-on information variables
 addon_info = AddonInfo(
 	# add-on Name/identifier, internal for NVDA
-	addon_name="unigramAccess",
+	addon_name="UnigramAccess",
 	# Add-on summary/title, usually the user visible name of the add-on
 	# Translators: Summary/title for this add-on
 	# to be shown on installation and add-on information found in add-on store
 	addon_summary=_("UnigramAccess"),
 	# Add-on description
 	# Translators: Long description to be shown for this add-on on add-on information from add-on store
-	addon_description=_("""This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"""),
+	addon_description=_("""Improves Unigram accessibility in NVDA, defining shortcuts and navigation enhancements."""),
 	# version
 	addon_version="1.0.0",
 	# Brief changelog for this version

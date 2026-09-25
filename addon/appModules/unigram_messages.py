@@ -170,7 +170,7 @@ class UnigramMessages:
 				if item:
 					item.setFocus()
 		else:
-			message(_("Button not found"))
+			message(_("Button to open comments not found"))
 
 	def script_copyMessage(self, gesture):
 		"""Copy focused link directly, or pass Ctrl+C to Telegram for native handling."""
@@ -243,7 +243,7 @@ class UnigramMessages:
 		if button:
 			button.doAction()
 		else:
-			message(_("Button not found"))
+			message(_("Attach file button not found"))
 
 	def script_new_conversation(self, gesture):
 		"""Click the New Conversation button."""
@@ -254,7 +254,7 @@ class UnigramMessages:
 		if button:
 			button.doAction()
 		else:
-			message(_("Button not found"))
+			message(_("New chat button not found"))
 
 	def script_copy_data_for_broadcast(self, gesture):
 		"""Extract and copy streaming RTMP URL and stream key to clipboard."""
