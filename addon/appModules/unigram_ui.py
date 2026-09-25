@@ -166,15 +166,86 @@ class UnigramUIHelper:
 			return False
 		except Exception: return False
 
+	def is_story_item(self, obj):
+		"""Check whether an NVDAObject is an item in the stories list."""
+		try:
+			if not obj:
+				return False
+			curr = obj if getattr(obj, "role", None) == Role.LISTITEM else getattr(obj, "parent", None)
+			if curr and getattr(curr, "role", None) == Role.LISTITEM:
+				parent = getattr(curr, "parent", None)
+				if parent and getattr(parent, "role", None) == Role.LIST:
+					for child in getattr(curr, "children", []):
+						if getattr(child, "UIAAutomationId", "") in ("SegmentsSmall", "Segments"):
+							return True
+			return False
+		except Exception as e:
+			log.debugException(f"is_story_item error: {e}")
+			return False
+
+	def is_stories_list(self, item):
+		"""Check whether an NVDAObject is the stories list container."""
+		if not item or getattr(item, "role", None) != Role.LIST:
+			return False
+		try:
+			for child in getattr(item, "children", []):
+				if getattr(child, "role", None) == Role.LISTITEM:
+					return self.is_story_item(child)
+			return False
+		except Exception as e:
+			log.debugException(f"is_stories_list error: {e}")
+			return False
+
+	def _is_topic_host(self, item):
+		"""Determine if a ScrollingHost container belongs to the forum topics list."""
+		if not item or getattr(item, "role", None) != Role.LIST:
+			return False
+		if getattr(item, "UIAAutomationId", "") == "TopicList":
+			return True
+		if getattr(item, "UIAAutomationId", "") != "ScrollingHost":
+			return False
+		try:
+			loc = getattr(item, "location", None)
+			if loc and loc.width == 0:
+				return False
+			states = getattr(item, "states", set())
+			if State.INVISIBLE in states or State.OFFSCREEN in states:
+				return False
+
+			if getattr(item, "previous", None) and getattr(item.previous, "UIAAutomationId", "") == "DetailHeaderPresenter":
+				return False
+			if self.is_stories_list(item) or self._is_profile_host(item):
+				return False
+
+			for child in getattr(item, "children", []):
+				if getattr(child, "role", None) == Role.LISTITEM:
+					name = getattr(child, "name", "") or ""
+					if name.startswith("forumTopic"):
+						return True
+					for sub in getattr(child, "children", []):
+						if getattr(sub, "UIAAutomationId", "") in ("TitleLabel", "BriefInfo", "TimeLabel"):
+							return True
+			return False
+		except Exception as e:
+			log.debugException(f"_is_topic_host error: {e}")
+			return False
+
 	def get_branch_list(self):
+		cached = self.appModule.saved_items.get("topics")
+		if cached and getattr(cached, "location", None) and cached.location.width:
+			states = getattr(cached, "states", set())
+			if State.INVISIBLE not in states and State.OFFSCREEN not in states:
+				return cached
+
 		for item in self.getElements():
-			if getattr(item, "role", None) == Role.LIST and getattr(item, "UIAAutomationId", "") in ("TopicList", "ScrollingHost"):
-				# Exclude profile panel and settings detail panel
-				if getattr(item, "firstChild", None) and getattr(item.firstChild, "UIAAutomationId", "") == "Segments":
-					continue
-				if getattr(item, "previous", None) and getattr(item.previous, "UIAAutomationId", "") == "DetailHeaderPresenter":
-					continue
-				return item
+			if getattr(item, "role", None) == Role.LIST:
+				uia_id = getattr(item, "UIAAutomationId", "")
+				if uia_id == "TopicList":
+					self.appModule.saved_items.save("topics", item)
+					return item
+				if uia_id == "ScrollingHost" and self._is_topic_host(item):
+					self.appModule.saved_items.save("topics", item)
+					return item
 		return False
 
 	def _is_profile_host(self, item):

@@ -118,7 +118,7 @@ class AppModule(appModuleHandler.AppModule):
 				parent = getattr(obj, "parent", None)
 				parentId = getattr(parent, "UIAAutomationId", "") if parent else ""
 
-				if parentId in ("ChatFolders", "ChatsList", "TopicList") or (getattr(self, "chats_helper", None) and self.chats_helper.is_topic_item(obj)):
+				if parentId in ("ChatFolders", "ChatsList", "TopicList") or (getattr(self, "chats_helper", None) and self.chats_helper.is_topic_item(obj)) or (getattr(self, "ui_helper", None) and self.ui_helper.is_story_item(obj)):
 					return
 
 				elif parentId == "Navigation":
@@ -355,6 +355,16 @@ class AppModule(appModuleHandler.AppModule):
 				obj.name = formatChatElementOnFocus(obj)
 			elif getattr(self, "chats_helper", None) and self.chats_helper.is_topic_item(obj):
 				self.saved_items.save("last focused topic", obj)
+				if getattr(obj, "name", "") and obj.name.startswith("forumTopic {\n  info = forumTopicInfo {"):
+					labels = [
+						label.name
+						for label in getattr(obj, "children", [])
+						if getattr(label, "UIAAutomationId", "") in ("TitleLabel", "BriefInfo", "TimeLabel")
+					]
+					if len(labels) >= 3:
+						obj.name = ". ".join((labels[0], labels[2], labels[1]))
+					elif labels:
+						obj.name = ". ".join(labels)
 			elif obj.parent.UIAAutomationId == "ScrollingHost":
 				if obj.name == "" and obj.childCount != 0:
 					for item in obj.children:
