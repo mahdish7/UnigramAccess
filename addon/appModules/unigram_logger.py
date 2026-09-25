@@ -48,37 +48,49 @@ class UnigramLogger:
 
 	def _log(self, level_name, msg, exc_info=False):
 		# 1. Log to NVDA standard log
-		if level_name == 'debug':
-			nvda_log.debug(msg, exc_info=exc_info)
-		elif level_name == 'debugWarning':
-			nvda_log.debugWarning(msg, exc_info=exc_info)
-		elif level_name == 'debugException':
-			nvda_log.debugException(msg, exc_info=exc_info)
-		elif level_name == 'info':
-			nvda_log.info(msg, exc_info=exc_info)
-		elif level_name == 'warning':
-			nvda_log.warning(msg, exc_info=exc_info)
-		elif level_name == 'error':
-			nvda_log.error(msg, exc_info=exc_info)
-		elif level_name == 'critical':
-			nvda_log.critical(msg, exc_info=exc_info)
+		try:
+			if level_name == 'debug':
+				nvda_log.debug(msg, exc_info=exc_info)
+			elif level_name == 'debugWarning':
+				if hasattr(nvda_log, 'debugWarning'):
+					nvda_log.debugWarning(msg, exc_info=exc_info)
+				else:
+					nvda_log.warning(msg, exc_info=exc_info)
+			elif level_name == 'debugException':
+				if hasattr(nvda_log, 'debugException'):
+					nvda_log.debugException(msg, exc_info=exc_info)
+				else:
+					nvda_log.debug(msg, exc_info=True)
+			elif level_name == 'info':
+				nvda_log.info(msg, exc_info=exc_info)
+			elif level_name == 'warning':
+				nvda_log.warning(msg, exc_info=exc_info)
+			elif level_name == 'error':
+				nvda_log.error(msg, exc_info=exc_info)
+			elif level_name == 'critical':
+				nvda_log.critical(msg, exc_info=exc_info)
+		except Exception:
+			pass
 
 		# 2. Log to dedicated file if enabled
 		if self.file_handler:
-			if level_name in ('debug', 'debugWarning', 'debugException'):
-				self.file_logger.debug(msg, exc_info=exc_info)
-			elif level_name == 'info':
-				self.file_logger.info(msg, exc_info=exc_info)
-			elif level_name == 'warning':
-				self.file_logger.warning(msg, exc_info=exc_info)
-			elif level_name == 'error':
-				self.file_logger.error(msg, exc_info=exc_info)
-			elif level_name == 'critical':
-				self.file_logger.critical(msg, exc_info=exc_info)
+			try:
+				if level_name in ('debug', 'debugWarning', 'debugException'):
+					self.file_logger.debug(msg, exc_info=exc_info)
+				elif level_name == 'info':
+					self.file_logger.info(msg, exc_info=exc_info)
+				elif level_name == 'warning':
+					self.file_logger.warning(msg, exc_info=exc_info)
+				elif level_name == 'error':
+					self.file_logger.error(msg, exc_info=exc_info)
+				elif level_name == 'critical':
+					self.file_logger.critical(msg, exc_info=exc_info)
+			except Exception:
+				pass
 
 	def debug(self, msg, exc_info=False): self._log('debug', msg, exc_info)
 	def debugWarning(self, msg, exc_info=False): self._log('debugWarning', msg, exc_info)
-	def debugException(self, msg, exc_info=False): self._log('debugException', msg, exc_info)
+	def debugException(self, msg, exc_info=True): self._log('debugException', msg, exc_info)
 	def info(self, msg, exc_info=False): self._log('info', msg, exc_info)
 	def warning(self, msg, exc_info=False): self._log('warning', msg, exc_info)
 	def error(self, msg, exc_info=False): self._log('error', msg, exc_info)

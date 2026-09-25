@@ -79,7 +79,6 @@ class AppModule(appModuleHandler.AppModule):
 	executeContextMenuOption = False
 	isMedia = False
 	isMessageSelectionMode = False
-	_selection_restore_target = None
 
 	# ── Initialization & Teardown ───────────────────────────────────────
 
@@ -210,9 +209,14 @@ class AppModule(appModuleHandler.AppModule):
 			roleName = getattr(role, "name", str(role)) if role else "Unknown"
 			log.debug(f"Focus changed: Role: {roleName} ({role}) - ID: '{objId}'")
 
-		if self.ui_helper.is_message_object(obj) and State.SELECTED in getattr(obj, "states", set()):
-			self.isMessageSelectionMode = True
-			log.debug("Message selection mode activated")
+		# Check if focus moved directly into full-screen media viewer
+		if not self.isMedia and self.media_helper.is_media_popup_element(obj):
+			self.isMedia = {
+				"initial_obj": self.saved_items.get("last focus object"),
+				"is_open": True,
+				"confirmed_dismissal": None,
+			}
+			log.debug("Media viewer: detected entry into media viewer")
 
 		# Restore background timers if window was minimized
 		if self._restoreBackgroundTimers():
@@ -292,14 +296,6 @@ class AppModule(appModuleHandler.AppModule):
 
 		Returns True if the focus event was consumed (should not call nextHandler).
 		"""
-		if self._selection_restore_target:
-			target = self._selection_restore_target
-			self._selection_restore_target = None
-			if obj != target and target and getattr(target, "parent", None):
-				log.debug("Selection exit: restoring focus to previous message")
-				self.msg_helper._safe_set_focus(target)
-				return True
-
 		if self.isOpenProfile:
 			self.isOpenProfile = False
 			if self.ui_helper._is_profile_host(self.profilePanelElement):
@@ -334,14 +330,6 @@ class AppModule(appModuleHandler.AppModule):
 			return bool(consumed)
 
 		return False
- 
-	def _restore_selection_focus(self, target):
-		"""Fallback timer to restore focus to target message upon selection exit."""
-		if self._selection_restore_target == target:
-			self._selection_restore_target = None
-			if target and getattr(target, "parent", None):
-				log.debug("Selection exit: fallback restoring focus to message")
-				self.msg_helper._safe_set_focus(target)
 
 	def _formatFocusedObject(self, obj):
 		"""Apply formatting and label enrichment to the focused object."""
@@ -621,7 +609,9 @@ class AppModule(appModuleHandler.AppModule):
 			if not self.chats_helper.select_chat():
 				gesture.send()
 		elif self.ui_helper.is_message_object(obj):
-			if not self.msg_helper.script_selectMessage(gesture):
+			if self.msg_helper.script_selectMessage(gesture):
+				self.isMessageSelectionMode = True
+			else:
 				gesture.send()
 		else:
 			gesture.send()
@@ -870,31 +860,37 @@ class AppModule(appModuleHandler.AppModule):
 
 	@script(gesture="kb:escape")
 	def script_action_escape_key(self, gesture):
-		"""Handle Escape key: restore focus when exiting full-screen media viewer, delete dialog, or selection mode."""
-		if self.isMessageSelectionMode:
-			self.isMessageSelectionMode = False
+		"""Handle Escape key: always forward to Unigram, executing contextual cleanup if needed."""
+		try:
+			# 1. Clear selection mode flag if active
+			if getattr(self, "isMessageSelectionMode", False):
+				self.isMessageSelectionMode = False
+				log.debug("Escape: cleared message selection mode")
+
+			# 2. Deletion confirmation dialog dismissal
+			if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":
+				self.isDelete["confirmed_dismissal"] = "escape"
+				log.debug("Escape: Delete dialog confirmed dismissal via Escape")
+
+			# 3. Media viewer dismissal
 			focus_obj = api.getFocusObject()
-			target_msg = focus_obj if self.ui_helper.is_message_object(focus_obj) else self.saved_items.get("last focus object")
-			self._selection_restore_target = target_msg
-			gesture.send()
-			core.callLater(150, self._restore_selection_focus, target_msg)
-			return
-
-		if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":
-			self.isDelete["confirmed_dismissal"] = "escape"
-			log.debug("Delete dialog: confirmed dismissal via Escape")
-
-		focus_obj = api.getFocusObject()
-		is_in_viewer = self.media_helper.is_media_popup_element(focus_obj)
-		if is_in_viewer or (self.isMedia and isinstance(self.isMedia, dict) and not self.ui_helper.is_message_object(focus_obj)):
-			target = (self.isMedia.get("initial_obj") if isinstance(self.isMedia, dict) else None) or self.saved_items.get("last focus object")
-			if target:
+			is_in_viewer = (
+				(self.isMedia and isinstance(self.isMedia, dict) and self.isMedia.get("is_open"))
+				or self.media_helper.is_media_popup_element(focus_obj)
+			)
+			if is_in_viewer:
+				target = (self.isMedia.get("initial_obj") if isinstance(self.isMedia, dict) else None) or self.saved_items.get("last focus object")
 				self.isMedia = {
 					"initial_obj": target,
+					"is_open": True,
 					"confirmed_dismissal": "escape",
 				}
-				log.debug("Media viewer: confirmed dismissal via Escape")
-		else:
-			self.isMedia = False
-
-		gesture.send()
+				log.debug("Escape: Media viewer confirmed dismissal via Escape")
+			else:
+				# Not in media viewer; ensure any lingering isMedia flag is cleared
+				if self.isMedia and not (isinstance(self.isMedia, dict) and self.isMedia.get("confirmed_dismissal")):
+					self.isMedia = False
+		except Exception as e:
+			log.debugException(f"Exception during escape preprocessing: {e}")
+		finally:
+			gesture.send()
