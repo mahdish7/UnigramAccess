@@ -3,7 +3,7 @@ requires = ["setuptools~=80.9", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "unigramAccess"
+name = "UnigramAccess"
 dynamic = ["version"]
 description = "UnigramAccess NVDA add-on"
 maintainers = [

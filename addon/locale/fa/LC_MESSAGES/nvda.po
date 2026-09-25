@@ -1023,8 +1023,8 @@ msgstr "اعلام پیامی که به آن پاسخ داده شده است (ب
 msgid "Announces the time a message was sent or received, as well as a list of reactions. Double-clicking toggles the announcement mode for this information."
 msgstr "زمان ارسال یا دریافت پیام و فهرست واکنشها را اعلام میکند. با دو بار فشردن، حالت اعلام این اطلاعات تغییر میکند."
 
-msgid "This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"
-msgstr "این افزونه کلیدهای میانبر متعددی را جهت پیمایش سریع در بخشهای مختلف برنامه یونیگرام، تعامل و مدیریت آسان پیامها و گفتگوها، و بهبودهای کاربردی فراوان برای کاربران صفحهخوان فراهم میکند."
+msgid "Improves Unigram accessibility in NVDA, defining shortcuts and navigation enhancements."
+msgstr "بهبود دسترسی‌پذیری یونیگرام در NVDA، تعریف میانبرها و ارتقای ناوبری."
 
 msgid "Initial release of UnigramAccess."
 msgstr "انتشار اولیه UnigramAccess."
@@ -1182,8 +1182,6 @@ msgstr "اعلام پیامی که به آن پاسخ داده شده است (ب
 msgid "Announces the time a message was sent or received, as well as a list of reactions. Double-clicking toggles the announcement mode for this information."
 msgstr "زمان ارسال یا دریافت پیام و فهرست واکنشها را اعلام میکند. با دو بار فشردن، حالت اعلام این اطلاعات تغییر میکند."
 
-msgid "This add-on adds a lot of hotkeys for quick navigation through the main elements of the Unigram application, convenient interaction with Chat messages, and also adds many small improvements that make working in Unigram much easier"
-msgstr "این افزونه کلیدهای میانبر متعددی را جهت پیمایش سریع در بخشهای مختلف برنامه یونیگرام، تعامل و مدیریت آسان پیامها و گفتگوها، و بهبودهای کاربردی فراوان برای کاربران صفحهخوان فراهم میکند."
 
 #: addon\appModules\unigram_calls.py:80
 msgid "Leave"
@@ -1443,3 +1441,24 @@ msgstr "پخش صدا هنگام حذف پیام‌ها و چت‌ها"
 
 msgid "Toggle focus between message edit field and previous position"
 msgstr "جابجایی فوکوس بین کادر ویرایش پیام و موقعیت قبلی"
+
+msgid "Section not found"
+msgstr "بخش پیدا نشد"
+
+msgid "Scroll down button not found"
+msgstr "دکمه رفتن به پایین پیدا نشد"
+
+msgid "Search is not active"
+msgstr "جستجو فعال نیست"
+
+msgid "More options button not found"
+msgstr "دکمه گزینه‌های بیشتر پیدا نشد"
+
+msgid "Attach file button not found"
+msgstr "دکمه ضمیمه کردن فایل پیدا نشد"
+
+msgid "New chat button not found"
+msgstr "دکمه گفتگوی جدید پیدا نشد"
+
+msgid "Move to next media item in message"
+msgstr "حرکت به رسانه بعدی در پیام"

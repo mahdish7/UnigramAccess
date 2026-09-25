@@ -164,6 +164,11 @@ class Message_list_item(ListItem):
 		if not self.appModule.msg_helper.activate_option_for_menu("reply"):
 			gesture.send()
 
+	@script(
+		# Translators: Description for the script that navigates to the next media item in a message.
+		description=_("Move to next media item in message"),
+		gesture="kb:rightArrow",
+	)
 	def script_next_media(self, gesture, revers=False):
 		self.list_media = self.list_media or [item for item in self.children if item.role == Role.LISTITEM]
 		obj = None
