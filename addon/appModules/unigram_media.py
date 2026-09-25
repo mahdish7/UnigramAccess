@@ -15,6 +15,11 @@ from .unigram_utils import isActivelyDownloading
 
 baseDir = os.path.join(os.path.dirname(__file__), "media")
 
+MEDIA_VIEWER_IDS = frozenset({
+	"Photo", "ZoomOut", "ZoomIn", "VolumeButton", "Recognize",
+	"MediaViewer", "MediaView", "ImageViewer", "VideoPlayer"
+})
+
 
 class UnigramMedia:
 	def __init__(self, appModule):
@@ -136,34 +141,39 @@ class UnigramMedia:
 		return False
 
 	def is_media_popup_element(self, obj):
-		"""Check if an NVDA object is the Popup window or inside it.
-
-		Identifies the container window named 'Popup' by walking up the ancestor hierarchy.
-		Does not rely on control labels or button automation IDs.
-		"""
+		"""Check if an NVDA object is inside the full-screen media viewer popup."""
 		if not obj:
 			return False
-		curr = obj
-		depth = 0
-		while curr and depth < 20:
-			try:
-				if getattr(curr, "role", None) == Role.DESKTOP:
+		try:
+			role = getattr(obj, "role", None)
+			if role in (Role.MENU, Role.MENUITEM, Role.POPUPMENU):
+				return False
+			auto_id = getattr(obj, "UIAAutomationId", "") or ""
+			if auto_id in MEDIA_VIEWER_IDS:
+				return True
+			if auto_id in ("TextField", "ChatsList", "SearchField", "Message_item"):
+				return False
+			if self.appModule.ui_helper.is_message_object(obj):
+				return False
+
+			curr = obj
+			depth = 0
+			while curr and depth < 8:
+				if not getattr(curr, "parent", None) or getattr(curr, "role", None) in (Role.WINDOW, Role.DIALOG):
 					break
+				curr_id = getattr(curr, "UIAAutomationId", "") or ""
+				if curr_id in MEDIA_VIEWER_IDS:
+					return True
 				raw_name = getattr(curr, "name", None) or getattr(curr, "windowText", None)
 				if raw_name:
 					clean_name = str(raw_name).strip().strip("\u200e\u200f\u202a\u202b\u202c").lower()
-					if clean_name == "popup":
-						return True
-				curr_id = getattr(curr, "UIAAutomationId", "") or ""
-				if curr_id == "Popup":
-					return True
-			except Exception as e:
-				log.debugException(f"Swallowed exception: {e}")
-			try:
+					if clean_name == "popup" or curr_id == "Popup":
+						if getattr(curr, "role", None) not in (Role.MENU, Role.POPUPMENU):
+							return True
 				curr = getattr(curr, "parent", None)
-			except Exception:
-				break
-			depth += 1
+				depth += 1
+		except Exception as e:
+			log.debugException(f"Swallowed exception: {e}")
 		return False
 
 	def handle_media_step(self, obj):
@@ -183,18 +193,25 @@ class UnigramMedia:
 				target = self.appModule.saved_items.get("last focus object")
 			self.appModule.isMedia = False
 
-			if target:
+			if target and getattr(target, "parent", None):
 				log.debug(f"Media viewer: restoring focus to target role={getattr(target, 'role', None)}")
 				return self._safe_set_focus(target)
 
+			return False
+
+		# Dismissal not requested yet: check if media viewer has opened
+		if self.is_media_popup_element(obj):
+			if not self.appModule.isMedia.get("is_open"):
+				self.appModule.isMedia["is_open"] = True
+				log.debug("Media viewer: popup element confirmed open")
 			return False
 
 		# Dismissal not confirmed yet: media opened or playing
 		if obj == self.appModule.isMedia.get("initial_obj"):
 			return False
 
-		# Only clear media state if user clearly navigated to text input or chat list
-		if getattr(obj, "UIAAutomationId", "") in ("TextField", "ChatsList"):
+		# If media was triggered but focus moved to another element without opening viewer:
+		if not self.appModule.isMedia.get("is_open"):
 			self.appModule.isMedia = False
 			return False
 
@@ -211,12 +228,15 @@ class UnigramMedia:
 			return
 
 		targetButton = None
-		item = obj.firstChild
-		while item:
-			if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button":
-				targetButton = item
-				break
-			item = item.next
+		if getattr(obj, "media", None):
+			targetButton = next((item for item in obj.media.children if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button"), None)
+		else:
+			item = obj.firstChild
+			while item:
+				if item.role in (Role.LINK, Role.BUTTON) and item.UIAAutomationId == "Button":
+					targetButton = item
+					break
+				item = item.next
 
 		if not targetButton:
 			gesture.send()
@@ -225,6 +245,7 @@ class UnigramMedia:
 		self.appModule.saved_items.save("last focus object", obj)
 		self.appModule.isMedia = {
 			"initial_obj": obj,
+			"is_open": False,
 			"confirmed_dismissal": None,
 		}
 		log.debug("Media: action triggered")
