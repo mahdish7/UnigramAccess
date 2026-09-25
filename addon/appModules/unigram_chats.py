@@ -175,12 +175,23 @@ class UnigramChats:
 			if not obj:
 				return False
 			curr = obj if getattr(obj, "role", None) == Role.LISTITEM else getattr(obj, "parent", None)
-			if curr and getattr(curr, "role", None) == Role.LISTITEM:
-				parent = getattr(curr, "parent", None)
-				return (
-					getattr(parent, "role", None) == Role.LIST
-					and getattr(parent, "UIAAutomationId", "") in ("TopicList", "ScrollingHost")
-				)
+			if not curr or getattr(curr, "role", None) != Role.LISTITEM:
+				return False
+			if getattr(self.appModule, "ui_helper", None) and self.appModule.ui_helper.is_story_item(curr):
+				return False
+			parent = getattr(curr, "parent", None)
+			if not parent or getattr(parent, "role", None) != Role.LIST:
+				return False
+			parent_id = getattr(parent, "UIAAutomationId", "")
+			if parent_id == "TopicList":
+				return True
+			if parent_id == "ScrollingHost":
+				name = getattr(curr, "name", "") or ""
+				if name.startswith("forumTopic"):
+					return True
+				for sub in getattr(curr, "children", []):
+					if getattr(sub, "UIAAutomationId", "") in ("TitleLabel", "BriefInfo", "TimeLabel"):
+						return True
 			return False
 		except Exception as e:
 			log.debugException(f"Swallowed exception: {e}")
