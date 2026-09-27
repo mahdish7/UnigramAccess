@@ -72,6 +72,7 @@ spec = (
 	"notify administrators in messages = boolean(default=True)",
 	"action_when_pressing_up_arrow_in_text_field = string(default=edit)",
 	"announce_end_of_message = boolean(default=True)",
+	"suppressProgressBarUpdates = boolean(default=True)",
 	"custom_log_level = string(default=disabled)"
 )
 
@@ -82,8 +83,11 @@ class cnf:
 		validator = Validator()
 		self.conf.validate(validator, copy=True)
 		self.conf.write()
-	def get(self, key):
-		return self.conf[key]
+	def get(self, key, default=None):
+		try:
+			return self.conf[key]
+		except KeyError:
+			return default
 	def set(self, key, value):
 		self.conf[key] = value
 		self.conf.write()

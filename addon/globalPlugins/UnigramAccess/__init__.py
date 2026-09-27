@@ -169,6 +169,11 @@ class UnigramAccessSettings(SettingsPanel):
 		)
 		self.voiceTypeAfterChatName.SetStringSelection(self.listVoiceTypeAfterChatName[conf.get("voiceTypeAfterChatName")])
 
+		self.suppressProgressBarUpdates = genHelper.addItem(
+			wx.CheckBox(genBox, label=_("Suppress progress bar updates (beeps and speech)"))
+		)
+		self.suppressProgressBarUpdates.SetValue(conf.get("suppressProgressBarUpdates", True))
+
 		settingsSizerHelper.addItem(genSizer)
 
 		# ── 2. Messages and Reading ──────────────────────────────────────
@@ -321,6 +326,7 @@ class UnigramAccessSettings(SettingsPanel):
 
 	def onSave(self):
 		conf.set("voiceTypeAfterChatName", self.get_key(self.listVoiceTypeAfterChatName, self.voiceTypeAfterChatName.GetStringSelection()))
+		conf.set("suppressProgressBarUpdates", self.suppressProgressBarUpdates.IsChecked())
 		conf.set("saySenderName", self.get_key(self.listSaySenderName, self.saySenderName.GetStringSelection()))
 		conf.set("unreadBeforeMessageContent", self.unreadBeforeMessageContent.IsChecked())
 		conf.set("announce_end_of_message", self.announce_end_of_message.IsChecked())

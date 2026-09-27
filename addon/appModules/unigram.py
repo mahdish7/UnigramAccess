@@ -259,6 +259,11 @@ class AppModule(appModuleHandler.AppModule):
 
 		nextHandler()
 
+	def event_valueChange(self, obj, nextHandler):
+		if conf.get("suppressProgressBarUpdates", True) and getattr(obj, "role", None) == Role.PROGRESSBAR:
+			return
+		nextHandler()
+
 	def _restoreBackgroundTimers(self):
 		"""Restore suspended background polling timers after window reactivation."""
 		restored = False
@@ -335,6 +340,10 @@ class AppModule(appModuleHandler.AppModule):
 		"""Apply formatting and label enrichment to the focused object."""
 		if obj.role == Role.LISTITEM:
 			speech.cancelSpeech()
+			try:
+				obj.states.discard(State.SELECTABLE)
+			except Exception:
+				pass
 			if self.ui_helper.is_message_object(obj):
 				self.saved_items.save("last focus object", obj)
 				obj.name = formatMessageOnFocus(obj, self.saved_items)

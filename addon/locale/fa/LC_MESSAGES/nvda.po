@@ -1462,3 +1462,6 @@ msgstr "دکمه گفتگوی جدید پیدا نشد"
 
 msgid "Move to next media item in message"
 msgstr "حرکت به رسانه بعدی در پیام"
+
+msgid "Suppress progress bar updates (beeps and speech)"
+msgstr "غیرفعال کردن صدا و اعلام نوارهای پیشرفت"
