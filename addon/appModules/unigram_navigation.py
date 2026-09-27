@@ -34,9 +34,8 @@ class UnigramNavigation:
 
 		if not arg:
 			message(_("List not found"))
-
-	def script_toLastMessage(self, gesture):
-		log.info("Executing toLastMessage shortcut.")
+	def script_toDetailPanel(self, gesture):
+		log.info("Executing toDetailPanel shortcut.")
 		# Priority 1: Focus or move caret to last message in active chat
 		if getattr(self.appModule, "msg_helper", None) and self.appModule.msg_helper.to_last_message():
 			return True
@@ -46,11 +45,12 @@ class UnigramNavigation:
 			return True
 
 		# Priority 3: Focus settings detail panel if in settings
-		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.is_in_settings():
-			if self.appModule.settings_helper.to_detail_panel():
-				return True
+		if getattr(self.appModule, "settings_helper", None) and self.appModule.settings_helper.to_detail_panel():
+			return True
 
 		message(_("Section not found"))
+
+	script_toLastMessage = script_toDetailPanel
 
 	def script_to_tabs_folder(self, gesture):
 		obj = self.appModule.saved_items.get("tabs folder")
@@ -164,8 +164,15 @@ class UnigramNavigation:
 			message(_("No open chat"))
 
 	def _focus_profile_on_open(self):
-		if getattr(self.appModule, "chats_helper", None):
-			self.appModule.chats_helper.to_profile_panel()
+		ui_helper = getattr(self.appModule, "ui_helper", None)
+		if not ui_helper:
+			return
+		panel = next((item for item in ui_helper.getElements() if ui_helper._is_profile_host(item)), None)
+		if panel and getattr(panel, "firstChild", None):
+			try:
+				panel.firstChild.setFocus()
+			except Exception as e:
+				log.debugException(f"_focus_profile_on_open error: {e}")
 
 	def script_to_down(self, gesture):
 		button = next((button for button in self.appModule.ui_helper.getElements() if button.role == Role.BUTTON and button.UIAAutomationId == "MessagesButton"), None)

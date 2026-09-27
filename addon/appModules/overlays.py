@@ -254,7 +254,7 @@ class SettingsPanelListItem:
 		if getattr(self.appModule, "settings_helper", None):
 			self.appModule.settings_helper.to_detail_panel()
 		else:
-			self.appModule.nav_helper.script_toLastMessage(gesture)
+			self.appModule.nav_helper.script_toDetailPanel(gesture)
 
 	__gestures = {
 		"kb:enter": "activate_element",

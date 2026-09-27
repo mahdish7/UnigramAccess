@@ -461,8 +461,10 @@ class AppModule(appModuleHandler.AppModule):
 		description=_("Move focus to the last message, profile, or settings"),
 		gesture="kb:ALT+2",
 	)
-	def script_toLastMessage(self, gesture):
-		return self.nav_helper.script_toLastMessage(gesture)
+	def script_toDetailPanel(self, gesture):
+		return self.nav_helper.script_toDetailPanel(gesture)
+
+	script_toLastMessage = script_toDetailPanel
 
 	@script(
 		# Translators: Description for the script that moves focus to the unread messages label.

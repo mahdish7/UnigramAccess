@@ -1,81 +1,32 @@
 # -*- coding:utf-8 -*-
 from controlTypes import Role, State
 import api
+from ui import message
 from .unigram_logger import ulog as log
 
 
 class UnigramSettings:
-	"""Manages settings screen detection, category navigation, and detail panel interactions."""
+	"""Manages settings screen detection, category navigation, and detail/content panel interactions."""
 
 	def __init__(self, appModule):
 		self.appModule = appModule
 
 	def get_navigation_list(self):
-		"""Locate and return the settings Navigation list control (Role.LIST)."""
+		"""Locate and return the settings Navigation category list control (Role.LIST)."""
 		try:
-			elements = self.appModule.ui_helper.getElements()
+			ui_helper = getattr(self.appModule, "ui_helper", None)
+			elements = ui_helper.getElements() if ui_helper else []
 			for item in elements:
 				if getattr(item, "role", None) == Role.LIST and getattr(item, "UIAAutomationId", "") == "Navigation":
 					return item
 				if getattr(item, "role", None) == Role.PANE and getattr(item, "UIAAutomationId", "") == "ScrollingHost":
-					nav = next(
-						(
-							child for child in getattr(item, "children", [])
-							if getattr(child, "role", None) == Role.LIST and getattr(child, "UIAAutomationId", "") == "Navigation"
-						),
-						None
-					)
-					if nav:
-						return nav
+					for child in getattr(item, "children", []):
+						if getattr(child, "role", None) == Role.LIST and getattr(child, "UIAAutomationId", "") == "Navigation":
+							return child
 			return None
 		except Exception:
 			log.debugException("Error getting settings navigation list")
 			return None
-
-	def get_detail_panel(self):
-		"""Locate and return the settings right-side detail panel or its first focusable control."""
-		try:
-			if not self.is_in_settings():
-				return None
-			elements = self.appModule.ui_helper.getElements()
-			settings_panel = next(
-				(
-					item for item in elements
-					if item.role in (Role.PANE, Role.LIST)
-					and item.UIAAutomationId in ("ScrollingHost", "List", "")
-					and ((item.previous and item.previous.UIAAutomationId == "DetailHeaderPresenter") or (item.location and item.location.width > 320))
-				),
-				None
-			)
-			if not settings_panel:
-				return None
-			return next(
-				(child for child in getattr(settings_panel, "children", []) if State.FOCUSABLE in getattr(child, "states", set())),
-				getattr(settings_panel, "firstChild", None)
-			)
-		except Exception:
-			log.debugException("Error getting settings detail panel")
-			return None
-
-	def is_in_settings(self):
-		"""Check whether Unigram is currently displaying the settings screen."""
-		try:
-			# Fast check: If the currently focused element is inside Navigation
-			focus_obj = api.getFocusObject()
-			if focus_obj:
-				parent = getattr(focus_obj, "parent", None)
-				if getattr(focus_obj, "UIAAutomationId", "") == "Navigation" or (parent and getattr(parent, "UIAAutomationId", "") == "Navigation"):
-					return True
-
-			# Structural check: If Navigation list exists and is visible on screen
-			nav = self.get_navigation_list()
-			if nav and getattr(nav, "location", None) and nav.location.width > 0:
-				return True
-
-			return False
-		except Exception as e:
-			log.debugException(f"Swallowed exception: {e}")
-			return False
 
 	def to_categories_list(self):
 		"""Move keyboard focus to the settings category list (selected item or first item)."""
@@ -109,12 +60,103 @@ class UnigramSettings:
 			log.debugException("Error focusing settings categories list")
 			return False
 
+	def _find_focus_target(self, panel):
+		"""Find the first focusable control within a detail panel from top to bottom."""
+		children = getattr(panel, "children", [])
+		if not children:
+			first = getattr(panel, "firstChild", None)
+			return first if first and (getattr(first, "isFocusable", False) or State.FOCUSABLE in getattr(first, "states", set())) else panel
+
+		for child in children:
+			child_states = getattr(child, "states", set())
+			if getattr(child, "isFocusable", False) or State.FOCUSABLE in child_states:
+				return child
+			for sub in getattr(child, "children", []):
+				sub_states = getattr(sub, "states", set())
+				if getattr(sub, "isFocusable", False) or State.FOCUSABLE in sub_states:
+					return sub
+
+		first = getattr(panel, "firstChild", None)
+		return first if first else panel
+
+	def get_detail_panel(self):
+		"""Locate and return the active detail/content panel focusable control."""
+		try:
+			ui_helper = getattr(self.appModule, "ui_helper", None)
+			if not ui_helper:
+				return None
+
+			# If chat messages are present, yield to chat message handling
+			if ui_helper.getMessagesElement():
+				return None
+
+			nav = self.get_navigation_list()
+			elements = ui_helper.getElements()
+
+			for item in elements:
+				if item == nav:
+					continue
+				if getattr(item, "role", None) not in (Role.LIST, Role.PANE):
+					continue
+
+				uia_id = getattr(item, "UIAAutomationId", "")
+				# Must be a ScrollingHost or List container
+				if uia_id not in ("ScrollingHost", "List"):
+					continue
+
+				# Exclude left-pane navigation and specialized containers
+				if uia_id in ("ChatsList", "TopicList", "ChatFolders", "Navigation"):
+					continue
+				if ui_helper._is_profile_host(item) or ui_helper._is_topic_host(item) or ui_helper.is_stories_list(item):
+					continue
+
+				# Must contain focusable interactive children
+				target = self._find_focus_target(item)
+				if target and target != item:
+					return target
+
+			return None
+		except Exception:
+			log.debugException("Error getting settings detail panel")
+			return None
+
+	def is_in_settings(self):
+		"""Check whether Unigram is currently displaying the settings screen or a settings subpage."""
+		try:
+			ui_helper = getattr(self.appModule, "ui_helper", None)
+			if ui_helper and ui_helper.getMessagesElement():
+				return False
+
+			if self.get_navigation_list():
+				return True
+
+			if self.get_detail_panel() is not None:
+				return True
+
+			return False
+		except Exception as e:
+			log.debugException(f"is_in_settings error: {e}")
+			return False
+
 	def to_detail_panel(self):
-		"""Move keyboard focus to the settings right-side detail panel."""
+		"""Move keyboard focus to the settings right-side detail panel or subpage content."""
 		try:
 			panel_control = self.get_detail_panel()
 			if panel_control:
-				panel_control.setFocus()
+				current_focus = api.getFocusObject()
+				if current_focus == panel_control:
+					name = getattr(panel_control, "name", "")
+					if name:
+						message(name)
+					return True
+				try:
+					panel_control.setFocus()
+				except Exception:
+					parent = getattr(panel_control, "parent", None)
+					if parent:
+						parent.setFocus()
+					else:
+						raise
 				return True
 			return False
 		except Exception:

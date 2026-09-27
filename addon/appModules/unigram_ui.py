@@ -126,7 +126,16 @@ class UnigramUIHelper:
 					break
 				curr = getattr(curr, "parent", None)
 
-			# If focus is not inside the Contacts dialog, return immediately
+			# If focus is not inside the Contacts dialog, check open dialogs in main container
+			if not dialog:
+				for item in self.getElements():
+					if getattr(item, "role", None) == Role.DIALOG:
+						name = getattr(item, "name", "") or ""
+						expected_title = contacts_dialog_titles.get(conf.get("lang"))
+						if expected_title and name == expected_title:
+							dialog = item
+							break
+
 			if not dialog:
 				return False
 
