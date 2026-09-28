@@ -1,4 +1,4 @@
-# -*- coding:utf-8 -*-
+﻿# -*- coding:utf-8 -*-
 # UnigramAccess: Message interaction logic (copy, delete, forward, reply, etc.).
 
 import os
@@ -170,7 +170,7 @@ class UnigramMessages:
 				if item:
 					item.setFocus()
 		else:
-			message(_("Button to open comments not found"))
+			message(_("Instant View not available for this message"))
 
 	def script_copyMessage(self, gesture):
 		"""Copy focused link directly, or pass Ctrl+C to Telegram for native handling."""

@@ -3,9 +3,9 @@
 
 import api
 from .unigram_logger import ulog as log
-from controlTypes import Role
+from controlTypes import Role, State
+import core
 import queueHandler
-from threading import Timer
 from ui import message
 
 import addonHandler
@@ -91,24 +91,70 @@ class UnigramCalls:
 
 	@staticmethod
 	def _getMicrophoneState(button):
-		"""Determine whether microphone is on or off based strictly on icon glyphs."""
+		"""Determine whether microphone is on or off based strictly on UIA states and patterns."""
+		if not button:
+			return None
+
+		# 1. Check TogglePattern (ToggleState_On = 1 = active/unmuted, Off = 0 = muted)
+		try:
+			import UIAHandler
+			toggle_pattern = button.UIAElement.GetCurrentPattern(UIAHandler.UIA_TogglePatternId)
+			if toggle_pattern:
+				toggle_state = toggle_pattern.QueryInterface(UIAHandler.IUIAutomationTogglePattern).CurrentToggleState
+				if toggle_state == 1:
+					return _("Microphone turned on")
+				elif toggle_state == 0:
+					return _("Microphone turned off")
+		except Exception:
+			pass
+
+		# 2. Check PRESSED state (from UIA states set)
+		states = getattr(button, "states", set())
+		if State.PRESSED in states:
+			return _("Microphone turned on")
+
+		# 3. Check child glyph (Unicode Segoe MDL2 icon codes for classic call window)
 		first_child = getattr(button, "firstChild", None)
 		child_name = getattr(first_child, "name", "") if first_child else ""
 		if child_name == "\ue720":
 			return _("Microphone turned on")
 		elif child_name in ("\ue74f", "\uf781"):
 			return _("Microphone turned off")
+
 		return None
 
 	@staticmethod
 	def _getVideoState(button):
-		"""Determine whether camera is on or off based strictly on icon glyphs."""
+		"""Determine whether camera is on or off based strictly on UIA states and patterns."""
+		if not button:
+			return None
+
+		# 1. Check TogglePattern
+		try:
+			import UIAHandler
+			toggle_pattern = button.UIAElement.GetCurrentPattern(UIAHandler.UIA_TogglePatternId)
+			if toggle_pattern:
+				toggle_state = toggle_pattern.QueryInterface(UIAHandler.IUIAutomationTogglePattern).CurrentToggleState
+				if toggle_state == 1:
+					return _("Camera turned on")
+				elif toggle_state == 0:
+					return _("Camera turned off")
+		except Exception:
+			pass
+
+		# 2. Check PRESSED state
+		states = getattr(button, "states", set())
+		if State.PRESSED in states:
+			return _("Camera turned on")
+
+		# 3. Check child glyph (Unicode Segoe MDL2 icon codes for classic call window)
 		first_child = getattr(button, "firstChild", None)
 		child_name = getattr(first_child, "name", "") if first_child else ""
 		if child_name == "\ue964":
 			return _("Camera turned on")
 		elif child_name == "\ue963":
 			return _("Camera turned off")
+
 		return None
 
 	def script_microphone(self, gesture):
@@ -153,7 +199,7 @@ class UnigramCalls:
 				if state_text:
 					queueHandler.queueFunction(queueHandler.eventQueue, message, state_text)
 
-			Timer(0.2, speakAudioState).start()
+			core.callLater(200, speakAudioState)
 			return True
 		return False
 
@@ -199,7 +245,7 @@ class UnigramCalls:
 				if state_text:
 					queueHandler.queueFunction(queueHandler.eventQueue, message, state_text)
 
-			Timer(0.2, speakVideoState).start()
+			core.callLater(200, speakVideoState)
 			return True
 		return False
 

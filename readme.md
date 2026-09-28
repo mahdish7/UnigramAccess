@@ -18,9 +18,9 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 ## Keyboard Shortcuts
 
 ### Navigation & Layout
-* **ALT+1**: Move focus to group topics list if open (or chats list, contacts list, or settings categories).
-* **ALT+2**: Move focus to the last message, open profile, or settings details.
-* **ALT+3**: Move focus to message edit field (pressing again restores previous focus).
+* **ALT+1**: Move focus to the chats list panel (or group topics list, contacts list, or settings categories if open).
+* **ALT+2**: Move focus to the chat detail panel (last message, open profile, or settings details).
+* **ALT+3**: Move focus to message edit field (pressing again returns focus to the last message).
 * **ALT+4**: Move focus to chat folders list.
 * **ALT+U**: Move focus to unread messages in the active chat.
 * **ALT+shift+P**: Open current chat profile.
@@ -30,7 +30,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 ### Messages & Interaction
 * **ALT+T**: Announce chat name and status; press twice to toggle automatic tracking of chat activity.
 * **ALT+W**: Announce focused message timestamp and reactions; press twice to toggle automatic announcement.
-* **Left arrow**: Announce the original replied-to message (press twice to move focus to it). In media albums, moves to previous media.
+* **Left arrow**: Announce the original replied-to message (press twice to move focus to it).
 * **Right arrow**: Move to next media in a message with multiple media attachments.
 * **ALT+C**: Show message text in a popup text window.
 * **control+C**: Copy message text (or focused link URL).
@@ -39,7 +39,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+F**: Forward focused message.
 * **control+space**: Select message or chat for multi-selection.
 * **delete**: Delete focused message or chat.
-* **shift+delete**: Delete focused message or chat with secondary option enabled (such as delete for everyone or block).
+* **shift+delete**: Delete focused message or chat with secondary option enabled.
 * **ALT+shift+R**: Mark focused chat as read or unread.
 * **ALT+L**: Toggle automatic announcement of incoming messages in the active chat.
 * **control+ALT+C**: Open comments thread for the focused message.
@@ -52,7 +52,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **Unassigned**: Save file attachment as...
 
 ### Media & Voice Messages
-* **space**: Play or pause focused voice or video message, or open photos and videos.
+* **space**: Activate focused media in message (play, pause, or open).
 * **ALT+P**: Play or pause currently active audio file.
 * **ALT+X**: Change audio playback speed.
 * **ALT+S**: Move focus to audio playback slider (pressing again restores previous focus).
@@ -76,7 +76,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 
 ### Settings & Help
 * **NVDA+ALT+U**: Open add-on settings panel in NVDA.
-* **ALT+H**: Show the complete list of add-on shortcuts in a popup window.
+* **ALT+H**: Show the list of add-on shortcuts in a popup window.
 
 ## Configuration Options
 

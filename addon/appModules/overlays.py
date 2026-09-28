@@ -6,11 +6,11 @@ from .unigram_logger import ulog as log
 from controlTypes import Role, State
 import editableText
 from NVDAObjects.UIA import ListItem
+import core
 import queueHandler
 import scriptHandler
 from scriptHandler import script
 import textInfos
-from threading import Timer
 from ui import message
 
 import addonHandler
@@ -41,36 +41,34 @@ class Media_download_button:
 class Audio_and_video_button:
 	"""Overlay for call Audio/Video toggle buttons.
 
-	Announces the new state after pressing Enter.
+	Announces the new state after pressing Enter or Space.
 	"""
 
-	def script_enter(self, gesture):
+	def _announce_state_after_toggle(self, gesture):
 		gesture.send()
 
 		def speakState():
+			from .unigram_calls import UnigramCalls
 			newName = None
 			if self.UIAAutomationId == "Audio":
-				first_child = getattr(self, "firstChild", None)
-				child_name = getattr(first_child, "name", "") if first_child else ""
-				if child_name == "\ue720":
-					newName = _("Microphone turned on")
-				elif child_name in ("\ue74f", "\uf781"):
-					newName = _("Microphone turned off")
+				newName = UnigramCalls._getMicrophoneState(self)
 			elif self.UIAAutomationId == "Video":
-				first_child = getattr(self, "firstChild", None)
-				child_name = getattr(first_child, "name", "") if first_child else ""
-				if child_name == "\ue964":
-					newName = _("Camera turned on")
-				elif child_name == "\ue963":
-					newName = _("Camera turned off")
+				newName = UnigramCalls._getVideoState(self)
 
 			if newName:
 				queueHandler.queueFunction(queueHandler.eventQueue, message, newName)
 
-		Timer(0.2, speakState).start()
+		core.callLater(200, speakState)
+
+	def script_enter(self, gesture):
+		self._announce_state_after_toggle(gesture)
+
+	def script_space(self, gesture):
+		self._announce_state_after_toggle(gesture)
 
 	__gestures = {
 		"kb:enter": "enter",
+		"kb:space": "space",
 	}
 
 
