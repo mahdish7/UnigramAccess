@@ -187,10 +187,10 @@ def formatMessageOnFocus(obj, savedItems):
 			obj.name = obj.name.replace(keywords[1], ".", -1)
 			obj.name = keywords[1][2:] + ". " + obj.name
 
-	if not conf.get("announce_end_of_message") and obj.index_last_part_in_message:
+	if conf.get("suppress_end_of_message") and obj.index_last_part_in_message:
 		obj.name = obj.name[:obj.index_last_part_in_message]
 
-	if not conf.get("notify administrators in messages"):
+	if conf.get("suppress_admin_badges"):
 		lines = obj.name.split("\n")
 		if len(lines) > 1:
 			clean_line1 = lines[1].strip().lstrip(",").rstrip(".").strip().lower()
@@ -201,7 +201,7 @@ def formatMessageOnFocus(obj, savedItems):
 				obj.name = "\n".join(lines)
 		obj.name = _ADMIN_BADGES_PATTERN.sub("", obj.name)
 
-	if not conf.get("announce_nickname_in_messages"):
+	if conf.get("suppress_nickname_in_messages"):
 		# Nickname is the Label child immediately following HeaderLabel.
 		# In obj.name it appears as: "SenderName\r\n, Nickname. \r\n..."
 		# Identify and remove it from the text.

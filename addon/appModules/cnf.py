@@ -61,18 +61,18 @@ spec = (
 	"unreadBeforeMessageContent = boolean(default=True)",
 	"voiceMessageRecordingIndicator = string(default=audio)",
 	"voiceDownloadProgress = boolean(default=True)",
-	"audioPlaybackWhenDeleted = boolean(default=False)",
-	"confirmation_at_deletion = boolean(default=False)",
+	"audioPlaybackWhenDeleted = boolean(default=True)",
+	"skip_deletion_confirmation = boolean(default=False)",
 	"actionDescriptionForLinks = boolean(default=True)",
 	"cleanLinkDescriptions = boolean(default=True)",
 	"voiceMediaButtonDetails = boolean(default=True)",
 	"saySenderName = string(default=none)",
 	"automatically announce new messages = boolean(default=False)",
 	"automatically announce activity in chats = boolean(default=False)",
-	"notify administrators in messages = boolean(default=True)",
-	"announce_nickname_in_messages = boolean(default=True)",
+	"suppress_admin_badges = boolean(default=False)",
+	"suppress_nickname_in_messages = boolean(default=False)",
 	"action_when_pressing_up_arrow_in_text_field = string(default=edit)",
-	"announce_end_of_message = boolean(default=True)",
+	"suppress_end_of_message = boolean(default=False)",
 	"suppressProgressBarUpdates = boolean(default=True)",
 	"custom_log_level = string(default=disabled)"
 )
@@ -81,6 +81,30 @@ class cnf:
 	def __init__(self):
 		self.path = os.path.join(globalVars.appArgs.configPath, "UnigramAccess.ini")
 		self.conf = ConfigObj(self.path, configspec=spec )
+		# Migrate legacy config keys if present
+		if "notify administrators in messages" in self.conf:
+			try:
+				if not self.conf.as_bool("notify administrators in messages"):
+					self.conf["suppress_admin_badges"] = True
+			except Exception:
+				pass
+			del self.conf["notify administrators in messages"]
+		if "announce_nickname_in_messages" in self.conf:
+			try:
+				if not self.conf.as_bool("announce_nickname_in_messages"):
+					self.conf["suppress_nickname_in_messages"] = True
+			except Exception:
+				pass
+			del self.conf["announce_nickname_in_messages"]
+		if "announce_end_of_message" in self.conf:
+			try:
+				if not self.conf.as_bool("announce_end_of_message"):
+					self.conf["suppress_end_of_message"] = True
+			except Exception:
+				pass
+			del self.conf["announce_end_of_message"]
+		if "confirmation_at_deletion" in self.conf:
+			del self.conf["confirmation_at_deletion"]
 		validator = Validator()
 		self.conf.validate(validator, copy=True)
 		self.conf.write()

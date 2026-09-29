@@ -202,20 +202,20 @@ class UnigramAccessSettings(SettingsPanel):
 		)
 		self.unreadBeforeMessageContent.SetValue(conf.get("unreadBeforeMessageContent"))
 
-		self.announce_end_of_message = msgHelper.addItem(
-			wx.CheckBox(msgBox, label=_("Announce timestamp and reactions at end of messages"))
+		self.suppress_end_of_message = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Do not announce timestamp and reactions at end of messages"))
 		)
-		self.announce_end_of_message.SetValue(conf.get("announce_end_of_message"))
+		self.suppress_end_of_message.SetValue(conf.get("suppress_end_of_message", False))
 
-		self.notify_administrators_in_messages = msgHelper.addItem(
-			wx.CheckBox(msgBox, label=_('Announce "Administrator" and "Owner" badges in communities'))
+		self.suppress_admin_badges = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_('Do not announce "Administrator" and "Owner" badges in communities'))
 		)
-		self.notify_administrators_in_messages.SetValue(conf.get("notify administrators in messages"))
+		self.suppress_admin_badges.SetValue(conf.get("suppress_admin_badges", False))
 
-		self.announce_nickname_in_messages = msgHelper.addItem(
-			wx.CheckBox(msgBox, label=_("Announce member nickname in group messages"))
+		self.suppress_nickname_in_messages = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Do not announce member nicknames in group messages"))
 		)
-		self.announce_nickname_in_messages.SetValue(conf.get("announce_nickname_in_messages"))
+		self.suppress_nickname_in_messages.SetValue(conf.get("suppress_nickname_in_messages", False))
 
 		self.actionDescriptionForLinks = msgHelper.addItem(
 			wx.CheckBox(msgBox, label=_("Read descriptions of message links"))
@@ -277,10 +277,10 @@ class UnigramAccessSettings(SettingsPanel):
 		delSizer = wx.StaticBoxSizer(delBox, wx.VERTICAL)
 		delHelper = gui.guiHelper.BoxSizerHelper(delBox, sizer=delSizer)
 
-		self.confirmation_at_deletion = delHelper.addItem(
-			wx.CheckBox(delBox, label=_("Show confirmation dialog when deleting messages and chats"))
+		self.skip_deletion_confirmation = delHelper.addItem(
+			wx.CheckBox(delBox, label=_("Do not show confirmation dialog when deleting messages and chats"))
 		)
-		self.confirmation_at_deletion.SetValue(conf.get("confirmation_at_deletion"))
+		self.skip_deletion_confirmation.SetValue(conf.get("skip_deletion_confirmation", False))
 
 		self.audioPlaybackWhenDeleted = delHelper.addItem(
 			wx.CheckBox(delBox, label=_("Play sound when deleting messages and chats"))
@@ -334,13 +334,12 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("suppressProgressBarUpdates", self.suppressProgressBarUpdates.IsChecked())
 		conf.set("saySenderName", self.get_key(self.listSaySenderName, self.saySenderName.GetStringSelection()))
 		conf.set("unreadBeforeMessageContent", self.unreadBeforeMessageContent.IsChecked())
-		conf.set("announce_end_of_message", self.announce_end_of_message.IsChecked())
+		conf.set("suppress_end_of_message", self.suppress_end_of_message.IsChecked())
 		conf.set("automatically announce new messages", self.automatically_announce_new_messages.IsChecked())
 		conf.set("automatically announce activity in chats", self.automatically_announce_activity_in_chats.IsChecked())
-		conf.set("notify administrators in messages",
-		         self.notify_administrators_in_messages.IsChecked())
-		conf.set("announce_nickname_in_messages", self.announce_nickname_in_messages.IsChecked())
-		conf.set("confirmation_at_deletion", self.confirmation_at_deletion.IsChecked())
+		conf.set("suppress_admin_badges", self.suppress_admin_badges.IsChecked())
+		conf.set("suppress_nickname_in_messages", self.suppress_nickname_in_messages.IsChecked())
+		conf.set("skip_deletion_confirmation", self.skip_deletion_confirmation.IsChecked())
 		conf.set("audioPlaybackWhenDeleted", self.audioPlaybackWhenDeleted.IsChecked())
 		conf.set("voiceMessageRecordingIndicator", self.get_key(self.listVoiceMessageRecordingIndicator, self.voiceMessageRecordingIndicator.GetStringSelection()))
 		conf.set("voiceDownloadProgress", self.voiceDownloadProgress.IsChecked())

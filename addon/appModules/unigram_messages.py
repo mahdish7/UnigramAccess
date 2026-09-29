@@ -1,4 +1,4 @@
-﻿# -*- coding:utf-8 -*-
+# -*- coding:utf-8 -*-
 # UnigramAccess: Message interaction logic (copy, delete, forward, reply, etc.).
 
 import os
@@ -505,7 +505,7 @@ class UnigramMessages:
 		State 1: Handle confirmation dialog (RevokeCheck checkbox + PrimaryButton).
 		State "awaiting_confirmation": Track dialog interaction and restore focus on close.
 		"""
-		if not conf.get("confirmation_at_deletion"):
+		if conf.get("skip_deletion_confirmation"):
 			speech.cancelSpeech()
 
 		state = self.appModule.isDelete.get("state", 0) if isinstance(self.appModule.isDelete, dict) else 0
@@ -543,9 +543,9 @@ class UnigramMessages:
 				self.appModule.isDelete = False
 				return False
 
-			# If confirmation setting is enabled, do not click. Focus on Delete and let user confirm.
-			if conf.get("confirmation_at_deletion"):
-				log.debug("Message deletion: confirmation_at_deletion is True, focusing PrimaryButton")
+			# If confirmation is not skipped (default behavior), do not auto-click. Focus on Delete and let user confirm.
+			if not conf.get("skip_deletion_confirmation"):
+				log.debug("Message deletion: skip_deletion_confirmation is False, focusing PrimaryButton")
 				self.appModule.isDelete["state"] = "awaiting_confirmation"
 				try:
 					primary_button.setFocus()
@@ -553,8 +553,8 @@ class UnigramMessages:
 					log.debug(f"Message deletion: Failed to set focus on PrimaryButton: {e}")
 				return False
 
-			# Automatic confirmation mode:
-			log.debug("Message deletion: confirmation_at_deletion is False, invoking PrimaryButton")
+			# Automatic confirmation mode (skip confirmation enabled):
+			log.debug("Message deletion: skip_deletion_confirmation is True, invoking PrimaryButton")
 			self.appModule.isDelete["confirmed_dismissal"] = "primary"
 			self.appModule.isDelete["state"] = "awaiting_confirmation"
 			primary_button.doAction()

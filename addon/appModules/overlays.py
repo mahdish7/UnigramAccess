@@ -205,8 +205,9 @@ class Message_list_item(ListItem):
 		if scriptHandler.getLastScriptRepeatCount() == 0:
 			message(self.last_part_in_message)
 		elif scriptHandler.getLastScriptRepeatCount() == 1:
-			conf.set("announce_end_of_message", not conf.get("announce_end_of_message"))
-			if conf.get("announce_end_of_message"):
+			is_suppressed = not conf.get("suppress_end_of_message")
+			conf.set("suppress_end_of_message", is_suppressed)
+			if not is_suppressed:
 				message(_("The display of message sending or receiving time and reactions is enabled."))
 			else:
 				message(_("The display of message sending or receiving time and reactions is disabled."))

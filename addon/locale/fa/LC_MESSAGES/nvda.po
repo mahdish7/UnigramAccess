@@ -1409,11 +1409,11 @@ msgstr "عملکرد کلید جهت‌نمای بالا در کادر خالی 
 msgid "Speak \"Not seen\" before message text"
 msgstr "اعلام «دیده نشده» قبل از متن پیام"
 
-msgid "Announce timestamp and reactions at end of messages"
-msgstr "اعلام زمان و واکنش‌ها در انتهای پیام"
+msgid "Do not announce timestamp and reactions at end of messages"
+msgstr "عدم اعلام زمان و واکنش‌ها در انتهای پیام"
 
-msgid "Announce \"Administrator\" and \"Owner\" badges in communities"
-msgstr "اعلام نشان‌های مدیر و مالک در گروه‌ها"
+msgid "Do not announce \"Administrator\" and \"Owner\" badges in communities"
+msgstr "عدم اعلام نشان‌های مدیر و مالک در گروه‌ها"
 
 msgid "Read descriptions of message links"
 msgstr "خواندن توضیحات لینک‌های ضمیمه"
@@ -1433,8 +1433,8 @@ msgstr "حالت اعلان ضبط پیام صوتی:"
 msgid "Announce file download progress"
 msgstr "اعلام درصد پیشرفت دانلود فایل‌ها"
 
-msgid "Show confirmation dialog when deleting messages and chats"
-msgstr "نمایش پیام تایید هنگام حذف پیام‌ها و چت‌ها"
+msgid "Do not show confirmation dialog when deleting messages and chats"
+msgstr "عدم نمایش پیام تایید هنگام حذف پیام‌ها و چت‌ها"
 
 msgid "Play sound when deleting messages and chats"
 msgstr "پخش صدا هنگام حذف پیام‌ها و چت‌ها"
@@ -1466,8 +1466,8 @@ msgstr "حرکت به رسانه بعدی در پیام"
 msgid "Suppress progress bar updates (beeps and speech)"
 msgstr "غیرفعال کردن صدا و اعلام نوارهای پیشرفت"
 
-msgid "Announce member nickname in group messages"
-msgstr "اعلام نام مستعار اعضا در پیام‌های گروه"
+msgid "Do not announce member nicknames in group messages"
+msgstr "عدم اعلام عنوان یا نام مستعار اعضا در پیام‌های گروه"
 
 msgid "Instant View not available for this message"
 msgstr "نمای فوری برای این پیام در دسترس نیست"
