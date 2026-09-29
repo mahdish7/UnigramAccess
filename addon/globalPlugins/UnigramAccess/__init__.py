@@ -213,7 +213,7 @@ class UnigramAccessSettings(SettingsPanel):
 		self.notify_administrators_in_messages.SetValue(conf.get("notify administrators in messages"))
 
 		self.announce_nickname_in_messages = msgHelper.addItem(
-			wx.CheckBox(msgBox, label=_("Announce member nickname (custom title) in group messages"))
+			wx.CheckBox(msgBox, label=_("Announce member nickname in group messages"))
 		)
 		self.announce_nickname_in_messages.SetValue(conf.get("announce_nickname_in_messages"))
 
@@ -240,7 +240,7 @@ class UnigramAccessSettings(SettingsPanel):
 		self.automatically_announce_new_messages.SetValue(conf.get("automatically announce new messages"))
 
 		self.automatically_announce_activity_in_chats = liveHelper.addItem(
-			wx.CheckBox(liveBox, label=_("Announce chat activity (typing, online status)"))
+			wx.CheckBox(liveBox, label=_("Announce chat activity (typing, status changes)"))
 		)
 		self.automatically_announce_activity_in_chats.SetValue(conf.get("automatically announce activity in chats"))
 

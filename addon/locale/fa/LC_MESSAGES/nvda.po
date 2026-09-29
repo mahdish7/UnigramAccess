@@ -940,7 +940,7 @@ msgid "Announce the phrases \"Administrator\" and \"Owner\" on messages in commu
 msgstr "اعلام عنوانهای «مدیر» و «مالک» در پیامهای گروهها و کانالها"
 
 msgid "Announce file details (name, size, duration) on media buttons"
-msgstr "اعلام جزئیات فایل (نام، اندازه و مدتزمان) روی دکمههای رسانه"
+msgstr "اعلام جزئیات فایل (نام، اندازه و مدت زمان) روی دکمه‌های رسانه"
 
 msgid "Add-on log level:"
 msgstr "سطح ثبت وقایع (لاگ) افزونه:"
@@ -1099,7 +1099,7 @@ msgid "Announce the phrases \"Administrator\" and \"Owner\" on messages in commu
 msgstr "اعلام عنوانهای «مدیر» و «مالک» در پیامهای گروهها و کانالها"
 
 msgid "Announce file details (name, size, duration) on media buttons"
-msgstr "اعلام جزئیات فایل (نام، اندازه و مدتزمان) روی دکمههای رسانه"
+msgstr "اعلام جزئیات فایل (نام، اندازه و مدت زمان) روی دکمه‌های رسانه"
 
 msgid "Add-on log level:"
 msgstr "سطح ثبت وقایع (لاگ) افزونه:"
@@ -1424,8 +1424,8 @@ msgstr "تمیزسازی متن‌های تکراری و زائد در پیش‌
 msgid "Automatically read incoming messages in active chat"
 msgstr "خواندن خودکار پیام‌های جدید در چت فعال"
 
-msgid "Announce chat activity (typing, online status)"
-msgstr "اعلام وضعیت فعالیت چت (در حال نوشتن، آنلاین بودن)"
+msgid "Announce chat activity (typing, status changes)"
+msgstr "اعلام فعالیت‌های چت (نوشتن، تغییر وضعیت)"
 
 msgid "Voice recording notification mode:"
 msgstr "حالت اعلان ضبط پیام صوتی:"
@@ -1465,3 +1465,9 @@ msgstr "حرکت به رسانه بعدی در پیام"
 
 msgid "Suppress progress bar updates (beeps and speech)"
 msgstr "غیرفعال کردن صدا و اعلام نوارهای پیشرفت"
+
+msgid "Announce member nickname in group messages"
+msgstr "اعلام نام مستعار اعضا در پیام‌های گروه"
+
+msgid "Instant View not available for this message"
+msgstr "نمای فوری برای این پیام در دسترس نیست"
