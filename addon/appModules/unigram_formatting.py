@@ -5,6 +5,8 @@ import re
 
 import addonHandler
 from controlTypes import Role, State
+import queueHandler
+from ui import message
 
 addonHandler.initTranslation()
 
@@ -397,3 +399,41 @@ def formatMediaButtonOnFocus(obj):
 	if not conf.get("voiceMediaButtonDetails"):
 		return
 	obj.name = formatMediaButtonName(obj, getattr(obj, "name", "") or "")
+
+
+def announceFolderChange(obj, savedItems):
+	"""Announce folder name and unread chat counts when switching chat folders."""
+	if not obj:
+		return False
+
+	children = getattr(obj, "children", [])
+	if not children:
+		return False
+
+	parent_id = getattr(getattr(obj, "parent", None), "UIAAutomationId", "")
+
+	# استخراج نام پوشه: حالت نوار کناری یا نوار بالایی
+	folder_name = ""
+	if parent_id == "ChatFoldersSide":
+		title_elem = next((c for c in children if getattr(c, "UIAAutomationId", "") == "Title"), None)
+		folder_name = title_elem.name.strip() if title_elem and title_elem.name else ""
+	elif parent_id == "ChatFolders":
+		folder_name = children[0].name.strip() if children[0].name else ""
+
+	if not folder_name:
+		return False
+
+	last_selected_folder = savedItems.get("last selected folder")
+	if last_selected_folder == folder_name:
+		return False
+
+	savedItems.save("last selected folder", folder_name)
+
+	# استخراج نشانگر پیام‌های خوانده‌نشده (مشترک در هر دو حالت)
+	label_elem = next((c for c in children if getattr(c, "UIAAutomationId", "") == "Label"), None)
+	unread_count = label_elem.name.strip() if label_elem and label_elem.name else ""
+
+	text = f"{folder_name}, {unread_count}" if unread_count else folder_name
+	queueHandler.queueFunction(queueHandler.eventQueue, message, text)
+	return True
+

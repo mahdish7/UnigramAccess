@@ -85,6 +85,7 @@ The add-on settings panel (accessible via **NVDA+ALT+U** or NVDA Settings -> Uni
 ### 1. General & Navigation
 * **Interface language in Unigram**: Select the language used by Unigram to ensure accurate recognition of UI elements.
 * **Chat type announcement in chats list**: Announce chat type before name, after name, or do not announce.
+* **Speak folder names when switching between them**: Announce folder name and unread chat counts when switching chat folders with keyboard shortcuts (Ctrl+1 to Ctrl+9).
 
 ### 2. Messages & Reading
 * **Announce sender name**: Control whether the sender's name is announced (disabled, sent messages only, received messages only, or all messages).

@@ -54,22 +54,28 @@ class UnigramNavigation:
 
 	def script_to_tabs_folder(self, gesture):
 		obj = self.appModule.saved_items.get("tabs folder")
+		if not (obj and getattr(obj, "location", None) and obj.location.width):
+			for item in self.appModule.ui_helper.getElements():
+				if getattr(item, "UIAAutomationId", "") in ("ChatFolders", "ChatFoldersSide"):
+					obj = item
+					self.appModule.saved_items.save("tabs folder", obj)
+					break
+			if not obj:
+				list_elem = self.appModule.ui_helper.getChatsListElement()
+				if list_elem and getattr(list_elem, "previous", None):
+					prev = list_elem.previous
+					if getattr(prev, "UIAAutomationId", "") in ("ChatFolders", "ChatFoldersSide"):
+						obj = prev
+						self.appModule.saved_items.save("tabs folder", obj)
+
 		if obj and getattr(obj, "location", None) and obj.location.width:
 			el = next((item for item in getattr(obj, "children", []) if State.SELECTED in getattr(item, "states", set())), None)
+			if not el:
+				el = getattr(obj, "firstChild", None)
 			if el:
 				el.setFocus()
-			else:
-				message(_("Chat folder list not found"))
-		else:
-			list_elem = self.appModule.ui_helper.getChatsListElement()
-			if list_elem and getattr(list_elem, "previous", None):
-				obj = list_elem.previous
-				self.appModule.saved_items.save("tabs folder", obj)
-				el = next((item for item in getattr(obj, "children", []) if State.SELECTED in getattr(item, "states", set())), None)
-				if el:
-					el.setFocus()
-					return
-			message(_("Chat folder list not found"))
+				return
+		message(_("Chat folder list not found"))
 
 	def _is_unread_messages_separator(self, obj):
 		"""Check if a message list item represents the unread messages separator."""

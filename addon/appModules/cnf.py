@@ -59,6 +59,7 @@ spec = (
 	f"lang = string(default={lang if lang in listLanguages else 'en'})",
 	"voiceTypeAfterChatName = string(default=beforeName)",
 	"unreadBeforeMessageContent = boolean(default=True)",
+	"voiceFolderNames = boolean(default=True)",
 	"voiceMessageRecordingIndicator = string(default=audio)",
 	"voiceDownloadProgress = boolean(default=True)",
 	"audioPlaybackWhenDeleted = boolean(default=True)",

@@ -105,7 +105,7 @@ class UnigramSettings:
 					continue
 
 				# Exclude left-pane navigation and specialized containers
-				if uia_id in ("ChatsList", "TopicList", "ChatFolders", "Navigation"):
+				if uia_id in ("ChatsList", "TopicList", "ChatFolders", "ChatFoldersSide", "Navigation"):
 					continue
 				if ui_helper._is_profile_host(item) or ui_helper._is_topic_host(item) or ui_helper.is_stories_list(item):
 					continue

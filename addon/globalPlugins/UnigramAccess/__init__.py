@@ -174,6 +174,11 @@ class UnigramAccessSettings(SettingsPanel):
 		)
 		self.suppressProgressBarUpdates.SetValue(conf.get("suppressProgressBarUpdates", True))
 
+		self.voiceFolderNames = genHelper.addItem(
+			wx.CheckBox(genBox, label=_("Speak folder names when switching between them"))
+		)
+		self.voiceFolderNames.SetValue(conf.get("voiceFolderNames", True))
+
 		settingsSizerHelper.addItem(genSizer)
 
 		# ── 2. Messages and Reading ──────────────────────────────────────
@@ -332,6 +337,7 @@ class UnigramAccessSettings(SettingsPanel):
 	def onSave(self):
 		conf.set("voiceTypeAfterChatName", self.get_key(self.listVoiceTypeAfterChatName, self.voiceTypeAfterChatName.GetStringSelection()))
 		conf.set("suppressProgressBarUpdates", self.suppressProgressBarUpdates.IsChecked())
+		conf.set("voiceFolderNames", self.voiceFolderNames.IsChecked())
 		conf.set("saySenderName", self.get_key(self.listSaySenderName, self.saySenderName.GetStringSelection()))
 		conf.set("unreadBeforeMessageContent", self.unreadBeforeMessageContent.IsChecked())
 		conf.set("suppress_end_of_message", self.suppress_end_of_message.IsChecked())
