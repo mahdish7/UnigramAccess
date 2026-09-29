@@ -212,6 +212,11 @@ class UnigramAccessSettings(SettingsPanel):
 		)
 		self.notify_administrators_in_messages.SetValue(conf.get("notify administrators in messages"))
 
+		self.announce_nickname_in_messages = msgHelper.addItem(
+			wx.CheckBox(msgBox, label=_("Announce member nickname (custom title) in group messages"))
+		)
+		self.announce_nickname_in_messages.SetValue(conf.get("announce_nickname_in_messages"))
+
 		self.actionDescriptionForLinks = msgHelper.addItem(
 			wx.CheckBox(msgBox, label=_("Read descriptions of message links"))
 		)
@@ -334,6 +339,7 @@ class UnigramAccessSettings(SettingsPanel):
 		conf.set("automatically announce activity in chats", self.automatically_announce_activity_in_chats.IsChecked())
 		conf.set("notify administrators in messages",
 		         self.notify_administrators_in_messages.IsChecked())
+		conf.set("announce_nickname_in_messages", self.announce_nickname_in_messages.IsChecked())
 		conf.set("confirmation_at_deletion", self.confirmation_at_deletion.IsChecked())
 		conf.set("audioPlaybackWhenDeleted", self.audioPlaybackWhenDeleted.IsChecked())
 		conf.set("voiceMessageRecordingIndicator", self.get_key(self.listVoiceMessageRecordingIndicator, self.voiceMessageRecordingIndicator.GetStringSelection()))

@@ -70,6 +70,7 @@ spec = (
 	"automatically announce new messages = boolean(default=False)",
 	"automatically announce activity in chats = boolean(default=False)",
 	"notify administrators in messages = boolean(default=True)",
+	"announce_nickname_in_messages = boolean(default=True)",
 	"action_when_pressing_up_arrow_in_text_field = string(default=edit)",
 	"announce_end_of_message = boolean(default=True)",
 	"suppressProgressBarUpdates = boolean(default=True)",

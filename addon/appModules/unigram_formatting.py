@@ -201,6 +201,28 @@ def formatMessageOnFocus(obj, savedItems):
 				obj.name = "\n".join(lines)
 		obj.name = _ADMIN_BADGES_PATTERN.sub("", obj.name)
 
+	if not conf.get("announce_nickname_in_messages"):
+		# Nickname is the Label child immediately following HeaderLabel.
+		# In obj.name it appears as: "SenderName\r\n, Nickname. \r\n..."
+		# Identify and remove it from the text.
+		children = getattr(obj, "children", [])
+		nickname = None
+		found_header = False
+		for child in children:
+			auto_id = getattr(child, "UIAAutomationId", "")
+			if auto_id == "HeaderLabel":
+				found_header = True
+			elif found_header and auto_id == "Label":
+				nickname = (getattr(child, "name", "") or "").strip()
+				break
+		if nickname:
+			# Remove ", Nickname." or ", Nickname. " patterns
+			obj.name = re.sub(
+				r",\s*" + re.escape(nickname) + r"\.?\s*(\r?\n)?",
+				r"\1",
+				obj.name,
+			)
+
 	obj.name = sender + obj.name
 
 	# Check if a message is selected
