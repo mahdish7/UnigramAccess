@@ -3,16 +3,18 @@
 
 import ctypes
 import os
+import time
 
-from controlTypes import Role
+from controlTypes import Role, State
 from keyboardHandler import KeyboardInputGesture
 import mouseHandler
 from winBindings import user32 as winUser
-
-import time
+import api
+import speech
 
 from .cnf import conf
 from .data import active_download_keywords, context_menu_items, icons_from_context_menu
+from .unigram_logger import ulog as log
 
 
 # Path to the media assets directory (WAV files for audio cues).
@@ -131,4 +133,106 @@ def find_and_activate_context_menu_item(obj, target, close_on_failure=True):
 	if close_on_failure:
 		CACHED_KEYS["escape"].send()
 	return False
+
+
+class FocusManager:
+	"""Unified focus tracking, safe restoration, and speech suppression for Unigram."""
+
+	def __init__(self, appModule):
+		self.appModule = appModule
+		self._saved = {}
+		self._silent_target = None
+		self._hold_target = None
+
+	def hold(self, obj=None):
+		"""Hold focus on obj (or current focus). If an action moves focus away, it will be restored silently."""
+		if obj is None:
+			obj = api.getFocusObject()
+		self._hold_target = obj
+		return obj
+
+	def release(self):
+		"""Release any held focus, allowing focus to move freely without restoration."""
+		self._hold_target = None
+		self._silent_target = None
+
+	def safe_set_focus(self, candidate):
+		"""Safely set focus to candidate or its first focusable child."""
+		if not candidate:
+			return False
+		try:
+			if not getattr(candidate, "parent", None):
+				return False
+			if getattr(candidate, "isFocusable", True):
+				try:
+					candidate.setFocus()
+					return True
+				except Exception:
+					pass
+			first = getattr(candidate, "firstChild", None)
+			if first and getattr(first, "isFocusable", True):
+				try:
+					first.setFocus()
+					return True
+				except Exception:
+					pass
+		except Exception:
+			pass
+		return False
+
+	def save(self, key, obj=None):
+		"""Save a focus target under key. Defaults to current focus object if obj is None."""
+		if obj is None:
+			obj = api.getFocusObject()
+		if obj:
+			self._saved[key] = obj
+		return obj
+
+	def get(self, key):
+		"""Retrieve a saved focus target by key."""
+		return self._saved.get(key)
+
+	def discard(self, key):
+		"""Discard a saved focus target."""
+		self._saved.pop(key, None)
+
+	def restore(self, key, silent=False):
+		"""Restore focus to a saved target by key."""
+		target = self._saved.pop(key, None)
+		if not target:
+			return False
+		if silent:
+			speech.cancelSpeech()
+			self._silent_target = target
+		if not self.safe_set_focus(target):
+			self._silent_target = None
+			return False
+		return True
+
+	def handle_focus_change(self, obj):
+		"""Process focus changes in event_gainFocus.
+
+		Returns True if the event was consumed and should not be processed further.
+		"""
+		# 1. If this is a restored object arriving silently, silence it and reset
+		if self._silent_target:
+			if obj == self._silent_target:
+				self._silent_target = None
+				speech.cancelSpeech()
+				return True
+			self._silent_target = None
+
+		# 2. If focus was held and an action moved it away, restore it silently
+		if self._hold_target:
+			target = self._hold_target
+			self._hold_target = None
+			if obj != target:
+				speech.cancelSpeech()
+				self._silent_target = target
+				if not self.safe_set_focus(target):
+					self._silent_target = None
+				return True
+
+		return False
+
 

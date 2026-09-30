@@ -57,7 +57,7 @@ from .unigram_messages import Chat_update, UnigramMessages
 from .unigram_navigation import UnigramNavigation
 from .unigram_settings import UnigramSettings
 from .unigram_ui import Saved_items, UnigramUIHelper
-from .unigram_utils import CACHED_KEYS, find_and_activate_context_menu_item
+from .unigram_utils import CACHED_KEYS, FocusManager, find_and_activate_context_menu_item
 
 
 class AppModule(appModuleHandler.AppModule):
@@ -94,6 +94,7 @@ class AppModule(appModuleHandler.AppModule):
 			Title_change_tracking.restore(self.saved_items)
 
 		# Initialize helper modules
+		self.focus_mgr = FocusManager(self)
 		self.ui_helper = UnigramUIHelper(self)
 		self.settings_helper = UnigramSettings(self)
 		self.nav_helper = UnigramNavigation(self)
@@ -178,6 +179,9 @@ class AppModule(appModuleHandler.AppModule):
 			log.error(f"Unexpected exception in chooseNVDAObjectOverlayClasses: {e}", exc_info=True)
 
 	def getScript(self, gesture):
+		if getattr(self, "focus_mgr", None) and self.focus_mgr._hold_target:
+			self.focus_mgr.release()
+
 		if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":
 			# Record confirmation / cancellation on Enter or Space
 			gesture_ids = getattr(gesture, "identifiers", []) or []
@@ -208,6 +212,9 @@ class AppModule(appModuleHandler.AppModule):
 		Orchestrates timer restoration, slider focus management, state machine
 		flag processing, and element-specific formatting/labeling.
 		"""
+		if self.focus_mgr.handle_focus_change(obj):
+			return
+
 		objId = getattr(obj, "UIAAutomationId", "")
 		objName = getattr(obj, "name", "")
 		if objId or objName:

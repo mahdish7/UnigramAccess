@@ -119,27 +119,7 @@ class UnigramMedia:
 
 	def _safe_set_focus(self, candidate):
 		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
-		if not candidate:
-			return False
-		try:
-			if not getattr(candidate, "parent", None):
-				return False
-			if getattr(candidate, "isFocusable", True):
-				try:
-					candidate.setFocus()
-					return True
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
-			first = getattr(candidate, "firstChild", None)
-			if first and getattr(first, "isFocusable", True):
-				try:
-					first.setFocus()
-					return True
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
-		except Exception as e:
-			log.debugException(f"Swallowed exception: {e}")
-		return False
+		return self.appModule.focus_mgr.safe_set_focus(candidate)
 
 	def is_media_popup_element(self, obj):
 		"""Check if an NVDA object is inside the full-screen media viewer popup."""
@@ -253,17 +233,18 @@ class UnigramMedia:
 		targetButton.doAction()
 
 	def script_recordMediaMessage(self, gesture):
-		# Send the key immediately so Unigram receives it synchronously without any timing delay
-		gesture.send()
 
 		indicator = conf.get("voiceMessageRecordingIndicator")
 		if indicator == "none":
 			self.is_recording = not self.is_recording
+			gesture.send()
 			return
 
 		if self.is_recording:
 			log.debug("Second press of record media button: sending recording")
 			self.is_recording = False
+			self.appModule.focus_mgr.hold()
+			gesture.send()
 			if indicator == "audio":
 				playWaveFile(os.path.join(baseDir, "send_voice_message.wav"))
 			elif indicator == "text":
@@ -271,6 +252,8 @@ class UnigramMedia:
 		else:
 			log.debug("First press of record media button: starting recording")
 			self.is_recording = True
+			self.appModule.focus_mgr.hold()
+			gesture.send()
 			if indicator == "audio":
 				playWaveFile(os.path.join(baseDir, "start_recording_voice_message.wav"))
 			elif indicator == "text":
@@ -278,8 +261,10 @@ class UnigramMedia:
 
 	def cancel_recording(self, gesture):
 		"""Cancel an ongoing voice or video recording."""
-		gesture.send()
 		self.is_recording = False
+		self.appModule.focus_mgr.hold()
+		gesture.send()
+
 		indicator = conf.get("voiceMessageRecordingIndicator")
 		if indicator == "audio":
 			playWaveFile(os.path.join(baseDir, "cancel_voice_message_recording.wav"))

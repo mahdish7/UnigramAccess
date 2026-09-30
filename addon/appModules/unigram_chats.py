@@ -282,27 +282,7 @@ class UnigramChats:
 
 	def _safe_set_focus(self, candidate):
 		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
-		if not candidate:
-			return False
-		try:
-			if not getattr(candidate, "parent", None):
-				return False
-			if getattr(candidate, "isFocusable", True):
-				try:
-					candidate.setFocus()
-					return True
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
-			first = getattr(candidate, "firstChild", None)
-			if first and getattr(first, "isFocusable", True):
-				try:
-					first.setFocus()
-					return True
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
-		except Exception as e:
-			log.debugException(f"Swallowed exception: {e}")
-		return False
+		return self.appModule.focus_mgr.safe_set_focus(candidate)
 
 	def restore_deletion_focus(self):
 		"""Restore focus prioritizing initial_obj, then next_obj, then prev_obj.
