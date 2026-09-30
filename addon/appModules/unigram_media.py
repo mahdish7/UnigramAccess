@@ -28,6 +28,7 @@ class UnigramMedia:
 		self.active_slider = None
 		self.last_progress_percentage = None
 		self._is_monitoring_download = False
+		self.is_recording = False
 
 	def script_voiceMessageAcceleration(self, gesture):
 		elements = self.appModule.ui_helper.getElements()
@@ -251,67 +252,39 @@ class UnigramMedia:
 		log.debug("Media: action triggered")
 		targetButton.doAction()
 
-	def script_recordingVoiceMessage(self, gesture):
-		lastFocus = api.getFocusObject()
-		if conf.get("voiceMessageRecordingIndicator") == "none":
-			gesture.send()
+	def script_recordMediaMessage(self, gesture):
+		# Send the key immediately so Unigram receives it synchronously without any timing delay
+		gesture.send()
+
+		indicator = conf.get("voiceMessageRecordingIndicator")
+		if indicator == "none":
+			self.is_recording = not self.is_recording
 			return
-		obj = False
-		log.debug("We got into the voice message recording function")
-		lastFocus.setFocus()
-		for item in reversed(self.appModule.ui_helper.getElements()):
-			if item.role == Role.TOGGLEBUTTON and item.UIAAutomationId == "btnVoiceMessage":
-				log.debug("Record voice message button found")
-				obj = item
-				break
-			elif item.role == Role.BUTTON and item.UIAAutomationId in ("btnSendMessage", "btnEdit"):
-				message(_("Recording a voice message will not be available until the edit field is empty"))
-				return
-		if not obj: return
-		if obj.next and obj.next.UIAAutomationId == "ElapsedLabel":
-			log.debug("Second press of the record voice message button")
-			if conf.get("voiceMessageRecordingIndicator") == "audio":
+
+		if self.is_recording:
+			log.debug("Second press of record media button: sending recording")
+			self.is_recording = False
+			if indicator == "audio":
 				playWaveFile(os.path.join(baseDir, "send_voice_message.wav"))
-			else:
+			elif indicator == "text":
 				message(_("Record sent"))
 		else:
-			log.debug("First press of the record voice message button")
-			if conf.get("voiceMessageRecordingIndicator") == "audio" and State.PRESSED in obj.states:
-				playWaveFile(os.path.join(baseDir, "start_recording_video_message.wav"))
-			elif conf.get("voiceMessageRecordingIndicator") == "audio":
+			log.debug("First press of record media button: starting recording")
+			self.is_recording = True
+			if indicator == "audio":
 				playWaveFile(os.path.join(baseDir, "start_recording_voice_message.wav"))
-			elif conf.get("voiceMessageRecordingIndicator") == "text" and State.PRESSED in obj.states:
-				message(_("Video"))
-			else:
+			elif indicator == "text":
 				message(_("Audio"))
-		obj.doAction()
-		lastFocus.setFocus()
 
-	def get_elapsed_label(self):
-		"""Find ElapsedLabel indicating active voice recording."""
-		for item in reversed(self.appModule.ui_helper.getElements()):
-			if getattr(item, "UIAAutomationId", None) == "ElapsedLabel":
-				return item
-		return None
-
-	def is_voice_recording(self):
-		"""Check if voice recording is currently active."""
-		return bool(self.get_elapsed_label())
-
-	def cancel_voice_recording(self, gesture):
-		"""Cancel an ongoing voice recording."""
+	def cancel_recording(self, gesture):
+		"""Cancel an ongoing voice or video recording."""
+		gesture.send()
+		self.is_recording = False
 		indicator = conf.get("voiceMessageRecordingIndicator")
 		if indicator == "audio":
 			playWaveFile(os.path.join(baseDir, "cancel_voice_message_recording.wav"))
 		elif indicator == "text":
 			message(_("Recording canceled"))
-		gesture.send()
-		last_focus = api.getFocusObject()
-		if last_focus:
-			try:
-				last_focus.setFocus()
-			except Exception as e:
-				log.debugException(f"Swallowed exception: {e}")
 		return True
 
 	def script_toggleVoiceSlider(self, gesture):

@@ -747,29 +747,29 @@ class AppModule(appModuleHandler.AppModule):
 		gesture.send()
 
 	@script(
-		# Translators: Description for the script that starts or stops voice message recording.
-		description=_("Start or stop recording a voice message"),
+		# Translators: Description for the script that starts or stops recording a voice or video message.
+		description=_("Start or stop recording a voice or video message"),
 		gesture="kb:control+R",
 	)
-	def script_recordingVoiceMessage(self, gesture):
-		return self.media_helper.script_recordingVoiceMessage(gesture)
+	def script_recordMediaMessage(self, gesture):
+		return self.media_helper.script_recordMediaMessage(gesture)
 
 	@script(
-		# Translators: Description for the script that cancels voice recording, message reply, or edit.
-		description=_("Cancel voice recording, message reply, or edit"),
+		# Translators: Description for the script that cancels media recording, message reply, or edit.
+		description=_("Cancel media recording, message reply, or edit"),
 		gesture="kb:control+D",
 	)
-	def script_cancelVoiceMessageRecording(self, gesture):
-		# Single press priority 1: Active voice message recording takes precedence
-		if self.media_helper.is_voice_recording():
-			self.media_helper.cancel_voice_recording(gesture)
+	def script_cancelMediaOrComposerAction(self, gesture):
+		# Priority 1: Active media recording takes precedence
+		if self.media_helper.is_recording:
+			self.media_helper.cancel_recording(gesture)
 			return
 
-		# Single press priority 2: Active reply or editing session in the composer header
+		# Priority 2: Active reply or editing session in the composer header
 		if self.msg_helper.cancel_reply_or_edit():
 			return
 
-		# Fallback: Neither voice recording nor reply/edit active; pass gesture to Telegram
+		# Fallback: Neither recording nor reply/edit active; forward gesture to Unigram
 		gesture.send()
 
 	@script(
