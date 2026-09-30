@@ -175,6 +175,31 @@ class UnigramUIHelper:
 			return False
 		except Exception: return False
 
+	def is_in_chat(self, obj=None):
+		if obj is None:
+			obj = api.getFocusObject()
+		if not obj:
+			return False
+		try:
+			if self.is_message_object(obj):
+				return True
+			auto_id = getattr(obj, "UIAAutomationId", "")
+			if auto_id in ("Message_item", "TextField", "ButtonAttach", "ButtonStickers", "btnVoiceMessage"):
+				return True
+
+			# Traverse up to 4 ancestor levels to cover inner buttons, reactions, and sub-elements
+			curr = getattr(obj, "parent", None)
+			depth = 0
+			while curr and depth < 4:
+				parent_id = getattr(curr, "UIAAutomationId", "")
+				if parent_id in ("Messages", "Message_item"):
+					return True
+				curr = getattr(curr, "parent", None)
+				depth += 1
+		except Exception:
+			pass
+		return False
+
 	def is_story_item(self, obj):
 		"""Check whether an NVDAObject is an item in the stories list."""
 		try:

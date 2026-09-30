@@ -759,6 +759,9 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:control+R",
 	)
 	def script_recordMediaMessage(self, gesture):
+		if not self.ui_helper.is_in_chat():
+			message(_("Focus must be in the chat"))
+			return
 		return self.media_helper.script_recordMediaMessage(gesture)
 
 	@script(
@@ -767,6 +770,10 @@ class AppModule(appModuleHandler.AppModule):
 		gesture="kb:control+D",
 	)
 	def script_cancelMediaOrComposerAction(self, gesture):
+		if not self.ui_helper.is_in_chat():
+			message(_("Focus must be in the chat"))
+			return
+
 		# Priority 1: Active media recording takes precedence
 		if self.media_helper.is_recording:
 			self.media_helper.cancel_recording(gesture)

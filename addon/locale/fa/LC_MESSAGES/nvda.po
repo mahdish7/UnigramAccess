@@ -525,6 +525,10 @@ msgstr "ویرایش لغو شد"
 msgid "Recording canceled"
 msgstr "ضبط پیام صوتی لغو شد."
 
+#: addon\appModules\unigram.py:763
+msgid "Focus must be in the chat"
+msgstr "فوکوس باید در بخش گفتگو باشد"
+
 #: addon\appModules\unigram.py:635
 msgid "Answer options"
 msgstr "گزینه‌های جواب."
@@ -879,9 +883,6 @@ msgstr "این پیام صوتی قبلاً به متن تبدیل شده است
 msgid "Converting this voice message is already in process"
 msgstr "تبدیل این پیام صوتی در حال انجام است"
 
-msgid "Recording a voice message will not be available until the edit field is empty"
-msgstr "برای ضبط پیام صوتی، کادر نوشتن پیام باید کاملاً خالی باشد"
-
 msgid "Chat activity tracking is enabled"
 msgstr "ردگیری فعالیتهای این گفتگو فعال شد"
 
@@ -1037,9 +1038,6 @@ msgstr "این پیام صوتی قبلاً به متن تبدیل شده است
 
 msgid "Converting this voice message is already in process"
 msgstr "تبدیل این پیام صوتی در حال انجام است"
-
-msgid "Recording a voice message will not be available until the edit field is empty"
-msgstr "برای ضبط پیام صوتی، کادر نوشتن پیام باید کاملاً خالی باشد"
 
 msgid "Chat activity tracking is enabled"
 msgstr "ردگیری فعالیتهای این گفتگو فعال شد"
