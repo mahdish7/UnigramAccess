@@ -157,14 +157,14 @@ class AppModule(appModuleHandler.AppModule):
 			elif (
 				conf.get("action_when_pressing_up_arrow_in_text_field") != "edit"
 				and obj.role == Role.EDITABLETEXT
-				and obj.UIAAutomationId == "TextField"
+				and getattr(obj, "UIAAutomationId", "") == "TextField"
 			):
 				clsList.insert(0, EditableText)
 
-			elif obj.role == Role.BUTTON and obj.UIAAutomationId == "Profile":
+			elif obj.role == Role.BUTTON and getattr(obj, "UIAAutomationId", "") == "Profile":
 				self.saved_items.save("profile name", obj)
 
-			elif obj.UIAAutomationId in ("Audio", "Video"):
+			elif getattr(obj, "UIAAutomationId", "") in ("Audio", "Video"):
 				clsList.insert(0, Audio_and_video_button)
 
 			elif obj.role in (Role.SLIDER, Role.UNKNOWN) and getattr(obj, "UIAAutomationId", "") == "Slider":
@@ -179,7 +179,7 @@ class AppModule(appModuleHandler.AppModule):
 			log.error(f"Unexpected exception in chooseNVDAObjectOverlayClasses: {e}", exc_info=True)
 
 	def getScript(self, gesture):
-		if getattr(self, "focus_mgr", None) and self.focus_mgr._hold_target:
+		if getattr(self, "focus_mgr", None) and (self.focus_mgr._hold_target or getattr(self.focus_mgr, "_timer_token", None)):
 			self.focus_mgr.release()
 
 		if self.isDelete and isinstance(self.isDelete, dict) and self.isDelete.get("state") == "awaiting_confirmation":

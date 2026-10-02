@@ -230,6 +230,7 @@ class UnigramMedia:
 			"confirmed_dismissal": None,
 		}
 		log.debug("Media: action triggered")
+		self.appModule.focus_mgr.hold(obj, cancel_condition=self.is_media_popup_element)
 		targetButton.doAction()
 
 	def script_recordMediaMessage(self, gesture):

@@ -10,6 +10,7 @@ from keyboardHandler import KeyboardInputGesture
 import mouseHandler
 from winBindings import user32 as winUser
 import api
+import core
 import speech
 
 from .cnf import conf
@@ -143,18 +144,80 @@ class FocusManager:
 		self._saved = {}
 		self._silent_target = None
 		self._hold_target = None
+		self._cancel_condition = None
+		self._hold_timer = None
+		self._timer_token = None
+		self._on_restore = None
+		self._announce = False
 
-	def hold(self, obj=None):
-		"""Hold focus on obj (or current focus). If an action moves focus away, it will be restored silently."""
+	def hold(self, obj=None, cancel_condition=None, delay_ms=0, on_restore=None, announce=False):
+		"""Hold focus on obj (or current focus). If an action moves focus away, it will be restored.
+
+		Args:
+			obj: Target object to hold focus on. Defaults to current focus.
+			cancel_condition: Optional callable(focus_obj) -> bool. If True, hold restoration is aborted.
+			delay_ms: If 0 (default), restores immediately on focus departure.
+			          If > 0, defers restoration by delay_ms, suppressing interim focus changes.
+			on_restore: Optional callable(restored_obj) invoked upon successful restoration.
+			announce: If False (default), restores silently. If True, the restored target is announced by NVDA.
+		"""
+		self.release()
 		if obj is None:
 			obj = api.getFocusObject()
 		self._hold_target = obj
+		self._cancel_condition = cancel_condition
+		self._on_restore = on_restore
+		self._announce = announce
+
+		if delay_ms > 0:
+			token = object()
+			self._timer_token = token
+
+			def _on_timer():
+				if self._timer_token is not token:
+					return
+				self._timer_token = None
+				self._hold_timer = None
+
+				target = self._hold_target
+				self._hold_target = None
+
+				if not target:
+					return
+
+				current = api.getFocusObject()
+				if self._is_cancelled(current):
+					log.debug("FocusManager: hold cancelled by cancel_condition")
+					return
+
+				if current == target:
+					return
+
+				log.debug("FocusManager: timer expired; restoring focus to target")
+				if not self._announce:
+					speech.cancelSpeech()
+					self._silent_target = target
+				if not self.safe_set_focus(target):
+					self._silent_target = None
+
+			self._hold_timer = core.callLater(delay_ms, _on_timer)
+
 		return obj
 
 	def release(self):
 		"""Release any held focus, allowing focus to move freely without restoration."""
+		self._timer_token = None
+		if self._hold_timer:
+			try:
+				self._hold_timer.Stop()
+			except Exception:
+				pass
+			self._hold_timer = None
 		self._hold_target = None
 		self._silent_target = None
+		self._cancel_condition = None
+		self._on_restore = None
+		self._announce = False
 
 	def safe_set_focus(self, candidate):
 		"""Safely set focus to candidate or its first focusable child."""
@@ -209,26 +272,67 @@ class FocusManager:
 			return False
 		return True
 
+	def _is_cancelled(self, obj):
+		"""Evaluate if cancel_condition is satisfied."""
+		if not callable(self._cancel_condition):
+			return False
+		try:
+			return bool(self._cancel_condition(obj))
+		except TypeError:
+			try:
+				return bool(self._cancel_condition())
+			except Exception:
+				return False
+		except Exception:
+			return False
+
 	def handle_focus_change(self, obj):
 		"""Process focus changes in event_gainFocus.
 
 		Returns True if the event was consumed and should not be processed further.
 		"""
-		# 1. If this is a restored object arriving silently, silence it and reset
+		# 1. If this is a restored object arriving silently, silence it and invoke on_restore callback
 		if self._silent_target:
 			if obj == self._silent_target:
 				self._silent_target = None
 				speech.cancelSpeech()
+				on_restore = self._on_restore
+				self._on_restore = None
+				if callable(on_restore):
+					try:
+						on_restore(obj)
+					except Exception:
+						pass
 				return True
 			self._silent_target = None
 
 		# 2. If focus was held and an action moved it away, restore it silently
 		if self._hold_target:
 			target = self._hold_target
+
+			# Check if dynamic cancel condition is met
+			if self._is_cancelled(obj):
+				log.debug("FocusManager: cancel condition satisfied; releasing hold")
+				self.release()
+				return False
+
+			# If a deferred timer is running:
+			if self._timer_token is not None:
+				# Intermediate focus change away from target: silence it and consume
+				if obj != target:
+					speech.cancelSpeech()
+					return True
+				return False
+
+			# Immediate hold mode (delay_ms == 0):
 			self._hold_target = None
+			self._cancel_condition = None
+			announce = self._announce
+			self._announce = False
 			if obj != target:
-				speech.cancelSpeech()
-				self._silent_target = target
+				if not announce:
+					speech.cancelSpeech()
+					self._silent_target = target
 				if not self.safe_set_focus(target):
 					self._silent_target = None
 				return True
