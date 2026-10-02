@@ -220,25 +220,15 @@ class FocusManager:
 		self._announce = False
 
 	def safe_set_focus(self, candidate):
-		"""Safely set focus to candidate or its first focusable child."""
+		"""Safely set focus to candidate if alive and focusable."""
 		if not candidate:
 			return False
 		try:
 			if not getattr(candidate, "parent", None):
 				return False
 			if getattr(candidate, "isFocusable", True):
-				try:
-					candidate.setFocus()
-					return True
-				except Exception:
-					pass
-			first = getattr(candidate, "firstChild", None)
-			if first and getattr(first, "isFocusable", True):
-				try:
-					first.setFocus()
-					return True
-				except Exception:
-					pass
+				candidate.setFocus()
+				return True
 		except Exception:
 			pass
 		return False

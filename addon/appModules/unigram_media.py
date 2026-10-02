@@ -95,12 +95,8 @@ class UnigramMedia:
 		targetButton = slider.previous if (slider and slider.previous and slider.previous.role == Role.BUTTON) else None
 		if targetButton:
 			lastFocus = api.getFocusObject()
+			self.appModule.focus_mgr.hold(lastFocus)
 			targetButton.doAction()
-			if lastFocus:
-				try:
-					lastFocus.setFocus()
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
 			message(_("The audio player has been closed"))
 		else:
 			message(_("Nothing is playing right now"))
@@ -109,16 +105,12 @@ class UnigramMedia:
 		targetButton = next((item for item in self.appModule.ui_helper.getElements() if item.role == Role.BUTTON and item.UIAAutomationId == "PlaybackButton"), False)
 		if targetButton:
 			lastFocus = api.getFocusObject()
+			self.appModule.focus_mgr.hold(lastFocus)
 			targetButton.doAction()
-			if lastFocus:
-				try:
-					lastFocus.setFocus()
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
 		else: message(_("Nothing is playing right now"))
 
 	def _safe_set_focus(self, candidate):
-		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
+		"""Safely set focus to candidate using FocusManager."""
 		return self.appModule.focus_mgr.safe_set_focus(candidate)
 
 	def is_media_popup_element(self, obj):
@@ -358,8 +350,8 @@ class UnigramMedia:
 				if button.next.UIAAutomationId == "RecognizedText" and button.next.name: message(_("This voice message is already converted to text"))
 				elif button.next.UIAAutomationId == "RecognizedText" and button.next.name == "": message(_("Converting this voice message is already in process"))
 				return
+			self.appModule.focus_mgr.hold(obj)
 			button.doAction()
-			obj.setFocus()
 			try: playWaveFile(os.path.join(baseDir, "RecognitionStart.wav"))
 			except Exception: message(_("Conversion started"))
 			self.waiting_for_recognition(button)

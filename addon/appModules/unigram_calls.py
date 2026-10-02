@@ -80,12 +80,8 @@ class UnigramCalls:
 			lastFocus = api.getFocusObject()
 			btn_name = getattr(targetButton, "name", "") or _("Leave")
 			message(btn_name)
+			self.appModule.focus_mgr.hold(lastFocus)
 			clickElementWithMouse(targetButton)
-			if lastFocus:
-				try:
-					lastFocus.setFocus()
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
 			return True
 		return False
 
@@ -171,17 +167,12 @@ class UnigramCalls:
 		)
 
 		if targetButton:
+			self.appModule.focus_mgr.hold(obj)
 			try:
 				clickElementWithMouse(targetButton)
 			except Exception:
 				try:
 					targetButton.doAction()
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
-
-			if obj:
-				try:
-					obj.setFocus()
 				except Exception as e:
 					log.debugException(f"Swallowed exception: {e}")
 
@@ -217,17 +208,12 @@ class UnigramCalls:
 		)
 
 		if targetButton:
+			self.appModule.focus_mgr.hold(obj)
 			try:
 				clickElementWithMouse(targetButton)
 			except Exception:
 				try:
 					targetButton.doAction()
-				except Exception as e:
-					log.debugException(f"Swallowed exception: {e}")
-
-			if obj:
-				try:
-					obj.setFocus()
 				except Exception as e:
 					log.debugException(f"Swallowed exception: {e}")
 

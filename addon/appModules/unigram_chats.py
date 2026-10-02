@@ -281,7 +281,7 @@ class UnigramChats:
 		return None
 
 	def _safe_set_focus(self, candidate):
-		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
+		"""Safely set focus to candidate using FocusManager."""
 		return self.appModule.focus_mgr.safe_set_focus(candidate)
 
 	def restore_deletion_focus(self):

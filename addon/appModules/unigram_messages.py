@@ -199,38 +199,31 @@ class UnigramMessages:
 		"""Toggle focus between the message input field and previous focus object."""
 		obj = api.getFocusObject()
 		lastFocusObject = self.appModule.saved_items.get("last focus object")
-		if (obj.role == Role.EDITABLETEXT and obj.UIAAutomationId == "TextField") or (
-			obj.role == Role.BUTTON and obj.UIAAutomationId == "ButtonAction"
+		if (getattr(obj, "role", None) == Role.EDITABLETEXT and getattr(obj, "UIAAutomationId", "") == "TextField") or (
+			getattr(obj, "role", None) == Role.BUTTON and getattr(obj, "UIAAutomationId", "") == "ButtonAction"
 		):
-			if lastFocusObject and lastFocusObject.location:
-				lastFocusObject.setFocus()
+			if lastFocusObject and self._safe_set_focus(lastFocusObject):
+				return
 			return
+
 		targetButton = self.appModule.saved_items.get("message box")
 		if not targetButton or not getattr(targetButton, "isFocusable", False):
 			targetButton = False
 			for item in reversed(self.appModule.ui_helper.getElements()):
-				if item.role == Role.EDITABLETEXT and item.UIAAutomationId == "TextField":
+				if getattr(item, "role", None) == Role.EDITABLETEXT and getattr(item, "UIAAutomationId", "") == "TextField":
 					targetButton = item
 					self.appModule.saved_items.save("message box", item)
 					break
+
 		if targetButton:
-			if not getattr(targetButton, "isFocusable", False):
-				self.appModule.saved_items.save("message box", None)
-				message(_("Message input field not found"))
-			else:
-				try:
-					targetButton.setFocus()
-				except Exception:
-					self.appModule.saved_items.save("message box", None)
-					message(_("Message input field not found"))
+			if self._safe_set_focus(targetButton):
+				return
+			self.appModule.saved_items.save("message box", None)
+			message(_("Message input field not found"))
 		elif lastFocusObject:
-			if not getattr(lastFocusObject, "isFocusable", False):
-				message(_("Message input field not found"))
-			else:
-				try:
-					lastFocusObject.setFocus()
-				except Exception:
-					message(_("Message input field not found"))
+			if self._safe_set_focus(lastFocusObject):
+				return
+			message(_("Message input field not found"))
 		else:
 			message(_("Message input field not found"))
 
@@ -347,7 +340,7 @@ class UnigramMessages:
 		return None
 
 	def _safe_set_focus(self, candidate):
-		"""Safely set focus to candidate or its focusable child using standard NVDA API."""
+		"""Safely set focus to candidate using FocusManager."""
 		return self.appModule.focus_mgr.safe_set_focus(candidate)
 
 	def restore_deletion_focus(self):
@@ -591,17 +584,14 @@ class UnigramMessages:
 		is_reply = any(kw in btn_name for kw in reply_kws)
 		is_edit = any(kw in btn_name for kw in edit_kws)
 
+		self.appModule.focus_mgr.hold(last_focus)
+
 		try:
 			btn.doAction()
 		except Exception as e:
+			self.appModule.focus_mgr.release()
 			log.debug(f"Failed to invoke ComposerHeaderCancel: {e}")
 			return False
-
-		if last_focus:
-			try:
-				last_focus.setFocus()
-			except Exception as e:
-				log.debugException(f"Swallowed exception: {e}")
 
 		if is_reply:
 			message(_("Reply canceled"))
