@@ -269,14 +269,14 @@ msgstr "افزایش/کاهش سرعت پیام صوتی."
 msgid "Nothing is playing right now"
 msgstr "چیزی درحال پخش شدن نیست."
 
-#. Функція закриття аудіопрогравача
-#: addon\appModules\unigram.py:166
-msgid "Close audio player"
-msgstr "بستن پخش کننده ی صدا."
+#. Translators: Description for the script that closes the media player.
+#: addon\appModules\unigram.py:738
+msgid "Close media player"
+msgstr "بستن مدیا پلیر."
 
-#: addon\appModules\unigram.py:174
-msgid "The audio player has been closed"
-msgstr "پخش کننده ی صدا بسته شد."
+#: addon\appModules\unigram_media.py:99
+msgid "The media player has been closed"
+msgstr "مدیا پلیر بسته شد."
 
 #. Функція призупинення голосового повідомлення
 #: addon\appModules\unigram.py:178

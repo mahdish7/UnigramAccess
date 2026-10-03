@@ -12,6 +12,7 @@ from winBindings import user32 as winUser
 import api
 import core
 import speech
+import ui
 
 from .cnf import conf
 from .data import active_download_keywords, context_menu_items, icons_from_context_menu
@@ -142,24 +143,25 @@ class FocusManager:
 	def __init__(self, appModule):
 		self.appModule = appModule
 		self._saved = {}
-		self._silent_target = None
 		self._hold_target = None
 		self._cancel_condition = None
 		self._hold_timer = None
 		self._timer_token = None
 		self._on_restore = None
 		self._announce = False
+		self._notification = None
 
-	def hold(self, obj=None, cancel_condition=None, delay_ms=0, on_restore=None, announce=False):
+	def hold(self, obj=None, cancel_condition=None, delay_ms=0, on_restore=None, announce=False, notification=None):
 		"""Hold focus on obj (or current focus). If an action moves focus away, it will be restored.
 
 		Args:
 			obj: Target object to hold focus on. Defaults to current focus.
 			cancel_condition: Optional callable(focus_obj) -> bool. If True, hold restoration is aborted.
-			delay_ms: If 0 (default), restores immediately on focus departure.
+			delay_ms: If 0 (default), event-driven restoration on focus change.
 			          If > 0, defers restoration by delay_ms, suppressing interim focus changes.
 			on_restore: Optional callable(restored_obj) invoked upon successful restoration.
 			announce: If False (default), restores silently. If True, the restored target is announced by NVDA.
+			notification: Optional speech message to deliver once focus is safely settled.
 		"""
 		self.release()
 		if obj is None:
@@ -168,6 +170,7 @@ class FocusManager:
 		self._cancel_condition = cancel_condition
 		self._on_restore = on_restore
 		self._announce = announce
+		self._notification = notification
 
 		if delay_ms > 0:
 			token = object()
@@ -191,18 +194,33 @@ class FocusManager:
 					return
 
 				if current == target:
+					notif = self._notification
+					self._notification = None
+					if notif:
+						ui.message(notif)
 					return
 
 				log.debug("FocusManager: timer expired; restoring focus to target")
 				if not self._announce:
 					speech.cancelSpeech()
-					self._silent_target = target
-				if not self.safe_set_focus(target):
-					self._silent_target = None
+				self.safe_set_focus(target)
 
 			self._hold_timer = core.callLater(delay_ms, _on_timer)
 
 		return obj
+
+	def execute_action(self, action, target=None, notification=None, cancel_condition=None, on_restore=None, announce=False):
+		"""Phase 1: Execute action, saving initial target and notification for event-driven restoration (no timers)."""
+		if target is None:
+			target = api.getFocusObject()
+		self.hold(obj=target, cancel_condition=cancel_condition, delay_ms=0, on_restore=on_restore, announce=announce, notification=notification)
+		try:
+			action()
+		except Exception as e:
+			self.release()
+			log.debugException(f"FocusManager.execute_action failed: {e}")
+			return False
+		return True
 
 	def release(self):
 		"""Release any held focus, allowing focus to move freely without restoration."""
@@ -214,10 +232,10 @@ class FocusManager:
 				pass
 			self._hold_timer = None
 		self._hold_target = None
-		self._silent_target = None
 		self._cancel_condition = None
 		self._on_restore = None
 		self._announce = False
+		self._notification = None
 
 	def safe_set_focus(self, candidate):
 		"""Safely set focus to candidate if alive and focusable."""
@@ -249,19 +267,6 @@ class FocusManager:
 		"""Discard a saved focus target."""
 		self._saved.pop(key, None)
 
-	def restore(self, key, silent=False):
-		"""Restore focus to a saved target by key."""
-		target = self._saved.pop(key, None)
-		if not target:
-			return False
-		if silent:
-			speech.cancelSpeech()
-			self._silent_target = target
-		if not self.safe_set_focus(target):
-			self._silent_target = None
-			return False
-		return True
-
 	def _is_cancelled(self, obj):
 		"""Evaluate if cancel_condition is satisfied."""
 		if not callable(self._cancel_condition):
@@ -281,52 +286,52 @@ class FocusManager:
 
 		Returns True if the event was consumed and should not be processed further.
 		"""
-		# 1. If this is a restored object arriving silently, silence it and invoke on_restore callback
-		if self._silent_target:
-			if obj == self._silent_target:
-				self._silent_target = None
-				speech.cancelSpeech()
-				on_restore = self._on_restore
-				self._on_restore = None
-				if callable(on_restore):
-					try:
-						on_restore(obj)
-					except Exception:
-						pass
-				return True
-			self._silent_target = None
+		if not self._hold_target:
+			return False
 
-		# 2. If focus was held and an action moved it away, restore it silently
-		if self._hold_target:
-			target = self._hold_target
+		target = self._hold_target
 
-			# Check if dynamic cancel condition is met
-			if self._is_cancelled(obj):
-				log.debug("FocusManager: cancel condition satisfied; releasing hold")
-				self.release()
-				return False
+		# Check if dynamic cancel condition is met
+		if self._is_cancelled(obj):
+			log.debug("FocusManager: cancel condition satisfied; releasing hold")
+			self.release()
+			return False
 
-			# If a deferred timer is running:
-			if self._timer_token is not None:
-				# Intermediate focus change away from target: silence it and consume
-				if obj != target:
-					speech.cancelSpeech()
-					return True
-				return False
-
-			# Immediate hold mode (delay_ms == 0):
-			self._hold_target = None
-			self._cancel_condition = None
-			announce = self._announce
-			self._announce = False
+		# If an explicit deferred timer (delay_ms > 0) is running:
+		if self._timer_token is not None:
+			# Intermediate focus change away from target: silence it and consume
 			if obj != target:
-				if not announce:
-					speech.cancelSpeech()
-					self._silent_target = target
-				if not self.safe_set_focus(target):
-					self._silent_target = None
+				speech.cancelSpeech()
 				return True
+			return False
 
-		return False
+		# Phase 3: Work finished and focus has returned to the initial target
+		if obj == target:
+			if not self._announce:
+				speech.cancelSpeech()
+			notif = self._notification
+			on_restore = self._on_restore
+			self.release()
+			if callable(on_restore):
+				try:
+					on_restore(obj)
+				except Exception:
+					pass
+			if notif:
+				ui.message(notif)
+			return not self._announce
+
+		# Phase 2: In-flight intermediate focus movement away from target
+		# Keep completely silent and redirect focus back to target
+		speech.cancelSpeech()
+		if not self.safe_set_focus(target):
+			# If target can no longer be focused (destroyed or detached)
+			notif = self._notification
+			self.release()
+			if notif:
+				ui.message(notif)
+			return False
+
+		return True
 
 

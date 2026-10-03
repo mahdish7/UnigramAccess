@@ -95,18 +95,20 @@ class UnigramMedia:
 		targetButton = slider.previous if (slider and slider.previous and slider.previous.role == Role.BUTTON) else None
 		if targetButton:
 			lastFocus = api.getFocusObject()
-			self.appModule.focus_mgr.hold(lastFocus)
-			targetButton.doAction()
-			message(_("The audio player has been closed"))
+			self.appModule.focus_mgr.execute_action(
+				action=targetButton.doAction,
+				target=lastFocus,
+				notification=_("The media player has been closed"),
+			)
 		else:
 			message(_("Nothing is playing right now"))
 
 	def script_pauseVoiceMessage(self, gesture):
 		targetButton = next((item for item in self.appModule.ui_helper.getElements() if item.role == Role.BUTTON and item.UIAAutomationId == "PlaybackButton"), False)
 		if targetButton:
-			lastFocus = api.getFocusObject()
-			self.appModule.focus_mgr.hold(lastFocus)
-			targetButton.doAction()
+			self.appModule.focus_mgr.execute_action(
+				action=targetButton.doAction,
+			)
 		else: message(_("Nothing is playing right now"))
 
 	def _safe_set_focus(self, candidate):
@@ -255,14 +257,12 @@ class UnigramMedia:
 	def cancel_recording(self, gesture):
 		"""Cancel an ongoing voice or video recording."""
 		self.is_recording = False
-		self.appModule.focus_mgr.hold()
-		gesture.send()
-
 		indicator = conf.get("voiceMessageRecordingIndicator")
+		notif = _("Recording canceled") if indicator == "text" else None
+		self.appModule.focus_mgr.execute_action(gesture.send, notification=notif)
+
 		if indicator == "audio":
 			playWaveFile(os.path.join(baseDir, "cancel_voice_message_recording.wav"))
-		elif indicator == "text":
-			message(_("Recording canceled"))
 		return True
 
 	def script_toggleVoiceSlider(self, gesture):

@@ -725,8 +725,8 @@ class AppModule(appModuleHandler.AppModule):
 		return self.media_helper.script_toggleVoiceSlider(gesture)
 
 	@script(
-		# Translators: Description for the script that closes the audio player.
-		description=_("Close audio player"),
+		# Translators: Description for the script that closes the media player.
+		description=_("Close media player"),
 		gesture="kb:ALT+E",
 	)
 	def script_closingVoiceMessage(self, gesture):

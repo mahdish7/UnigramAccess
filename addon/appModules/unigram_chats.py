@@ -270,10 +270,8 @@ class UnigramChats:
 	def _get_adjacent_item(self, item, forward=True):
 		"""Find the nearest adjacent valid chat item."""
 		curr = item
-		depth = 0
-		while curr and depth < 6:
+		while curr:
 			curr = getattr(curr, "next" if forward else "previous", None)
-			depth += 1
 			if not curr:
 				break
 			if getattr(curr, "role", None) == Role.LISTITEM and self.is_chat_item(curr):
@@ -298,19 +296,26 @@ class UnigramChats:
 		if not isinstance(self.appModule.isDelete, dict):
 			return False
 
-		candidates = [
-			("initial", self.appModule.isDelete.get("initial_obj")),
-			("next", self.appModule.isDelete.get("next_obj")),
-			("previous", self.appModule.isDelete.get("prev_obj")),
-		]
+		initial_obj = self.appModule.isDelete.get("initial_obj")
+		next_obj = self.appModule.isDelete.get("next_obj")
+		prev_obj = self.appModule.isDelete.get("prev_obj")
 
 		log.debug("Attempting chat focus restoration")
-		for name, candidate in candidates:
-			if not candidate:
-				continue
-			if self._safe_set_focus(candidate):
-				log.debug(f"Successfully restored focus to {name} chat candidate (role={getattr(candidate, 'role', None)})")
-				return name
+
+		# 1. First priority: initial chat (must still be on screen / not deleted)
+		if initial_obj and State.OFFSCREEN not in getattr(initial_obj, "states", set()) and self._safe_set_focus(initial_obj):
+			log.debug("Successfully restored focus to initial chat candidate")
+			return "initial"
+
+		# 2. Second priority: next chat
+		if next_obj and self._safe_set_focus(next_obj):
+			log.debug("Successfully restored focus to next chat candidate")
+			return "next"
+
+		# 3. Third priority: previous chat
+		if prev_obj and self._safe_set_focus(prev_obj):
+			log.debug("Successfully restored focus to previous chat candidate")
+			return "previous"
 
 		log.warning("Chat focus restoration failed: None of the three candidates (initial, next, previous) could be identified or focused")
 		return False

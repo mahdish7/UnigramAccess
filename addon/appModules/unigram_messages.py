@@ -307,36 +307,36 @@ class UnigramMessages:
 		"""Save attached file via context menu."""
 		return self.activate_option_for_menu("save_as")
 
-	def _is_message_item(self, item):
-		"""Determine if item is an actual message (and not a date header, separator, or container)."""
+	def _get_message_item(self, item):
+		"""Get the focusable Message_item: either item itself or its firstChild."""
 		if not item:
-			return False
+			return None
 		try:
-			if getattr(item, "role", None) != Role.LISTITEM:
-				return False
-			auto_id = getattr(item, "UIAAutomationId", "") or ""
-			if auto_id == "Message_item":
-				return True
+			if getattr(item, "UIAAutomationId", "") == "Message_item":
+				return item
 			first = getattr(item, "firstChild", None)
 			if first and getattr(first, "UIAAutomationId", "") == "Message_item":
-				return True
-			if getattr(item, "sender_message", None):
-				return True
+				return first
 		except Exception as e:
-			log.debugException(f"Swallowed exception: {e}")
-		return False
+			log.debugException(f"_get_message_item error: {e}")
+		return None
 
 	def _get_adjacent_item(self, item, forward=True):
-		"""Find the nearest adjacent valid message item."""
-		curr = item
-		depth = 0
-		while curr and depth < 6:
-			curr = getattr(curr, "next" if forward else "previous", None)
-			depth += 1
-			if not curr:
+		"""Find the nearest adjacent valid, unselected message item."""
+		if not item:
+			return None
+
+		row = getattr(item, "parent", None) if getattr(getattr(item, "parent", None), "role", None) == Role.LISTITEM else item
+		while row:
+			row = getattr(row, "next" if forward else "previous", None)
+			if not row:
 				break
-			if self._is_message_item(curr):
-				return curr
+			msg_item = self._get_message_item(row)
+			if not msg_item:
+				continue
+			if State.SELECTED in getattr(msg_item, "states", set()):
+				continue
+			return msg_item
 		return None
 
 	def _safe_set_focus(self, candidate):
@@ -357,19 +357,26 @@ class UnigramMessages:
 		if not isinstance(self.appModule.isDelete, dict):
 			return False
 
-		candidates = [
-			("initial", self.appModule.isDelete.get("initial_obj")),
-			("next", self.appModule.isDelete.get("next_obj")),
-			("previous", self.appModule.isDelete.get("prev_obj")),
-		]
+		initial_obj = self.appModule.isDelete.get("initial_obj")
+		next_obj = self.appModule.isDelete.get("next_obj")
+		prev_obj = self.appModule.isDelete.get("prev_obj")
 
-		log.debug("Attempting message focus restoration")
-		for name, candidate in candidates:
-			if not candidate:
-				continue
-			if self._safe_set_focus(candidate):
-				log.debug(f"Successfully restored focus to {name} message candidate (role={getattr(candidate, 'role', None)})")
-				return name
+		log.debug(f"Attempting message focus restoration: initial={initial_obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
+
+		# 1. First priority: initial message (must still be on screen / not deleted)
+		if initial_obj and State.OFFSCREEN not in getattr(initial_obj, "states", set()) and self._safe_set_focus(initial_obj):
+			log.debug("Successfully restored focus to initial message candidate")
+			return "initial"
+
+		# 2. Second priority: next message
+		if next_obj and self._safe_set_focus(next_obj):
+			log.debug("Successfully restored focus to next message candidate")
+			return "next"
+
+		# 3. Third priority: previous message
+		if prev_obj and self._safe_set_focus(prev_obj):
+			log.debug("Successfully restored focus to previous message candidate")
+			return "previous"
 
 		log.warning("Message focus restoration failed: None of the three candidates (initial, next, previous) could be identified or focused")
 		return False
@@ -384,15 +391,13 @@ class UnigramMessages:
 		if not self.appModule.ui_helper.is_message_object(obj):
 			return False
 
-		if getattr(obj, "parent", None) and obj.parent.role == Role.LISTITEM:
-			obj = obj.parent
-		try:
-			obj.setFocus()
-		except Exception as e:
-			log.debugException(f"Swallowed exception: {e}")
+		msg_item = self._get_message_item(obj)
+		if msg_item:
+			obj = msg_item
 
 		next_obj = self._get_adjacent_item(obj, forward=True)
 		prev_obj = self._get_adjacent_item(obj, forward=False)
+		log.debug(f"start_delete_message: initial={obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
 
 		self.appModule.isDelete = {
 			"target": "messages",
@@ -583,21 +588,13 @@ class UnigramMessages:
 		edit_kws = composer_header_cancel_types.get("edit", {}).get(lang, ())
 		is_reply = any(kw in btn_name for kw in reply_kws)
 		is_edit = any(kw in btn_name for kw in edit_kws)
+		notif = _("Reply canceled") if is_reply else (_("Edit canceled") if is_edit else None)
 
-		self.appModule.focus_mgr.hold(last_focus)
-
-		try:
-			btn.doAction()
-		except Exception as e:
-			self.appModule.focus_mgr.release()
-			log.debug(f"Failed to invoke ComposerHeaderCancel: {e}")
-			return False
-
-		if is_reply:
-			message(_("Reply canceled"))
-		elif is_edit:
-			message(_("Edit canceled"))
-		return True
+		return self.appModule.focus_mgr.execute_action(
+			action=btn.doAction,
+			target=last_focus,
+			notification=notif,
+		)
 
 	def script_toggle_live_chat(self, gesture):
 		"""Toggle real-time background announcement of incoming messages."""

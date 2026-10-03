@@ -56,7 +56,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+P**: Play or pause currently active audio file.
 * **ALT+X**: Change audio playback speed.
 * **ALT+S**: Move focus to audio playback slider (pressing again restores previous focus).
-* **ALT+E**: Close active audio player bar.
+* **ALT+E**: Close active media player bar.
 * **control+R**: Start or stop recording a voice message.
 * **control+D**: Cancel voice recording, or cancel message reply and edit.
 * **NVDA+ALT+R**: Convert voice message to text (transcribe speech-to-text).
