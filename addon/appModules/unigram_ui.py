@@ -168,12 +168,16 @@ class UnigramUIHelper:
 
 	def is_message_object(self, obj):
 		try:
-			if not obj: return False
-			if getattr(obj, "UIAAutomationId", "") == "Message_item": return True
+			if not obj:
+				return False
+			if getattr(obj, "UIAAutomationId", "") == "Message_item":
+				return True
 			parent = getattr(obj, "parent", None)
-			if parent and getattr(parent, "UIAAutomationId", "") == "Messages": return True
+			if parent and getattr(parent, "UIAAutomationId", "") == "Messages":
+				return True
 			return False
-		except Exception: return False
+		except Exception:
+			return False
 
 	def is_in_chat(self, obj=None):
 		if obj is None:
@@ -327,3 +331,81 @@ class UnigramUIHelper:
 
 		# Fallback to the first item in the profile panel
 		return getattr(panel, "firstChild", None)
+
+	def is_tree_connected(self, obj, container_id, max_depth=4):
+		"""Check if an element's parent hierarchy connects to expected container_id.
+
+		Args:
+			obj: The NVDAObject to inspect.
+			container_id (str): UIAAutomationId of expected ancestor (e.g. "Messages", "ChatsList").
+			max_depth (int): Maximum parent levels to inspect. Defaults to 4.
+
+		Returns:
+			bool: True if container_id was found in the ancestor chain, False otherwise.
+		"""
+		if not obj or not container_id:
+			return False
+
+		curr = obj
+		depth = 0
+		while curr and depth < max_depth:
+			curr = getattr(curr, "parent", None)
+			if curr and getattr(curr, "UIAAutomationId", "") == container_id:
+				return True
+			depth += 1
+
+		return False
+
+	def reconnect_tree_hierarchy(self, obj, container_id, container_elem=None, item_extractor=None):
+		"""Reconstruct a broken UIA tree connection top-down via container_id.
+
+		In XAML/WinUI applications like Unigram, virtualized items may lose their
+		parent chain (parent becomes CoreWindow directly). This method resolves
+		the container top-down, matches the item, and re-focuses it to restore
+		the UIA tree structure in memory.
+
+		Args:
+			obj: The NVDAObject to reconnect.
+			container_id (str): UIAAutomationId of ancestor container (e.g. "Messages", "ChatsList").
+			container_elem (optional): Pre-resolved container NVDAObject.
+			item_extractor (optional): Callable(row) returning the interactive child.
+
+		Returns:
+			NVDAObject: The reconnected item, or original obj if matching failed.
+		"""
+		if not obj:
+			return None
+
+		log.info(f"Reconnecting tree hierarchy for '{container_id}' top-down...")
+
+		# 1. Resolve container element
+		if not container_elem:
+			if container_id == "Messages":
+				container_elem = self.getMessagesElement()
+			elif container_id in ("ChatsList", "chats"):
+				container_elem = self.getChatsListElement()
+			else:
+				container_elem = next((item for item in self.getElements() if getattr(item, "UIAAutomationId", "") == container_id), None)
+
+		if not container_elem:
+			log.warning(f"reconnect_tree_hierarchy failed: container '{container_id}' not found")
+			return obj
+
+		# 2. Match current item in container children
+		items = getattr(container_elem, "children", [])
+		obj_name = getattr(obj, "name", "")
+		for row in items:
+			item = item_extractor(row) if item_extractor else row
+			if item == obj or (obj_name and getattr(row, "name", "") == obj_name) or (item and getattr(item, "name", "") == obj_name):
+				target = item or row
+				log.info(f"reconnect_tree_hierarchy: matched item in '{container_id}'. Setting focus to reconnect tree.")
+				try:
+					target.setFocus()
+				except Exception as e:
+					log.debugException(f"reconnect_tree_hierarchy setFocus error: {e}")
+				return target
+
+		log.warning(f"reconnect_tree_hierarchy failed: item not matched in container '{container_id}' items")
+		return obj
+
+

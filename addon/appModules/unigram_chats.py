@@ -267,15 +267,31 @@ class UnigramChats:
 			log.debugException(f"Swallowed exception: {e}")
 			return False
 
-	def _get_adjacent_item(self, item, forward=True):
-		"""Find the nearest adjacent valid chat item."""
+	def _get_neighbor_chat(self, item, forward=True):
+		"""Find the nearest neighboring valid chat item."""
+		direction = "forward (next)" if forward else "backward (prev)"
+		if not item:
+			log.debug(f"Chats _get_neighbor_chat [{direction}]: item is None, returning None")
+			return None
+		log.debug(f"Chats _get_neighbor_chat [{direction}]: start item role={getattr(item, 'role', None)}, auto_id='{getattr(item, 'UIAAutomationId', '')}', name='{getattr(item, 'name', '')}'")
+
+		step = 0
 		curr = item
-		while curr:
+		while curr and step < 25:
+			step += 1
 			curr = getattr(curr, "next" if forward else "previous", None)
 			if not curr:
+				log.debug(f"Chats _get_neighbor_chat [{direction}]: step {step} - no more siblings (reached end of loaded list)")
 				break
-			if getattr(curr, "role", None) == Role.LISTITEM and self.is_chat_item(curr):
+			curr_role = getattr(curr, "role", None)
+			curr_id = getattr(curr, "UIAAutomationId", "") or ""
+			curr_name = getattr(curr, "name", "") or ""
+			log.debug(f"Chats _get_neighbor_chat [{direction}]: step {step} inspecting sibling role={curr_role}, auto_id='{curr_id}', name='{curr_name}'")
+			if curr_role == Role.LISTITEM and self.is_chat_item(curr):
+				log.debug(f"Chats _get_neighbor_chat [{direction}]: step {step} SUCCESS! Candidate found: role={curr_role}, auto_id='{curr_id}', name='{curr_name}'")
 				return curr
+
+		log.debug(f"Chats _get_neighbor_chat [{direction}]: completed {step} steps without finding candidate, returning None")
 		return None
 
 	def _safe_set_focus(self, candidate):
@@ -294,30 +310,33 @@ class UnigramChats:
 			or False if no candidate could be focused.
 		"""
 		if not isinstance(self.appModule.isDelete, dict):
+			log.debug("Chats restore_deletion_focus: isDelete is not a dict, aborting")
 			return False
 
 		initial_obj = self.appModule.isDelete.get("initial_obj")
 		next_obj = self.appModule.isDelete.get("next_obj")
 		prev_obj = self.appModule.isDelete.get("prev_obj")
 
-		log.debug("Attempting chat focus restoration")
+		log.debug(f"Chats restore_deletion_focus: candidates present - initial={initial_obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
 
 		# 1. First priority: initial chat (must still be on screen / not deleted)
-		if initial_obj and State.OFFSCREEN not in getattr(initial_obj, "states", set()) and self._safe_set_focus(initial_obj):
-			log.debug("Successfully restored focus to initial chat candidate")
-			return "initial"
+		if initial_obj:
+			initial_states = getattr(initial_obj, "states", set())
+			if State.OFFSCREEN not in initial_states and self._safe_set_focus(initial_obj):
+				log.debug("Chats restore_deletion_focus: restored to initial_obj")
+				return "initial"
 
 		# 2. Second priority: next chat
 		if next_obj and self._safe_set_focus(next_obj):
-			log.debug("Successfully restored focus to next chat candidate")
+			log.debug("Chats restore_deletion_focus: restored to next_obj")
 			return "next"
 
 		# 3. Third priority: previous chat
 		if prev_obj and self._safe_set_focus(prev_obj):
-			log.debug("Successfully restored focus to previous chat candidate")
+			log.debug("Chats restore_deletion_focus: restored to prev_obj")
 			return "previous"
 
-		log.warning("Chat focus restoration failed: None of the three candidates (initial, next, previous) could be identified or focused")
+		log.warning("Chats restore_deletion_focus: none of the three candidates could be focused")
 		return False
 
 	def start_delete_chat(self, isCompleteDeletion=False):
@@ -327,18 +346,37 @@ class UnigramChats:
 		then opens the context menu to find the delete option.
 		"""
 		obj = api.getFocusObject()
+		obj_role = getattr(obj, "role", None)
+		obj_id = getattr(obj, "UIAAutomationId", "") or ""
+		obj_name = getattr(obj, "name", "") or ""
+		log.debug(f"start_delete_chat: focus object role={obj_role}, auto_id='{obj_id}', name='{obj_name}', isCompleteDeletion={isCompleteDeletion}")
+
 		if not self.is_chat_item(obj):
+			log.warning(f"start_delete_chat: rejected - focus object is not a chat item (role={obj_role}, auto_id='{obj_id}')")
 			return False
 
 		if getattr(obj, "parent", None) and obj.parent.role == Role.LISTITEM:
+			log.debug("start_delete_chat: wrapping parent is Role.LISTITEM, moving to parent")
 			obj = obj.parent
 		try:
 			obj.setFocus()
 		except Exception as e:
-			log.debugException(f"Swallowed exception: {e}")
+			log.debugException(f"start_delete_chat setFocus error: {e}")
 
-		next_obj = self._get_adjacent_item(obj, forward=True)
-		prev_obj = self._get_adjacent_item(obj, forward=False)
+		log.debug("start_delete_chat: finding next_obj...")
+		next_obj = self._get_neighbor_chat(obj, forward=True)
+		log.debug("start_delete_chat: finding prev_obj...")
+		prev_obj = self._get_neighbor_chat(obj, forward=False)
+
+		log.debug(f"start_delete_chat RESULT: initial={obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
+		if next_obj:
+			log.debug(f"start_delete_chat -> next_obj: role={getattr(next_obj, 'role', None)}, auto_id='{getattr(next_obj, 'UIAAutomationId', '')}', name='{getattr(next_obj, 'name', '')}'")
+		else:
+			log.debug("start_delete_chat -> next_obj: None")
+		if prev_obj:
+			log.debug(f"start_delete_chat -> prev_obj: role={getattr(prev_obj, 'role', None)}, auto_id='{getattr(prev_obj, 'UIAAutomationId', '')}', name='{getattr(prev_obj, 'name', '')}'")
+		else:
+			log.debug("start_delete_chat -> prev_obj: None")
 
 		self.appModule.isDelete = {
 			"target": "chats",
@@ -352,6 +390,7 @@ class UnigramChats:
 		if conf.get("audioPlaybackWhenDeleted"):
 			self.appModule.isDelete["message"] = "audio"
 
+		log.debug("start_delete_chat: opening context menu via Applications key")
 		CACHED_KEYS["Applications"].send()
 		return True
 

@@ -308,36 +308,58 @@ class UnigramMessages:
 		return self.activate_option_for_menu("save_as")
 
 	def _get_message_item(self, item):
-		"""Get the focusable Message_item: either item itself or its firstChild."""
+		"""Get the focusable Message_item: either item itself or from its direct children."""
 		if not item:
 			return None
 		try:
 			if getattr(item, "UIAAutomationId", "") == "Message_item":
 				return item
+
+			# If item is a row container (e.g. ListViewItem), find Message_item in children
 			first = getattr(item, "firstChild", None)
 			if first and getattr(first, "UIAAutomationId", "") == "Message_item":
 				return first
+
+			for child in getattr(item, "children", []):
+				if getattr(child, "UIAAutomationId", "") == "Message_item":
+					return child
 		except Exception as e:
 			log.debugException(f"_get_message_item error: {e}")
 		return None
 
-	def _get_adjacent_item(self, item, forward=True):
-		"""Find the nearest adjacent valid, unselected message item."""
-		if not item:
-			return None
-
-		row = getattr(item, "parent", None) if getattr(getattr(item, "parent", None), "role", None) == Role.LISTITEM else item
-		while row:
-			row = getattr(row, "next" if forward else "previous", None)
+	def _get_neighbor_message(self, obj, forward=True):
+		"""Find the nearest neighboring valid, unselected message item."""
+		row = obj
+		for _ in range(4):
 			if not row:
 				break
-			msg_item = self._get_message_item(row)
-			if not msg_item:
-				continue
-			if State.SELECTED in getattr(msg_item, "states", set()):
-				continue
-			return msg_item
+			parent = getattr(row, "parent", None)
+			if parent and getattr(parent, "UIAAutomationId", "") == "Messages":
+				break
+			row = parent
+		row = row or getattr(obj, "parent", None) or obj
+
+		curr = row
+		while curr:
+			curr = getattr(curr, "next" if forward else "previous", None)
+			if not curr:
+				break
+
+			msg_item = self._get_message_item(curr)
+			if msg_item and State.SELECTED not in getattr(msg_item, "states", set()):
+				return msg_item
+
 		return None
+
+	def _ensure_message_tree(self, obj):
+		"""Ensure message object is connected to the Messages container tree."""
+		if not self.appModule.ui_helper.is_tree_connected(obj, "Messages"):
+			return self.appModule.ui_helper.reconnect_tree_hierarchy(
+				obj=obj,
+				container_id="Messages",
+				item_extractor=self._get_message_item,
+			)
+		return obj
 
 	def _safe_set_focus(self, candidate):
 		"""Safely set focus to candidate using FocusManager."""
@@ -361,24 +383,26 @@ class UnigramMessages:
 		next_obj = self.appModule.isDelete.get("next_obj")
 		prev_obj = self.appModule.isDelete.get("prev_obj")
 
-		log.debug(f"Attempting message focus restoration: initial={initial_obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
+		log.debug(f"restore_deletion_focus: candidates present - initial={initial_obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
 
 		# 1. First priority: initial message (must still be on screen / not deleted)
-		if initial_obj and State.OFFSCREEN not in getattr(initial_obj, "states", set()) and self._safe_set_focus(initial_obj):
-			log.debug("Successfully restored focus to initial message candidate")
-			return "initial"
+		if initial_obj:
+			initial_states = getattr(initial_obj, "states", set())
+			if State.OFFSCREEN not in initial_states and self._safe_set_focus(initial_obj):
+				log.debug("restore_deletion_focus: restored to initial_obj")
+				return "initial"
 
 		# 2. Second priority: next message
 		if next_obj and self._safe_set_focus(next_obj):
-			log.debug("Successfully restored focus to next message candidate")
+			log.debug("restore_deletion_focus: restored to next_obj")
 			return "next"
 
 		# 3. Third priority: previous message
 		if prev_obj and self._safe_set_focus(prev_obj):
-			log.debug("Successfully restored focus to previous message candidate")
+			log.debug("restore_deletion_focus: restored to prev_obj")
 			return "previous"
 
-		log.warning("Message focus restoration failed: None of the three candidates (initial, next, previous) could be identified or focused")
+		log.warning("restore_deletion_focus: none of the three candidates could be focused")
 		return False
 
 	def start_delete_message(self, isCompleteDeletion=False):
@@ -388,16 +412,39 @@ class UnigramMessages:
 		then opens the context menu to find the delete option.
 		"""
 		obj = api.getFocusObject()
+		obj_role = getattr(obj, "role", None)
+		obj_id = getattr(obj, "UIAAutomationId", "") or ""
+		obj_name = getattr(obj, "name", "") or ""
+		log.debug(f"start_delete_message: focus object role={obj_role}, auto_id='{obj_id}', name='{obj_name}', isCompleteDeletion={isCompleteDeletion}")
+
 		if not self.appModule.ui_helper.is_message_object(obj):
+			log.warning(f"start_delete_message: rejected - focus object is not a message object (role={obj_role}, auto_id='{obj_id}')")
 			return False
 
 		msg_item = self._get_message_item(obj)
+		log.debug(f"start_delete_message: resolved msg_item={msg_item is not None} (role={getattr(msg_item, 'role', None)}, auto_id='{getattr(msg_item, 'UIAAutomationId', '')}')")
 		if msg_item:
 			obj = msg_item
 
-		next_obj = self._get_adjacent_item(obj, forward=True)
-		prev_obj = self._get_adjacent_item(obj, forward=False)
-		log.debug(f"start_delete_message: initial={obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
+		# Ensure tree connection is healthy before finding neighbors
+		obj = self._ensure_message_tree(obj)
+
+		log.debug("start_delete_message: finding next_obj...")
+		next_obj = self._get_neighbor_message(obj, forward=True)
+		log.debug("start_delete_message: finding prev_obj...")
+		prev_obj = self._get_neighbor_message(obj, forward=False)
+
+		# NOTE: If both next_obj and prev_obj evaluate to None and focus loss recurs,
+		# consider triggering tree reconnection (reconnect_tree_hierarchy) as a fallback here.
+		log.debug(f"start_delete_message RESULT: initial={obj is not None}, next={next_obj is not None}, prev={prev_obj is not None}")
+		if next_obj:
+			log.debug(f"start_delete_message -> next_obj: role={getattr(next_obj, 'role', None)}, auto_id='{getattr(next_obj, 'UIAAutomationId', '')}', name='{getattr(next_obj, 'name', '')}'")
+		else:
+			log.debug("start_delete_message -> next_obj: None")
+		if prev_obj:
+			log.debug(f"start_delete_message -> prev_obj: role={getattr(prev_obj, 'role', None)}, auto_id='{getattr(prev_obj, 'UIAAutomationId', '')}', name='{getattr(prev_obj, 'name', '')}'")
+		else:
+			log.debug("start_delete_message -> prev_obj: None")
 
 		self.appModule.isDelete = {
 			"target": "messages",
@@ -411,6 +458,7 @@ class UnigramMessages:
 		if conf.get("audioPlaybackWhenDeleted"):
 			self.appModule.isDelete["message"] = "audio"
 
+		log.debug("start_delete_message: opening context menu via Applications key")
 		CACHED_KEYS["Applications"].send()
 		return True
 
