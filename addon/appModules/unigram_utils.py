@@ -183,27 +183,24 @@ class FocusManager:
 				self._hold_timer = None
 
 				target = self._hold_target
-				self._hold_target = None
-
 				if not target:
 					return
 
 				current = api.getFocusObject()
 				if self._is_cancelled(current):
 					log.debug("FocusManager: hold cancelled by cancel_condition")
+					self.release()
 					return
 
 				if current == target:
-					notif = self._notification
-					self._notification = None
-					if notif:
-						ui.message(notif)
+					self.complete(current)
 					return
 
 				log.debug("FocusManager: timer expired; restoring focus to target")
 				if not self._announce:
 					speech.cancelSpeech()
-				self.safe_set_focus(target)
+				if not self.safe_set_focus(target):
+					log.warning("FocusManager: timer expired but failed to restore focus to target")
 
 			self._hold_timer = core.callLater(delay_ms, _on_timer)
 
@@ -220,7 +217,44 @@ class FocusManager:
 			self.release()
 			log.debugException(f"FocusManager.execute_action failed: {e}")
 			return False
+		# Deferred completion: if no async UIA focus event arrives (focus didn't move),
+		# finalize the hold to deliver any pending notification.
+		def _deferred_completion_check():
+			if not self._hold_target:
+				return  # Already handled by a focus change event
+			try:
+				current = api.getFocusObject()
+				if current == self._hold_target:
+					self.complete(self._hold_target)
+			except Exception as e:
+				log.debugException(f"Error in deferred completion check: {e}")
+		core.callLater(100, _deferred_completion_check)
 		return True
+
+	def complete(self, obj=None):
+		"""Terminal completion state for focus hold operations.
+
+		Finalizes the hold lifecycle by silencing interim speech if needed,
+		clearing state via release(), executing on_restore callback, and
+		delivering any pending notification.
+		"""
+		target = obj or self._hold_target
+		if not self._announce:
+			speech.cancelSpeech()
+
+		on_restore = self._on_restore
+		notif = self._notification
+
+		self.release()
+
+		if callable(on_restore) and target:
+			try:
+				on_restore(target)
+			except Exception:
+				pass
+
+		if notif:
+			ui.message(notif)
 
 	def release(self):
 		"""Release any held focus, allowing focus to move freely without restoration."""
@@ -307,31 +341,19 @@ class FocusManager:
 
 		# Phase 3: Work finished and focus has returned to the initial target
 		if obj == target:
-			if not self._announce:
-				speech.cancelSpeech()
-			notif = self._notification
-			on_restore = self._on_restore
-			self.release()
-			if callable(on_restore):
-				try:
-					on_restore(obj)
-				except Exception:
-					pass
-			if notif:
-				ui.message(notif)
-			return not self._announce
+			should_consume = not self._announce
+			self.complete(obj)
+			return should_consume
 
 		# Phase 2: In-flight intermediate focus movement away from target
 		# Keep completely silent and redirect focus back to target
 		speech.cancelSpeech()
 		if not self.safe_set_focus(target):
-			# If target can no longer be focused (destroyed or detached)
-			notif = self._notification
-			self.release()
-			if notif:
-				ui.message(notif)
+			# Target can no longer be focused (destroyed or detached);
+			# finalize the hold lifecycle and let normal focus processing continue.
+			log.warning("FocusManager: failed to restore focus to target; object may be detached or non-focusable")
+			self.complete()
 			return False
-
 		return True
 
 
