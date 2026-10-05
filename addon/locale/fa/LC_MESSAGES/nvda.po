@@ -1469,3 +1469,6 @@ msgstr "عدم اعلام عنوان یا نام مستعار اعضا در پی
 
 msgid "Instant View not available for this message"
 msgstr "نمای فوری برای این پیام در دسترس نیست"
+
+msgid "Replying to {name}.\n"
+msgstr "پاسخ به {name}.\n"

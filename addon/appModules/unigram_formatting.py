@@ -225,6 +225,18 @@ def formatMessageOnFocus(obj, savedItems):
 				obj.name,
 			)
 
+	# Detect cross-chat replies and announce reply header if omitted by Unigram
+	try:
+		reply_elem = next((item for item in getattr(obj, "children", []) if getattr(item, "UIAAutomationId", "") == "Reply"), None)
+		if reply_elem:
+			title_elem = next((item for item in getattr(reply_elem, "children", []) if getattr(item, "UIAAutomationId", "") == "TitleLabel"), None)
+			if title_elem:
+				reply_author = (getattr(title_elem, "name", "") or "").strip()
+				if reply_author and reply_author not in obj.name:
+					obj.name = _("Replying to {name}.\n").format(name=reply_author) + obj.name
+	except Exception as e:
+		log.debugException(f"Swallowed exception while formatting reply: {e}")
+
 	obj.name = sender + obj.name
 
 	# Check if a message is selected
