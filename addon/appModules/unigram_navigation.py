@@ -1,4 +1,5 @@
 # -*- coding:utf-8 -*-
+import re
 import addonHandler
 addonHandler.initTranslation()
 from controlTypes import Role, State
@@ -8,6 +9,7 @@ import core
 from ui import message
 from .cnf import conf
 from .data import unread_messages_keywords
+from .unigram_formatting import announceFolderChange
 from .unigram_logger import ulog as log
 
 class UnigramNavigation:
@@ -52,7 +54,8 @@ class UnigramNavigation:
 
 	script_toLastMessage = script_toDetailPanel
 
-	def script_to_tabs_folder(self, gesture):
+	def get_tabs_folder_element(self):
+		"""Retrieve and cache the chat folders container element (top bar or side bar)."""
 		obj = self.appModule.saved_items.get("tabs folder")
 		if not (obj and getattr(obj, "location", None) and obj.location.width):
 			for item in self.appModule.ui_helper.getElements():
@@ -67,15 +70,42 @@ class UnigramNavigation:
 					if getattr(prev, "UIAAutomationId", "") in ("ChatFolders", "ChatFoldersSide"):
 						obj = prev
 						self.appModule.saved_items.save("tabs folder", obj)
+		return obj if (obj and getattr(obj, "location", None) and obj.location.width) else None
 
-		if obj and getattr(obj, "location", None) and obj.location.width:
-			el = next((item for item in getattr(obj, "children", []) if State.SELECTED in getattr(item, "states", set())), None)
-			if not el:
-				el = getattr(obj, "firstChild", None)
-			if el:
+	def script_to_tabs_folder(self, gesture):
+		obj = self.get_tabs_folder_element()
+		if obj:
+			children = [item for item in getattr(obj, "children", []) if getattr(item, "location", None) and item.location.width]
+			if children:
+				el = next((item for item in children if State.SELECTED in getattr(item, "states", set())), children[0])
 				el.setFocus()
 				return
 		message(_("Chat folder list not found"))
+
+	def script_switch_chat_folder(self, gesture):
+		gesture.send()
+		if not conf.get("voiceFolderNames"):
+			return
+
+		obj = self.get_tabs_folder_element()
+		if not obj:
+			return
+		children = [item for item in getattr(obj, "children", []) if getattr(item, "location", None) and item.location.width]
+		if not children:
+			return
+
+		key = getattr(gesture, "mainKeyName", "") or getattr(gesture, "displayName", "") or getattr(gesture, "id", "")
+		match = re.search(r"(\d)$", key)
+		idx = int(match.group(1)) - 1 if match else None
+
+		target = None
+		if idx is not None and 0 <= idx < len(children):
+			target = children[idx]
+		else:
+			target = next((item for item in children if State.SELECTED in getattr(item, "states", set())), None)
+
+		if target:
+			announceFolderChange(target)
 
 	def _is_unread_messages_separator(self, obj):
 		"""Check if a message list item represents the unread messages separator."""

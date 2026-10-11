@@ -42,7 +42,6 @@ from .overlays import (
 from .text_window import TextWindow
 from .unigram_calls import UnigramCalls
 from .unigram_formatting import (
-	announceFolderChange,
 	formatChatElementOnFocus,
 	formatMediaButtonName,
 	formatMediaButtonOnFocus,
@@ -120,8 +119,6 @@ class AppModule(appModuleHandler.AppModule):
 				parentId = getattr(parent, "UIAAutomationId", "") if parent else ""
 
 				if parentId in ("ChatFolders", "ChatFoldersSide"):
-					if conf.get("voiceFolderNames") and State.SELECTED in obj.states:
-						announceFolderChange(obj, self.saved_items)
 					return True
 
 				elif parentId in ("ChatsList", "TopicList") or (getattr(self, "chats_helper", None) and self.chats_helper.is_topic_item(obj)) or (getattr(self, "ui_helper", None) and self.ui_helper.is_story_item(obj)):
@@ -497,6 +494,14 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_to_tabs_folder(self, gesture):
 		return self.nav_helper.script_to_tabs_folder(gesture)
+
+	@script(
+		# Translators: Description for the script that switches chat folders.
+		description=_("Switch to chat folder and announce its name"),
+		gestures=[f"kb:control+{i}" for i in range(1, 10)],
+	)
+	def script_switch_chat_folder(self, gesture):
+		return self.nav_helper.script_switch_chat_folder(gesture)
 
 	@script(
 		# Translators: Description for the script that opens the navigation menu.

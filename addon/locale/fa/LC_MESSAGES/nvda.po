@@ -323,6 +323,12 @@ msgstr "هیچ گفتگویی باز نیست"
 msgid "Move focus to list of chat folders"
 msgstr "قرار دادن مکان نما بر روی لیست پوشه‌های گفتوگوها."
 
+#. Translators: Description for the script that switches chat folders.
+#: addon\appModules\unigram.py:500
+msgid "Switch to chat folder and announce its name"
+msgstr "جابه‌جایی به پوشه گفتگوها و اعلام نام آن"
+
+
 #: addon\appModules\unigram.py:262 addon\appModules\unigram.py:270
 #: addon\appModules\unigram.py:271
 msgid "Chat folder list not found"
