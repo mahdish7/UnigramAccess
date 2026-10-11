@@ -22,6 +22,9 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+2**: Move focus to the chat detail panel (last message, open profile, or settings details).
 * **ALT+3**: Move focus to message edit field (pressing again returns focus to the last message).
 * **ALT+4**: Move focus to chat folders list.
+* **ALT+upArrow / ALT+downArrow**: Switch to previous or next chat and announce its name.
+* **control+1 to control+8**: Switch to chat folder and announce its name and unread badge count.
+* **control+9**: Open archived chats and announce "Archived chats".
 * **ALT+U**: Move focus to unread messages in the active chat.
 * **ALT+shift+P**: Open current chat profile.
 * **ALT+M**: Open main navigation menu.
@@ -85,7 +88,8 @@ The add-on settings panel (accessible via **NVDA+ALT+U** or NVDA Settings -> Uni
 ### 1. General & Navigation
 * **Interface language in Unigram**: Select the language used by Unigram to ensure accurate recognition of UI elements.
 * **Chat type announcement in chats list**: Announce chat type before name, after name, or do not announce.
-* **Speak folder names when switching between them**: Announce folder name and unread chat counts when switching chat folders with keyboard shortcuts (Ctrl+1 to Ctrl+9).
+* **Speak folder names when switching between them**: Announce folder name and unread chat counts when switching chat folders with keyboard shortcuts (Ctrl+1 to Ctrl+8).
+* **Speak chat names when switching between them**: Announce active chat name when navigating between chats using Alt+Up/Down.
 
 ### 2. Messages & Reading
 * **Announce sender name**: Control whether the sender's name is announced (disabled, sent messages only, received messages only, or all messages).
