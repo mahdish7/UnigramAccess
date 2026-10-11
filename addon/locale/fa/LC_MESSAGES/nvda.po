@@ -269,6 +269,12 @@ msgstr "افزایش/کاهش سرعت پیام صوتی."
 msgid "Nothing is playing right now"
 msgstr "چیزی درحال پخش شدن نیست."
 
+msgid "Playback speed button not found"
+msgstr "دکمه سرعت پخش پیدا نشد"
+
+msgid "Playback button not found"
+msgstr "دکمه پخش یا توقف پیدا نشد"
+
 #. Translators: Description for the script that closes the media player.
 #: addon\appModules\unigram.py:738
 msgid "Close media player"
@@ -290,7 +296,7 @@ msgstr "قرار دادن مکان نما بر روی لیست گفت و گوه�
 
 #: addon\appModules\unigram.py:229
 msgid "Chat list not found"
-msgstr "لیست گفت و گوها یافت نشد."
+msgstr "فهرست گفتگوها پیدا نشد"
 
 #: addon\appModules\unigram.py:237
 msgid "Chat list is empty"
@@ -310,7 +316,7 @@ msgstr "این گفت و گو خالی است."
 #: addon\appModules\unigram.py:322 addon\appModules\unigram.py:539
 #: addon\appModules\unigram.py:729
 msgid "No open chat"
-msgstr "پنجره گفتوگو باز نیست."
+msgstr "هیچ گفتگویی باز نیست"
 
 #. Перенести фокус до списку папок чатів
 #: addon\appModules\unigram.py:256
@@ -331,6 +337,9 @@ msgstr "قرار دادن مکان نما بر روی پنجره ی پروفای
 msgid "There is no open profile"
 msgstr "پنجره ی پروفایل بازی وجود ندارد"
 
+msgid "Chat profile not found"
+msgstr "پروفایل گفتگو پیدا نشد"
+
 #. Озвучує назву і статус профілю, в відкритому чаті
 #: addon\appModules\unigram.py:298
 msgid "Announce the name and status of an open chat"
@@ -342,8 +351,8 @@ msgid "Move focus to 'unread messages' label"
 msgstr "بردن مکان نما به برچسب پیامهای خوانده نشده."
 
 #: addon\appModules\unigram.py:332
-msgid "There are no unread messages in this chat"
-msgstr "در این گفت و گو پیام خوانده نشده ای وجود ندارد."
+msgid "Unread message not found"
+msgstr "پیام خوانده نشده پیدا نشد"
 
 #. Зателефонувати якщо це контакт, або увійти до голосового чату, якщо це група
 #: addon\appModules\unigram.py:335
@@ -372,8 +381,8 @@ msgstr "فشار دادن دکمه ی مشاهده ی سریع اگر در ای�
 
 #: addon\appModules\unigram.py:361 addon\appModules\unigram.py:496
 #: addon\appModules\unigram.py:503 addon\appModules\unigram.py:511
-msgid "Button not found"
-msgstr "دکمه ای یافت نشد."
+msgid "Transcription button not found"
+msgstr "دکمه تبدیل صوت به متن پیدا نشد"
 
 #. Відповідь на дзвінок
 #: addon\appModules\unigram.py:364
@@ -889,14 +898,14 @@ msgstr "ردگیری فعالیتهای این گفتگو فعال شد"
 msgid "Chat activity tracking is disabled"
 msgstr "ردگیری فعالیتهای این گفتگو غیرفعال شد"
 
-msgid "Failed to read chat title"
+msgid "Chat title not found"
 msgstr "عنوان گفتگو پیدا نشد"
 
 msgid "Automatic reading of messages is enabled"
 msgstr "خواندن خودکار پیامها فعال شد"
 
-msgid "Automatic reading of new messages is disabled"
-msgstr "خواندن خودکار پیامهای جدید غیرفعال شد"
+msgid "Automatic reading of messages is disabled"
+msgstr "خواندن خودکار پیامها غیرفعال شد"
 
 msgid "No list with threads was found"
 msgstr "فهرست تاپیکهای گروه پیدا نشد"
@@ -907,11 +916,11 @@ msgstr "نتیجهای برای جستجوی بعدی وجود ندارد"
 msgid "No previous search result"
 msgstr "نتیجهای برای جستجوی قبلی وجود ندارد"
 
-msgid "Data not found"
-msgstr "دادهای یافت نشد"
+msgid "Stream data not found"
+msgstr "دیتای استریم پیدا نشد"
 
-msgid "Slider not found"
-msgstr "نوار پخش صوتی یافت نشد"
+msgid "Media player slider not found"
+msgstr "اسلایدر مدیا پلیر پیدا نشد"
 
 msgid "The display of message sending or receiving time and the list of installed emojis is enabled."
 msgstr "اعلام زمان پیام و واکنشها فعال شد."
@@ -1045,14 +1054,14 @@ msgstr "ردگیری فعالیتهای این گفتگو فعال شد"
 msgid "Chat activity tracking is disabled"
 msgstr "ردگیری فعالیتهای این گفتگو غیرفعال شد"
 
-msgid "Failed to read chat title"
+msgid "Chat title not found"
 msgstr "عنوان گفتگو پیدا نشد"
 
 msgid "Automatic reading of messages is enabled"
 msgstr "خواندن خودکار پیامها فعال شد"
 
-msgid "Automatic reading of new messages is disabled"
-msgstr "خواندن خودکار پیامهای جدید غیرفعال شد"
+msgid "Automatic reading of messages is disabled"
+msgstr "خواندن خودکار پیامها غیرفعال شد"
 
 msgid "No list with threads was found"
 msgstr "فهرست تاپیکهای گروه پیدا نشد"
@@ -1063,11 +1072,11 @@ msgstr "نتیجهای برای جستجوی بعدی وجود ندارد"
 msgid "No previous search result"
 msgstr "نتیجهای برای جستجوی قبلی وجود ندارد"
 
-msgid "Data not found"
-msgstr "دادهای یافت نشد"
+msgid "Stream data not found"
+msgstr "دیتای استریم پیدا نشد"
 
-msgid "Slider not found"
-msgstr "نوار پخش صوتی یافت نشد"
+msgid "Media player slider not found"
+msgstr "اسلایدر مدیا پلیر پیدا نشد"
 
 msgid "The display of message sending or receiving time and the list of installed emojis is enabled."
 msgstr "اعلام زمان پیام و واکنشها فعال شد."

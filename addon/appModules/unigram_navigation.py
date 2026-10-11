@@ -146,7 +146,7 @@ class UnigramNavigation:
 				except Exception as e:
 					log.debugException(f"Swallowed exception: {e}")
 		else:
-			message(_("There are no unread messages in this chat"))
+			message(_("Unread message not found"))
 
 	def script_showMenu(self, gesture):
 		try:
@@ -167,7 +167,7 @@ class UnigramNavigation:
 			profile.doAction()
 			core.callLater(200, self._focus_profile_on_open)
 		else:
-			message(_("No open chat"))
+			message(_("Chat profile not found"))
 
 	def _focus_profile_on_open(self):
 		ui_helper = getattr(self.appModule, "ui_helper", None)

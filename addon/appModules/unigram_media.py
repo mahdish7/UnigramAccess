@@ -36,7 +36,7 @@ class UnigramMedia:
 		if not targetButton and elements and getattr(elements[0], "role", None) == Role.WINDOW:
 			targetButton = next((item for item in getattr(elements[0], "children", []) if getattr(item, "role", None) == Role.BUTTON and getattr(item, "UIAAutomationId", "") == "SpeedButton"), False)
 		if targetButton: targetButton.doAction()
-		else: message(_("Nothing is playing right now"))
+		else: message(_("Playback speed button not found"))
 
 	def _is_slider_element(self, obj):
 		try:
@@ -109,7 +109,7 @@ class UnigramMedia:
 			self.appModule.focus_mgr.execute_action(
 				action=targetButton.doAction,
 			)
-		else: message(_("Nothing is playing right now"))
+		else: message(_("Playback button not found"))
 
 	def _safe_set_focus(self, candidate):
 		"""Safely set focus to candidate using FocusManager."""
@@ -322,7 +322,7 @@ class UnigramMedia:
 
 			core.callLater(300, monitor_slider)
 		else:
-			message(_("Slider not found"))
+			message(_("Media player slider not found"))
 
 
 	def waiting_for_recognition(self, obj):
@@ -355,7 +355,7 @@ class UnigramMedia:
 			try: playWaveFile(os.path.join(baseDir, "RecognitionStart.wav"))
 			except Exception: message(_("Conversion started"))
 			self.waiting_for_recognition(button)
-		else: message(_("Button not found"))
+		else: message(_("Transcription button not found"))
 
 	def start_download_monitoring(self, obj):
 		"""Poll download progress in real time (500ms) while focus remains on the actively downloading media button."""

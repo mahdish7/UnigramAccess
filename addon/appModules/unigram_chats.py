@@ -590,7 +590,7 @@ class UnigramChats:
 					title = header
 					message(header.name)
 		if not title:
-			message(_("Failed to read chat title"))
+			message(_("Chat title not found"))
 		if title:
 			self.appModule.saved_items.save("profile name", title)
 

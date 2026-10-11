@@ -270,7 +270,7 @@ class UnigramMessages:
 			False,
 		)
 		if not url or not url.next or not url.next.next:
-			message(_("Data not found"))
+			message(_("Stream data not found"))
 			return False
 		key = url.next.next
 		urlName = url.previous.name if url.previous else "URL"
@@ -649,5 +649,5 @@ class UnigramMessages:
 		if Chat_update.toggle(self.appModule):
 			message(_("Automatic reading of messages is enabled"))
 		else:
-			message(_("Automatic reading of new messages is disabled"))
+			message(_("Automatic reading of messages is disabled"))
 
