@@ -79,6 +79,7 @@ class AppModule(appModuleHandler.AppModule):
 	executeContextMenuOption = False
 	isMedia = False
 	isMessageSelectionMode = False
+	isSwitchingChat = False
 
 	# ── Initialization & Teardown ───────────────────────────────────────
 
@@ -176,6 +177,10 @@ class AppModule(appModuleHandler.AppModule):
 			log.error(f"Unexpected exception in chooseNVDAObjectOverlayClasses: {e}", exc_info=True)
 
 	def getScript(self, gesture):
+		script = super().getScript(gesture)
+		if script != self.script_switch_chat:
+			self.isSwitchingChat = False
+
 		if getattr(self, "focus_mgr", None) and (self.focus_mgr._hold_target or getattr(self.focus_mgr, "_timer_token", None)):
 			self.focus_mgr.release()
 
@@ -199,7 +204,7 @@ class AppModule(appModuleHandler.AppModule):
 				except Exception as e:
 					log.debug(f"Error checking focus in getScript: {e}")
 
-		return super().getScript(gesture)
+		return script
 
 	# ── Focus Event Handler ─────────────────────────────────────────────
 
@@ -343,6 +348,10 @@ class AppModule(appModuleHandler.AppModule):
 		elif self.isMedia:
 			consumed = self.media_helper.handle_media_step(obj)
 			return bool(consumed)
+
+		elif self.isSwitchingChat:
+			self.isSwitchingChat = False
+			return True
 
 		return False
 
@@ -502,6 +511,14 @@ class AppModule(appModuleHandler.AppModule):
 	)
 	def script_switch_chat_folder(self, gesture):
 		return self.nav_helper.script_switch_chat_folder(gesture)
+
+	@script(
+		# Translators: Description for the script that switches to previous or next chat.
+		description=_("Switch chat and announce its name"),
+		gestures=["kb:alt+upArrow", "kb:alt+downArrow"],
+	)
+	def script_switch_chat(self, gesture):
+		return self.nav_helper.script_switch_chat(gesture)
 
 	@script(
 		# Translators: Description for the script that opens the navigation menu.

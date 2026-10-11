@@ -328,6 +328,21 @@ msgstr "قرار دادن مکان نما بر روی لیست پوشه‌های
 msgid "Switch to chat folder and announce its name"
 msgstr "جابه‌جایی به پوشه گفتگوها و اعلام نام آن"
 
+#. Translators: Description for the script that switches to previous or next chat.
+#: addon\appModules\unigram.py:507
+msgid "Switch chat and announce its name"
+msgstr "جابه‌جایی بین گفتگوها و اعلام نام آن"
+
+#. Translators: Description for the script that starts or stops recording a voice or video message.
+#: addon\appModules\unigram.py:776
+msgid "Start or stop recording a voice or video message"
+msgstr "شروع یا توقف ضبط پیام صوتی یا تصویری"
+
+#. Translators: Description for the script that cancels media recording, message reply, or edit.
+#: addon\appModules\unigram.py:787
+msgid "Cancel media recording, message reply, or edit"
+msgstr "لغو ضبط رسانه، پاسخ یا ویرایش پیام"
+
 
 #: addon\appModules\unigram.py:262 addon\appModules\unigram.py:270
 #: addon\appModules\unigram.py:271
@@ -810,6 +825,10 @@ msgstr "اعلام کردن کلمه ی دیده نشده قبل از خواند
 #: addon\GlobalPlugins\UnigramAccess\__init__.py:168
 msgid "Speak folder names when switching between them"
 msgstr "اعلام کردن نام پوشه‌ها هنگام جا به جا شدن بین آنها."
+
+#: addon\globalPlugins\UnigramAccess\__init__.py
+msgid "Speak chat names when switching between them"
+msgstr "اعلام کردن نام گفتگوها هنگام جا به جا شدن بین آنها."
 
 #. Тип оповіщення при видаленні
 #: addon\GlobalPlugins\UnigramAccess\__init__.py:171

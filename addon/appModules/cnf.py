@@ -60,6 +60,7 @@ spec = (
 	"voiceTypeAfterChatName = string(default=beforeName)",
 	"unreadBeforeMessageContent = boolean(default=True)",
 	"voiceFolderNames = boolean(default=True)",
+	"voiceChatNames = boolean(default=True)",
 	"voiceMessageRecordingIndicator = string(default=audio)",
 	"voiceDownloadProgress = boolean(default=True)",
 	"audioPlaybackWhenDeleted = boolean(default=True)",

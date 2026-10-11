@@ -107,6 +107,27 @@ class UnigramNavigation:
 		if target:
 			announceFolderChange(target)
 
+	def script_switch_chat(self, gesture):
+		gesture.send()
+		if not conf.get("voiceChatNames", True):
+			return
+
+		self.appModule.isSwitchingChat = True
+		profile = self.appModule.saved_items.get("profile name")
+		if not profile or not getattr(profile, "isFocusable", False):
+			profile = next((item for item in self.appModule.ui_helper.getElements() if item.role in (Role.BUTTON, Role.LINK) and item.UIAAutomationId == "Profile"), None)
+			if profile and getattr(profile, "isFocusable", False):
+				self.appModule.saved_items.save("profile name", profile)
+
+		if not profile:
+			return
+
+		children = getattr(profile, "children", []) or []
+		if children and getattr(children[0], "name", None):
+			name = children[0].name.strip()
+			if name:
+				message(name)
+
 	def _is_unread_messages_separator(self, obj):
 		"""Check if a message list item represents the unread messages separator."""
 		if not obj:
