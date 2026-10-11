@@ -87,6 +87,14 @@ class UnigramNavigation:
 		if not conf.get("voiceFolderNames"):
 			return
 
+		key = getattr(gesture, "mainKeyName", "") or getattr(gesture, "displayName", "") or getattr(gesture, "id", "")
+		match = re.search(r"(\d)$", key)
+		idx = int(match.group(1)) - 1 if match else None
+
+		if idx == 8:
+			message(_("Archived chats"))
+			return
+
 		obj = self.get_tabs_folder_element()
 		if not obj:
 			return
@@ -94,18 +102,8 @@ class UnigramNavigation:
 		if not children:
 			return
 
-		key = getattr(gesture, "mainKeyName", "") or getattr(gesture, "displayName", "") or getattr(gesture, "id", "")
-		match = re.search(r"(\d)$", key)
-		idx = int(match.group(1)) - 1 if match else None
-
-		target = None
 		if idx is not None and 0 <= idx < len(children):
-			target = children[idx]
-		else:
-			target = next((item for item in children if State.SELECTED in getattr(item, "states", set())), None)
-
-		if target:
-			announceFolderChange(target)
+			announceFolderChange(children[idx])
 
 	def script_switch_chat(self, gesture):
 		gesture.send()

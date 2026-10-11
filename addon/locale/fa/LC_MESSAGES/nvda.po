@@ -328,6 +328,10 @@ msgstr "قرار دادن مکان نما بر روی لیست پوشه‌های
 msgid "Switch to chat folder and announce its name"
 msgstr "جابه‌جایی به پوشه گفتگوها و اعلام نام آن"
 
+#: addon\appModules\unigram_navigation.py:100
+msgid "Archived chats"
+msgstr "گفتگوهای بایگانی‌شده"
+
 #. Translators: Description for the script that switches to previous or next chat.
 #: addon\appModules\unigram.py:507
 msgid "Switch chat and announce its name"
