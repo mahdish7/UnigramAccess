@@ -208,7 +208,7 @@ class UnigramAccessSettings(SettingsPanel):
 		)
 
 		self.unreadBeforeMessageContent = msgHelper.addItem(
-			wx.CheckBox(msgBox, label=_("Speak \"Not seen\" before message text"))
+			wx.CheckBox(msgBox, label=_("Speak \"Not seen\" before sent messages"))
 		)
 		self.unreadBeforeMessageContent.SetValue(conf.get("unreadBeforeMessageContent"))
 

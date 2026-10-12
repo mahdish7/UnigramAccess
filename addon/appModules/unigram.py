@@ -332,9 +332,13 @@ class AppModule(appModuleHandler.AppModule):
 			return True
 
 		elif self.executeContextMenuOption:
-			target = self.executeContextMenuOption
+			raw_target = self.executeContextMenuOption
 			self.executeContextMenuOption = False
-			find_and_activate_context_menu_item(obj, target, close_on_failure=True)
+			if isinstance(raw_target, tuple):
+				target, origin_obj = raw_target
+			else:
+				target, origin_obj = raw_target, None
+			find_and_activate_context_menu_item(obj, target, close_on_failure=True, origin_obj=origin_obj, appModule=self)
 			return True
 
 		elif self.isDelete:
@@ -695,6 +699,7 @@ class AppModule(appModuleHandler.AppModule):
 	@script(
 		# Translators: Description for the script that saves a file attachment.
 		description=_("Save file as..."),
+		gesture="kb:control+S",
 	)
 	def script_save_file(self, gesture):
 		obj = api.getFocusObject()

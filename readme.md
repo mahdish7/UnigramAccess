@@ -7,7 +7,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 
 ## Key Accessibility Features
 
-* **Reduced Screen Reader Verbosity**: Suppresses redundant phrases like "chats, tab, selected list" and "list". Announces "Not seen" before message text and eliminates unnecessary "Seen" announcements.
+* **Reduced Screen Reader Verbosity**: Suppresses redundant phrases like "chats, tab, selected list" and "list". Announces "Not seen" before sent messages and eliminates unnecessary "Seen" announcements.
 * **Smart File & Media Details**: Announces file name and size on download/open buttons, and audio title and duration on playback buttons. Suppresses misleading static progress indicators when files are not downloading.
 * **Enhanced Voice Messaging**: Distinct audio or text alerts for starting, sending, and canceling voice messages without shifting focus. Quick speech-to-text transcription, playback controls, and speed adjustment.
 * **Call & Conference Controls**: Dedicated shortcuts to accept, decline, mute/unmute microphone, and toggle camera for both one-on-one calls and group voice chats.
@@ -22,9 +22,9 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+2**: Move focus to the chat detail panel (last message, open profile, or settings details).
 * **ALT+3**: Move focus to message edit field (pressing again returns focus to the last message).
 * **ALT+4**: Move focus to chat folders list.
-* **ALT+upArrow / ALT+downArrow**: Switch to previous or next chat and announce its name.
-* **control+1 to control+8**: Switch to chat folder and announce its name and unread badge count.
-* **control+9**: Open archived chats and announce "Archived chats".
+* **ALT+upArrow / ALT+downArrow**: Switch to previous or next chat.
+* **control+1 to control+8**: Switch to chat folder and announce its name.
+* **control+9**: Open archived chats.
 * **ALT+U**: Move focus to unread messages in the active chat.
 * **ALT+shift+P**: Open current chat profile.
 * **ALT+M**: Open main navigation menu.
@@ -52,7 +52,7 @@ UnigramAccess is an NVDA add-on that brings a comfortable, efficient, and fully 
 * **ALT+shift+L**: Copy live stream RTMP URL and stream key to clipboard (in broadcast window).
 * **control+P**: Pin or unpin focused message or chat.
 * **ALT+shift+O**: Open more options menu in the active chat.
-* **Unassigned**: Save file attachment as...
+* **control+S**: Save file attachment as...
 
 ### Media & Voice Messages
 * **space**: Activate focused media in message (play, pause, or open).
@@ -94,7 +94,7 @@ The add-on settings panel (accessible via **NVDA+ALT+U** or NVDA Settings -> Uni
 ### 2. Messages & Reading
 * **Announce sender name**: Control whether the sender's name is announced (disabled, sent messages only, received messages only, or all messages).
 * **Up arrow action in empty message edit field**: Configure whether pressing Up Arrow in an empty edit field edits the last sent message, moves focus to the last message in the chat, or does nothing.
-* **Speak "Not seen" before message text**: Announces unread status before the message text and suppresses "Seen".
+* **Speak "Not seen" before sent messages**: Announces unread status before sent messages and suppresses "Seen".
 * **Announce timestamp and reactions at end of messages**: Announce message sending or receiving time and reactions when moving through messages.
 * **Announce "Administrator" and "Owner" badges in communities**: Speak admin badges on messages in communities.
 * **Read descriptions of message links**: Read descriptions and summaries of web links and video previews attached to messages.

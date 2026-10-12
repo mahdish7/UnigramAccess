@@ -287,7 +287,7 @@ class UnigramMessages:
 		"""Open context menu on focused message and automatically select a specific option."""
 		if self.appModule.executeContextMenuOption:
 			return False
-		self.appModule.executeContextMenuOption = option
+		self.appModule.executeContextMenuOption = (option, api.getFocusObject())
 		CACHED_KEYS["Applications"].send()
 		return True
 

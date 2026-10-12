@@ -659,7 +659,10 @@ msgstr "مارک کن گفتوگو را به حالت خوانده شده."
 
 #: addon\appModules\unigram.py:968
 msgid "Save file as..."
-msgstr "زخیره ی فایل به عنوان"
+msgstr "ذخیره فایل پیوست به عنوان..."
+
+msgid "Option not found"
+msgstr "گزینه پیدا نشد"
 
 #: addon\appModules\unigram.py:971
 msgid "Pin a message or chat"
@@ -1442,8 +1445,8 @@ msgstr "اعلام نام فرستنده پیام:"
 msgid "Up arrow action in empty message edit field:"
 msgstr "عملکرد کلید جهت‌نمای بالا در کادر خالی پیام:"
 
-msgid "Speak \"Not seen\" before message text"
-msgstr "اعلام «دیده نشده» قبل از متن پیام"
+msgid "Speak \"Not seen\" before sent messages"
+msgstr "اعلام «دیده نشده» قبل از پیام‌های ارسال‌شده"
 
 msgid "Do not announce timestamp and reactions at end of messages"
 msgstr "عدم اعلام زمان و واکنش‌ها در انتهای پیام"

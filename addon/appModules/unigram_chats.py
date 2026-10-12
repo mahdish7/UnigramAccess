@@ -89,7 +89,7 @@ class UnigramChats:
 		"""Open context menu on chat item and automatically select a specific option."""
 		if self.appModule.executeContextMenuOption:
 			return False
-		self.appModule.executeContextMenuOption = option
+		self.appModule.executeContextMenuOption = (option, api.getFocusObject())
 		CACHED_KEYS["Applications"].send()
 		return True
 

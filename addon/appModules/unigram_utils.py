@@ -5,6 +5,7 @@ import ctypes
 import os
 import time
 
+import addonHandler
 from controlTypes import Role, State
 from keyboardHandler import KeyboardInputGesture
 import mouseHandler
@@ -13,6 +14,8 @@ import api
 import core
 import speech
 import ui
+
+addonHandler.initTranslation()
 
 from .cnf import conf
 from .data import active_download_keywords, context_menu_items, icons_from_context_menu
@@ -95,7 +98,19 @@ def get_context_menu_targets(action):
 	return targets
 
 
-def find_and_activate_context_menu_item(obj, target, close_on_failure=True):
+def close_context_menu():
+	"""Safely close context menu by sending Escape, releasing modifiers like Control first to prevent Ctrl+Escape (Start menu)."""
+	try:
+		# Release Control (0x11) and Alt (0x12) before Escape to avoid accidental
+		# Windows shortcuts like Ctrl+Escape (Open Start Menu) or Alt+Escape.
+		ctypes.windll.user32.keybd_event(0x11, 0, 2, 0)
+		ctypes.windll.user32.keybd_event(0x12, 0, 2, 0)
+	except Exception as e:
+		log.debugException(f"Error releasing modifier keys: {e}")
+	CACHED_KEYS["escape"].send()
+
+
+def find_and_activate_context_menu_item(obj, target, close_on_failure=True, origin_obj=None, appModule=None):
 	"""Find and invoke a menu item matching target from the context menu containing obj.
 
 	Safely skips separators and items without children. Resolves action names
@@ -104,15 +119,23 @@ def find_and_activate_context_menu_item(obj, target, close_on_failure=True):
 	@param obj: The focused menu item or menu container.
 	@param target: An action key (e.g. 'select', 'delete') or iterable/string of target labels.
 	@param close_on_failure: Whether to send Escape if the target is not found.
+	@param origin_obj: The object that had focus before the context menu opened.
+	@param appModule: The active AppModule instance providing focus_mgr.
 	@return: True if target was found and invoked, False otherwise.
 	"""
 	if not obj:
 		return False
 
+	notif = _("Option not found")
+
 	container = obj if getattr(obj, "role", None) in (Role.MENU, Role.POPUPMENU) else getattr(obj, "parent", None)
 	if not container or not getattr(container, "children", None):
 		if close_on_failure:
-			CACHED_KEYS["escape"].send()
+			if origin_obj and appModule and getattr(appModule, "focus_mgr", None):
+				appModule.focus_mgr.hold(obj=origin_obj, announce=False, notification=notif)
+			close_context_menu()
+			if not (origin_obj and appModule and getattr(appModule, "focus_mgr", None)):
+				ui.message(notif)
 		return False
 
 	targets = get_context_menu_targets(target) if isinstance(target, str) and target in context_menu_items else target
@@ -133,7 +156,11 @@ def find_and_activate_context_menu_item(obj, target, close_on_failure=True):
 			return True
 
 	if close_on_failure:
-		CACHED_KEYS["escape"].send()
+		if origin_obj and appModule and getattr(appModule, "focus_mgr", None):
+			appModule.focus_mgr.hold(obj=origin_obj, announce=False, notification=notif)
+		close_context_menu()
+		if not (origin_obj and appModule and getattr(appModule, "focus_mgr", None)):
+			ui.message(notif)
 	return False
 
 
