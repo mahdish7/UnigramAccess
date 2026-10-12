@@ -1,16 +1,11 @@
-name: build addon
+name: Release
+run-name: Release ${{ github.ref_name }}
 
 on:
   push:
     tags: ["*"]
-    # To build on main/master branch, uncomment the following line:
-    # branches: [ main , master ]
-
-  pull_request:
-    branches: [ main, master ]
 
   workflow_dispatch:
-  workflow_call:
 
 jobs:
   build:
@@ -28,9 +23,6 @@ jobs:
         sudo apt-get update  -y
         sudo apt-get install -y gettext
         uv sync
-
-    - name: Code checks
-      run: export PREK_SKIP=no-commit-to-branch; uv run prek run --all-files
 
     - name: Run unit tests
       run: uv run python -m unittest discover -s tests -v
