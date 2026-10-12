@@ -70,6 +70,7 @@ class Chat_update:
 			if ((title == lastSavedMessage[0]) or not title) and keywords[3] in lastMessage.name[-60:]:
 				from .unigram_formatting import formatMessageOnFocus
 
+				# Unigram XAML nests the actual focusable Message_item inside an outer ListViewItem wrapper (lastMessage.firstChild)
 				text = formatMessageOnFocus(lastMessage.firstChild, cls.app.saved_items)
 				queueHandler.queueFunction(queueHandler.eventQueue, message, text)
 			try:
@@ -85,6 +86,17 @@ class Chat_update:
 			cls.active = True
 			conf.set("automatically announce new messages", True)
 			cls.app = app
+			try:
+				messages_elem = app.ui_helper.getMessagesElement() if app else None
+				last_msg = getattr(messages_elem, "lastChild", None) if messages_elem else None
+				if last_msg:
+					profile = app.saved_items.get("profile name")
+					title = getattr(getattr(profile, "firstChild", None), "name", None) or ""
+					idx = last_msg.positionInfo.get("indexInGroup")
+					if idx is not None:
+						app.saved_items.save("last message", (title, idx))
+			except Exception as e:
+				log.debugException(f"Swallowed exception: {e}")
 			core.callLater(int(cls.interval * 1000), cls.tick)
 			return True
 		else:

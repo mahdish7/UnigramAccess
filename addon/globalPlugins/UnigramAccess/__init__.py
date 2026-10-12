@@ -70,27 +70,26 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 	# Call answer
 	@script(description=_("Accept call"), gesture="kb:ALT+Y")
 	def script_answeringCall(self, gesture):
-		gesture.send()
 		toast = self._getIncomingCallNotification()
-		if not toast:
-			return
-		verb_buttons = [
-			c for c in getattr(toast, "children", [])
-			if getattr(c, "UIAAutomationId", "") == "VerbButton"
-		]
-		button = next((c for c in verb_buttons if getattr(c, "name", "") == "Audio"), None)
-		if not button and verb_buttons:
-			button = verb_buttons[0]
-		if button:
-			try:
-				button.doAction()
-			except Exception:
-				pass
+		if toast:
+			verb_buttons = [
+				c for c in getattr(toast, "children", [])
+				if getattr(c, "UIAAutomationId", "") == "VerbButton"
+			]
+			button = next((c for c in verb_buttons if getattr(c, "name", "") == "Audio"), None)
+			if not button and verb_buttons:
+				button = verb_buttons[0]
+			if button:
+				try:
+					button.doAction()
+					return
+				except Exception:
+					pass
+		gesture.send()
 
 	# End a call, decline call, or leave a voice chat
 	@script(description=_("Decline incoming call, end active call, or leave voice chat"), gesture="kb:ALT+N")
 	def script_callCancellation(self, gesture):
-		gesture.send()
 		toast = self._getIncomingCallNotification()
 		button = None
 		if toast:
@@ -104,15 +103,17 @@ class GlobalPlugin(globalPluginHandler.GlobalPlugin):
 		if button:
 			try:
 				button.doAction()
+				return
 			except Exception:
 				pass
-			return
 		focus = api.getFocusObject()
 		if focus:
 			import appModuleHandler
 			appMod = appModuleHandler.getAppModuleFromProcessID(focus.processID)
 			if appMod and hasattr(appMod, 'script_callCancellation'):
-				appMod.script_callCancellation(gesture)
+				if appMod.script_callCancellation(gesture):
+					return
+		gesture.send()
 
 
 class UnigramAccessSettings(SettingsPanel):
